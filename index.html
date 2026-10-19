@@ -99,10 +99,10 @@
         <h3 class="text-xl font-bold text-slate-900 dark:text-white">Daftar Modul Praktikum</h3>
         <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Pilih modul pembelajaran di bawah untuk membuka simulator dan materi.</p>
       </div>
-      <span id="moduleCount" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300">3 Modul Tersedia</span>
+      <span id="moduleCount" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300">5 Modul Tersedia</span>
     </div>
 
-    <div id="moduleGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div id="moduleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
       <!-- Kartu 1: SSH Remote Server -->
       <div class="module-card card-hover bg-white dark:bg-[#15231f] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-400/50 group" data-keywords="ssh remote server openssh terminal putty terminal kunci pubkey scp sftp rsync tunnel port 22 2222">
@@ -128,7 +128,6 @@
           </div>
         </div>
         <div>
-          <!-- Sesuaikan nama file jika modul SSH Anda bernama ssh.html atau modul_ssh.html -->
           <a href="ssh.html" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-medium text-sm transition shadow-sm shadow-teal-700/20">
             <span>Buka Modul SSH</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
@@ -167,32 +166,63 @@
         </div>
       </div>
 
-      <!-- Kartu 3: MariaDB Database Server -->
-      <div class="module-card card-hover bg-white dark:bg-[#15231f] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-400/50 group" data-keywords="mariadb mysql database server rdbms sql ddl dml grant privileges bind-address backup restore dump port 3306">
+      <!-- Kartu 4: Firewall Server UFW -->
+      <div class="module-card card-hover bg-white dark:bg-[#15231f] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-400/50 group" data-keywords="ufw firewall packet filtering iptables nftables default deny incoming allow rate limit port 22 80 443 3306 logging">
         <div>
           <div class="flex items-center justify-between mb-4">
             <span class="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-900">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
             </span>
             <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              Modul 03
+              Modul 04
             </span>
           </div>
           <h4 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors mb-2">
-            Database Server (MariaDB)
+            Firewall Server (UFW)
           </h4>
           <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-            Instalasi & hardening wizard, operasi SQL DDL/DML tabel, hak akses pengguna (least privilege), konfigurasi remote access bind-address 0.0.0.0, serta backup/restore dump SQL.
+            Konsep packet filtering, default deny policy, pembukaan port layanan (TCP/UDP), isolasi subnet IP, urutan rule, rate limiting brute-force, dan analisis ufw log.
           </p>
           <div class="flex flex-wrap gap-1.5 mb-6">
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">port 3306</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">sql-cli</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">mariadb-dump</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">packet-filter</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">least-privilege</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">port-rules</span>
           </div>
         </div>
         <div>
-          <a href="mariadb.html" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-medium text-sm transition shadow-sm shadow-teal-700/20">
-            <span>Buka Modul MariaDB</span>
+          <a href="ufw.html" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-medium text-sm transition shadow-sm shadow-teal-700/20">
+            <span>Buka Modul UFW</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Kartu 5: Intrusion Prevention Fail2ban -->
+      <div class="module-card card-hover bg-white dark:bg-[#15231f] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-400/50 group" data-keywords="fail2ban ips intrusion prevention system brute force jail local sshd bantime findtime maxretry unbanip fail2ban-client regex audit log">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              Modul 05
+            </span>
+          </div>
+          <h4 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors mb-2">
+            IPS Server (Fail2ban)
+          </h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+            Pencegahan intrusi otomatis berbasis log, konfigurasi jail.local (bantime, findtime, maxretry), proteksi brute-force SSH & Web, manajemen unban IP, serta audit log.
+          </p>
+          <div class="flex flex-wrap gap-1.5 mb-6">
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">anti-bruteforce</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">jail.local</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">unbanip</span>
+          </div>
+        </div>
+        <div>
+          <a href="fail2ban.html" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-medium text-sm transition shadow-sm shadow-teal-700/20">
+            <span>Buka Modul Fail2ban</span>
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
           </a>
         </div>
