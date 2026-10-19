@@ -3,333 +3,401 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Portal Modul Ajar Interaktif ASJ - SMK Wikrama Bogor</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<script>
-  tailwind.config = {
-    darkMode: 'class',
-    theme: {
-      extend: {
-        fontFamily: {
-          sans: ['Inter', 'sans-serif'],
-          mono: ['JetBrains Mono', 'monospace'],
-        },
-        colors: {
-          pri: {
-            DEFAULT: '#0f766e',
-            light: '#14b8a6',
-            dark: '#0d5952'
-          }
-        }
-      }
-    }
-  }
-</script>
+<title>Portal Modul Praktikum ASJ - SMK Wikrama Bogor</title>
 <style>
-  /* Efek blur kartu dan transisi halus */
-  .card-hover {
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+:root {
+  --bg: #f4f7f6;
+  --fg: #13241d;
+  --card: #ffffff;
+  --pri: #0f766e;
+  --pri-hov: #0d635c;
+  --acc: #dff3ef;
+  --bd: #cfdcd6;
+  --mut: #52675e;
+  --hd: #ffffff;
+  --tag: #e6f4f1;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b1411;
+    --fg: #e2ede8;
+    --card: #13221e;
+    --pri: #34d399;
+    --pri-hov: #2bb883;
+    --acc: #173830;
+    --bd: #263d35;
+    --mut: #95aea3;
+    --hd: #0f1c18;
+    --tag: #1a3c33;
   }
-  .card-hover:hover {
-    transform: translateY(-4px);
-  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1411;
+  --fg: #e2ede8;
+  --card: #13221e;
+  --pri: #34d399;
+  --pri-hov: #2bb883;
+  --acc: #173830;
+  --bd: #263d35;
+  --mut: #95aea3;
+  --hd: #0f1c18;
+  --tag: #1a3c33;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.6 "Segoe UI", system-ui, sans-serif;
+}
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: var(--hd);
+  border-bottom: 1px solid var(--bd);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+}
+.hw {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+}
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--pri);
+  text-decoration: none;
+}
+.badge {
+  background: var(--acc);
+  color: var(--pri);
+  font-size: 12px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 600;
+}
+.btn-ui {
+  border: 1px solid var(--bd);
+  background: var(--card);
+  color: var(--fg);
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14px;
+}
+main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 96px 24px 60px;
+}
+.hero {
+  background: linear-gradient(135deg, var(--pri), #0b3b36);
+  color: #fff;
+  border-radius: 16px;
+  padding: 40px 32px;
+  margin-bottom: 36px;
+  box-shadow: 0 8px 24px rgba(15,118,110,0.15);
+}
+.hero h1 {
+  font-size: 2.2rem;
+  margin: 0 0 10px;
+  line-height: 1.2;
+}
+.hero p {
+  font-size: 1.05rem;
+  opacity: 0.9;
+  max-width: 75ch;
+  margin: 0 0 20px;
+}
+.hero-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 13.5px;
+}
+.hero-tag {
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(4px);
+  padding: 5px 12px;
+  border-radius: 8px;
+}
+.sec-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.sec-head h2 {
+  font-size: 1.5rem;
+  margin: 0;
+  border-left: 5px solid var(--pri);
+  padding-left: 12px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: 14px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
+}
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.card-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: var(--acc);
+  color: var(--pri);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+.card h3 {
+  font-size: 1.25rem;
+  margin: 0 0 10px;
+}
+.card p {
+  font-size: 14px;
+  color: var(--mut);
+  line-height: 1.6;
+  margin: 0 0 18px;
+  flex: 1;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.tags span {
+  font-size: 12px;
+  background: var(--tag);
+  color: var(--pri);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: ui-monospace, monospace;
+}
+.btn-go {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: var(--pri);
+  color: #fff;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14.5px;
+  padding: 10px 16px;
+  border-radius: 8px;
+  transition: background 0.2s;
+  text-align: center;
+}
+.btn-go:hover {
+  background: var(--pri-hov);
+}
+.guide-box {
+  background: var(--card);
+  border: 1px solid var(--bd);
+  border-radius: 14px;
+  padding: 24px 28px;
+  margin-top: 40px;
+}
+.guide-box h3 {
+  margin: 0 0 12px;
+  color: var(--pri);
+  font-size: 1.2rem;
+}
+.guide-box ol {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14.5px;
+  color: var(--mut);
+}
+.guide-box li {
+  margin-bottom: 8px;
+}
+footer {
+  text-align: center;
+  font-size: 13.5px;
+  color: var(--mut);
+  padding: 40px 20px;
+  border-top: 1px solid var(--bd);
+  margin-top: 60px;
+}
 </style>
 </head>
-<body class="bg-slate-50 dark:bg-[#0c1412] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased transition-colors duration-200">
+<body>
 
-  <!-- Header & Navigasi -->
-  <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-[#121e1a]/80 border-b border-slate-200 dark:border-slate-800">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-700 to-teal-500 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-teal-700/20">
-          W
-        </div>
-        <div>
-          <h1 class="text-base font-bold leading-tight text-slate-900 dark:text-white">SMK Wikrama Bogor</h1>
-          <p class="text-xs text-slate-500 dark:text-teal-400/80 font-medium tracking-wide">Konsentrasi Keahlian TJKT / TKJ</p>
-        </div>
-      </div>
+<header>
+  <div class="hw">
+    <a href="#" class="brand">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="2" width="20" height="8" rx="2" ry="2"></rect>
+        <rect x="2" y="14" width="20" height="8" rx="2" ry="2"></rect>
+        <line x1="6" y1="6" x2="6.01" y2="6"></line>
+        <line x1="6" y1="18" x2="6.01" y2="18"></line>
+      </svg>
+      <span>Lab ASJ Wikrama</span>
+      <span class="badge">Debian 12</span>
+    </a>
+    <button class="btn-ui" id="tg" aria-label="Ganti Tema">◐ Mode</button>
+  </div>
+</header>
 
-      <div class="flex items-center gap-2">
-        <!-- Tombol Ganti Tema -->
-        <button id="themeToggle" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="Ganti Tema">
-          <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-          <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
-        </button>
-      </div>
+<main>
+  <div class="hero">
+    <h1>Portal Praktikum Administrasi Sistem Jaringan</h1>
+    <p>Media pembelajaran interaktif berbasis web untuk siswa SMK Wikrama Bogor. Eksplorasi konsep, konfigurasi berkas, dan uji perintah langsung di browser tanpa instalasi awal.</p>
+    <div class="hero-meta">
+      <div class="hero-tag">Sekolah: SMK Wikrama Bogor</div>
+      <div class="hero-tag">Konsentrasi: Teknik Komputer dan Jaringan</div>
+      <div class="hero-tag">Fase/Kelas: F / XI</div>
+      <div class="hero-tag">Arsitektur: Debian 12 (Bookworm)</div>
     </div>
-  </header>
+  </div>
 
-  <!-- Hero Section -->
-  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
-    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-800 via-teal-900 to-slate-900 text-white p-6 sm:p-10 shadow-xl shadow-teal-900/10 mb-10">
-      <div class="relative z-10 max-w-2xl">
-        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-200 border border-teal-400/30 mb-4 backdrop-blur-sm">
-          <span>🎯 Modul Ajar Interaktif</span> • <span>Fase F (Kelas XI)</span>
-        </div>
-        <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
-          Laboratorium Administrasi Sistem Jaringan
-        </h2>
-        <p class="text-sm sm:text-base text-teal-100/90 leading-relaxed mb-6 font-normal">
-          Pelajari konsep server Linux Debian 12 secara langsung melalui simulator terminal interaktif. Tanpa perlu install virtual machine, cukup buka tautan modul untuk mulai belajar dan mengerjakan misi mandiri.
-        </p>
-
-        <!-- Search Bar Sederhana -->
-        <div class="relative max-w-md">
-          <input 
-            type="text" 
-            id="searchInput"
-            placeholder="Cari materi modul (contoh: ssh, nginx, sql)..." 
-            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/10 dark:bg-black/30 border border-white/20 text-white placeholder-teal-200/60 focus:outline-none focus:ring-2 focus:ring-teal-400 backdrop-blur-md text-sm"
-          >
-          <svg class="w-4 h-4 text-teal-200/70 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-        </div>
-      </div>
-
-      <!-- Aksen Visual Latar -->
-      <div class="absolute -right-10 -bottom-10 w-72 h-72 rounded-full bg-teal-500/10 blur-3xl pointer-events-none"></div>
+  <div class="sec-head">
+    <div>
+      <h2>Daftar Modul Praktikum</h2>
+      <p style="margin: 4px 0 0; color: var(--mut); font-size: 14.5px;">Pilih modul pembelajaran di bawah untuk membuka simulator dan materi.</p>
     </div>
+    <span class="badge" style="font-size: 13px; padding: 6px 12px;">5 Modul Tersedia</span>
+  </div>
 
-    <!-- Bagian Grid Modul -->
-    <div class="flex items-center justify-between mb-6">
-      <div>
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Daftar Modul Praktikum</h3>
-        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Pilih modul pembelajaran di bawah untuk membuka simulator dan materi.</p>
+  <div class="grid">
+    <!-- Modul 01: SSH -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-icon">⌨</div>
+        <span class="badge">Modul 01</span>
       </div>
-      <span id="moduleCount" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300">5 Modul Tersedia</span>
+      <h3>Remote Server (SSH)</h3>
+      <p>Pengelolaan OpenSSH Server di Debian 12, login tanpa password via Public Key ed25519, hardening port &amp; firewall UFW, transfer file (SCP/SFTP/Rsync), serta SSH Tunneling.</p>
+      <div class="tags">
+        <span>port 22</span>
+        <span>ed25519</span>
+        <span>tunneling</span>
+      </div>
+      <a href="ssh.html" class="btn-go">Buka Modul SSH &rarr;</a>
     </div>
 
-    <div id="moduleGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-
-      <!-- Kartu 1: SSH Remote Server -->
-      <div class="module-card card-hover bg-white dark:bg-[#15231f] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-400/50 group" data-keywords="ssh remote server openssh terminal putty terminal kunci pubkey scp sftp rsync tunnel port 22 2222">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-900">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-            </span>
-            <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              Modul 01
-            </span>
-          </div>
-          <h4 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors mb-2">
-            Remote Server (SSH)
-          </h4>
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-            Pengelolaan OpenSSH Server di Debian 12, login tanpa password via Public Key ed25519, hardening port & firewall UFW, transfer file (SCP/SFTP/Rsync), serta SSH Tunneling.
-          </p>
-          <div class="flex flex-wrap gap-1.5 mb-6">
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">port 22</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">ed25519</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">tunneling</span>
-          </div>
-        </div>
-        <div>
-          <a href="ssh.html" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-medium text-sm transition shadow-sm shadow-teal-700/20">
-            <span>Buka Modul SSH</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-          </a>
-        </div>
+    <!-- Modul 02: Nginx -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-icon">🌐</div>
+        <span class="badge">Modul 02</span>
       </div>
-
-      <!-- Kartu 2: Nginx Web Server -->
-      <div class="module-card card-hover bg-white dark:bg-[#15231f] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-400/50 group" data-keywords="nginx web server http https virtual host server blocks reverse proxy ssl tls certbot ufw port 80 443">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-900">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
-            </span>
-            <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              Modul 02
-            </span>
-          </div>
-          <h4 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors mb-2">
-            Web Server (Nginx)
-          </h4>
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-            Arsitektur asynchronous event-driven, konfigurasi Virtual Host Server Blocks, Reverse Proxy microservice, hardening banner identitas, dan sertifikat enkripsi SSL/HTTPS.
-          </p>
-          <div class="flex flex-wrap gap-1.5 mb-6">
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">port 80/443</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">vhost</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">reverse-proxy</span>
-          </div>
-        </div>
-        <div>
-          <a href="nginx.html" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-medium text-sm transition shadow-sm shadow-teal-700/20">
-            <span>Buka Modul Nginx</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-          </a>
-        </div>
+      <h3>Web Server (Nginx)</h3>
+      <p>Arsitektur asynchronous event-driven, konfigurasi Virtual Host Server Blocks, Reverse Proxy microservice, hardening banner identitas, dan sertifikat enkripsi SSL/HTTPS.</p>
+      <div class="tags">
+        <span>port 80/443</span>
+        <span>vhost</span>
+        <span>reverse-proxy</span>
       </div>
-
-      <!-- Kartu 4: Firewall Server UFW -->
-      <div class="module-card card-hover bg-white dark:bg-[#15231f] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-400/50 group" data-keywords="ufw firewall packet filtering iptables nftables default deny incoming allow rate limit port 22 80 443 3306 logging">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-900">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
-            </span>
-            <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              Modul 04
-            </span>
-          </div>
-          <h4 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors mb-2">
-            Firewall Server (UFW)
-          </h4>
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-            Konsep packet filtering, default deny policy, pembukaan port layanan (TCP/UDP), isolasi subnet IP, urutan rule, rate limiting brute-force, dan analisis ufw log.
-          </p>
-          <div class="flex flex-wrap gap-1.5 mb-6">
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">packet-filter</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">least-privilege</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">port-rules</span>
-          </div>
-        </div>
-        <div>
-          <a href="ufw.html" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-medium text-sm transition shadow-sm shadow-teal-700/20">
-            <span>Buka Modul UFW</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-          </a>
-        </div>
-      </div>
-
-      <!-- Kartu 5: Intrusion Prevention Fail2ban -->
-      <div class="module-card card-hover bg-white dark:bg-[#15231f] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-400/50 group" data-keywords="fail2ban ips intrusion prevention system brute force jail local sshd bantime findtime maxretry unbanip fail2ban-client regex audit log">
-        <div>
-          <div class="flex items-center justify-between mb-4">
-            <span class="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-900">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-            </span>
-            <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-              Modul 05
-            </span>
-          </div>
-          <h4 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors mb-2">
-            IPS Server (Fail2ban)
-          </h4>
-          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
-            Pencegahan intrusi otomatis berbasis log, konfigurasi jail.local (bantime, findtime, maxretry), proteksi brute-force SSH & Web, manajemen unban IP, serta audit log.
-          </p>
-          <div class="flex flex-wrap gap-1.5 mb-6">
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">anti-bruteforce</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">jail.local</span>
-            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">unbanip</span>
-          </div>
-        </div>
-        <div>
-          <a href="fail2ban.html" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-medium text-sm transition shadow-sm shadow-teal-700/20">
-            <span>Buka Modul Fail2ban</span>
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-          </a>
-        </div>
-      </div>
-
+      <a href="nginx.html" class="btn-go">Buka Modul Nginx &rarr;</a>
     </div>
 
-    <!-- Petunjuk Singkat Pembelajaran untuk Siswa -->
-    <div class="mt-12 bg-white dark:bg-[#15231f] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8">
-      <h4 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
-        <span>🚀</span> Petunjuk Belajar Praktikum Mandiri
-      </h4>
-      <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-6">
-        Gunakan simulator browser ini untuk mengasah keterampilan administrasi sistem jaringan Linux tanpa memerlukan aplikasi tambahan:
-      </p>
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
-        <div class="p-4 rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200/70 dark:border-slate-800">
-          <div class="font-bold text-teal-700 dark:text-teal-400 mb-1">1. Baca Konsep & Alur</div>
-          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
-            Pahami fungsi layanan, arsitektur protokol, dan alur konfigurasi sebelum mengeksekusi perintah.
-          </p>
-        </div>
-
-        <div class="p-4 rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200/70 dark:border-slate-800">
-          <div class="font-bold text-teal-700 dark:text-teal-400 mb-1">2. Klik "Coba" ke Terminal</div>
-          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
-            Tekan tombol <b>Coba</b> pada tabel perintah untuk memasukkan sintaks langsung ke terminal simulator.
-          </p>
-        </div>
-
-        <div class="p-4 rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200/70 dark:border-slate-800">
-          <div class="font-bold text-teal-700 dark:text-teal-400 mb-1">3. Tuntaskan Misi & Kuis</div>
-          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
-            Selesaikan 6 misi mandiri di tab Lab Terminal dan uji pemahaman kamu pada kuis pilihan ganda.
-          </p>
-        </div>
+    <!-- Modul 03: MariaDB -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-icon">🗄</div>
+        <span class="badge">Modul 03</span>
       </div>
-    </div>
-  </main>
-
-  <!-- Footer -->
-  <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#121e1a] py-6">
-    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
-      <p>© 2026 SMK Wikrama Bogor • Konsentrasi Keahlian Teknik Komputer dan Jaringan</p>
-      <div class="flex items-center gap-4">
-        <span>Debian 12 Bookworm Emulation</span>
-        <span>•</span>
-        <span>Standalone Web Artifacts</span>
+      <h3>Database Server (MariaDB)</h3>
+      <p>Pemasangan RDBMS, wizard mariadb-secure-installation, operasi DDL/DML, hak akses user remote, konfigurasi bind-address 0.0.0.0, serta pencadangan data mariadb-dump.</p>
+      <div class="tags">
+        <span>port 3306</span>
+        <span>sql-privileges</span>
+        <span>mariadb-dump</span>
       </div>
+      <a href="mariadb.html" class="btn-go">Buka Modul MariaDB &rarr;</a>
     </div>
-  </footer>
 
-  <script>
-    // Penanganan Tema Gelap & Terang
-    const themeToggleBtn = document.getElementById('themeToggle');
-    const sunIcon = document.getElementById('sunIcon');
-    const moonIcon = document.getElementById('moonIcon');
+    <!-- Modul 04: UFW -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-icon">🛡</div>
+        <span class="badge">Modul 04</span>
+      </div>
+      <h3>Firewall Server (UFW)</h3>
+      <p>Konsep packet filtering, default deny policy, pembukaan port layanan (TCP/UDP), isolasi subnet IP, urutan rule, rate limiting brute-force, dan analisis ufw log.</p>
+      <div class="tags">
+        <span>packet-filter</span>
+        <span>least-privilege</span>
+        <span>port-rules</span>
+      </div>
+      <a href="ufw.html" class="btn-go">Buka Modul UFW &rarr;</a>
+    </div>
 
-    function applyTheme(isDark) {
-      if (isDark) {
-        document.documentElement.classList.add('dark');
-        sunIcon.classList.remove('hidden');
-        moonIcon.classList.add('hidden');
-      } else {
-        document.documentElement.classList.remove('dark');
-        sunIcon.classList.add('hidden');
-        moonIcon.classList.remove('hidden');
-      }
-    }
+    <!-- Modul 05: Fail2ban -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-icon">🔒</div>
+        <span class="badge">Modul 05</span>
+      </div>
+      <h3>IPS Server (Fail2ban)</h3>
+      <p>Pencegahan intrusi otomatis berbasis log, konfigurasi jail.local (bantime, findtime, maxretry), proteksi brute-force SSH &amp; Web, manajemen unban IP, serta audit log.</p>
+      <div class="tags">
+        <span>anti-bruteforce</span>
+        <span>jail.local</span>
+        <span>unbanip</span>
+      </div>
+      <a href="fail2ban.html" class="btn-go">Buka Modul Fail2ban &rarr;</a>
+    </div>
+  </div>
 
-    const savedTheme = localStorage.getItem('theme');
-    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    const initialDark = savedTheme ? savedTheme === 'dark' : systemPrefersDark;
-    applyTheme(initialDark);
+  <div class="guide-box">
+    <h3>Petunjuk Belajar Mandiri Siswa</h3>
+    <ol>
+      <li>Pilih materi modul secara bertahap mulai dari <strong>Modul 01</strong>.</li>
+      <li>Pelajari teori singkat pada setiap bab, lalu perhatikan tabel perintah yang disediakan.</li>
+      <li>Gunakan tombol <strong>Coba</strong> di sebelah perintah untuk memasukkan sintaks langsung ke simulator terminal.</li>
+      <li>Selesaikan seluruh target pada tab <strong>Lab Terminal</strong> sampai tanda centang hijau muncul di setiap misi.</li>
+      <li>Kerjakan kuis evaluasi pada tab <strong>Latihan</strong> untuk menguji pemahaman konsep sebelum melanjutkan ke modul berikutnya.</li>
+    </ol>
+  </div>
+</main>
 
-    themeToggleBtn.addEventListener('click', () => {
-      const isCurrentlyDark = document.documentElement.classList.contains('dark');
-      const newDarkState = !isCurrentlyDark;
-      applyTheme(newDarkState);
-      localStorage.setItem('theme', newDarkState ? 'dark' : 'light');
-    });
+<footer>
+  &copy; 2026 Konsentrasi Keahlian TKJ - SMK Wikrama Bogor. Modul Ajar Digital Interaktif Administrasi Sistem Jaringan.
+</footer>
 
-    // Fitur Live Search Modul Sederhana
-    const searchInput = document.getElementById('searchInput');
-    const moduleCards = document.querySelectorAll('.module-card');
-    const moduleCount = document.getElementById('moduleCount');
-
-    searchInput.addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      let visible = 0;
-
-      moduleCards.forEach(card => {
-        const title = card.querySelector('h4').textContent.toLowerCase();
-        const desc = card.querySelector('p').textContent.toLowerCase();
-        const kw = card.dataset.keywords ? card.dataset.keywords.toLowerCase() : '';
-
-        if (title.includes(q) || desc.includes(q) || kw.includes(q)) {
-          card.style.display = 'flex';
-          visible++;
-        } else {
-          card.style.display = 'none';
-        }
-      });
-
-      moduleCount.textContent = visible + ' Modul Ditemukan';
-    });
-  </script>
+<script>
+const tg = document.getElementById('tg');
+tg.onclick = () => {
+  const r = document.documentElement;
+  const isDark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+  r.dataset.theme = isDark ? 'light' : 'dark';
+};
+</script>
 </body>
 </html>
