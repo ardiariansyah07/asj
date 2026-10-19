@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Soal Praktik: Rancang Bangun Server Mini Production - SMK Wikrama Bogor</title>
+<style>
+:root{
+  --bg:#f2f6f4;--fg:#14261f;--card:#fff;--pri:#0f766e;--acc:#dff3ef;--bd:#cfdcd6;
+  --mut:#4f645b;--warn:#fff4e0;--wb:#d97706;--hd:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+    --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+  --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+}
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font:16px/1.7 "Segoe UI",system-ui,-apple-system,sans-serif;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:0 0 auto;
+  height:env(safe-area-inset-top,0px);
+  background:var(--hd);z-index:1001;
+}
+
+header{
+  position:fixed;
+  top:env(safe-area-inset-top,0px);
+  left:0;
+  right:0;
+  z-index:1000;
+  background:var(--hd);
+  border-bottom:1px solid var(--bd);
+  width:100%;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+#bar{height:3px;background:var(--pri);width:0;transition:width .3s}
+.hw{display:flex;align-items:center;gap:10px;padding:8px 20px;max-width:100%;width:100%}
+nav{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  white-space:nowrap;border:0;background:none;color:var(--mut);
+  padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-size:14px;
+  transition:all 0.15s ease;
+}
+nav button:hover{background:var(--acc);color:var(--fg)}
+nav button.on{background:var(--pri);color:var(--hd);font-weight:600}
+button:focus-visible,input:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+.actions{display:flex;gap:8px;align-items:center}
+.tg{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.tg:hover{background:var(--acc)}
+
+main{
+  width:100%;
+  max-width:100%;
+  flex:1;
+  margin:0 auto;
+  padding:84px 32px 80px;
+}
+@media(max-width:768px){
+  main{padding:74px 14px 60px}
+  .hw{padding:6px 10px}
+}
+
+.tab{display:none}
+.tab.active{display:block}
+
+h1{font-size:2.2rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.5rem;margin:1.6em 0 .4em;border-left:5px solid var(--pri);padding-left:12px}
+h3{font-size:1.15rem;margin:1.3em 0 .3em;color:var(--pri)}
+p,li{max-width:100%}
+
+.cover{
+  background:linear-gradient(135deg,var(--pri),#0b3b36);
+  color:#fff;border-radius:14px;padding:36px 32px;margin-bottom:24px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+.cover h1{font-size:2.5rem}
+.cover table,.cover td,.cover tr:nth-child(even) td{
+  border:0;background:none;color:#fff;padding:4px 14px 4px 0;
+}
+.co{
+  border-left:5px solid var(--pri);background:var(--acc);padding:12px 18px;
+  border-radius:8px;margin:16px 0;
+}
+.co.w{border-color:var(--wb);background:var(--warn)}
+.tw{overflow-x:auto;margin:14px 0;border-radius:10px;border:1px solid var(--bd)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--card)}
+th{background:var(--pri);color:var(--hd);text-align:left;padding:10px 14px;font-weight:600}
+td{padding:9px 14px;border:1px solid var(--bd);vertical-align:top}
+tr:nth-child(even) td{background:var(--acc)}
+code{
+  font-family:ui-monospace,Consolas,monospace;font-size:.92em;
+  background:var(--acc);padding:2px 6px;border-radius:4px;word-break:break-word;
+}
+.nv{display:flex;justify-content:space-between;margin-top:36px;gap:12px}
+.nv button,.btn{
+  background:var(--pri);color:var(--hd);border:0;border-radius:8px;
+  padding:10px 20px;cursor:pointer;font:inherit;font-weight:600;
+  transition:filter .15s;
+}
+.nv button:hover,.btn:hover{filter:brightness(1.1)}
+svg text{fill:currentColor;font:13px sans-serif}
+
+.card{
+  background:var(--card);border:1px solid var(--bd);border-radius:10px;
+  padding:18px 22px;margin:16px 0;
+}
+.spec-box{
+  background:var(--card);border:1px solid var(--bd);border-radius:10px;
+  padding:18px 22px;margin:16px 0;border-left:5px solid var(--pri);
+}
+.spec-box h4{margin:0 0 8px;font-size:1.1rem;color:var(--pri)}
+.spec-box ul{margin:0;padding-left:20px}
+.spec-box li{margin-bottom:6px}
+
+@media print{
+  header,.nv,.actions{display:none}
+  .tab{display:block!important;page-break-after:always}
+  body::before{display:none}
+  body{font-size:12pt;background:#fff;color:#000}
+}
+</style>
+</head>
+<body>
+<header>
+  <div id="bar"></div>
+  <div class="hw">
+    <nav id="nav"></nav>
+    <div class="actions">
+      <button class="tg" onclick="window.print()" title="Cetak Lembar Soal">🖨️ Cetak</button>
+      <button class="tg" id="btnFs" title="Toggle Layar Penuh">⛶ Fullscreen</button>
+      <button class="tg" id="tg" aria-label="Ganti tema">◐</button>
+    </div>
+  </div>
+</header>
+<main>
+
+<section class="tab active" data-title="Brief Soal">
+<div class="cover">
+  <p style="font-size:1.1rem;margin-bottom:4px">LEMBAR PENILAIAN UNJUK KERJA / SOAL PRAKTIK KEJURUAN</p>
+  <h1>Rancang Bangun Server Mini Production</h1>
+  <table>
+    <tr><td>Satuan Pendidikan</td><td>: SMK Wikrama Bogor</td></tr>
+    <tr><td>Konsentrasi Keahlian</td><td>: Teknik Komputer dan Jaringan (TKJ)</td></tr>
+    <tr><td>Mata Pelajaran</td><td>: Administrasi Sistem Jaringan (ASJ)</td></tr>
+    <tr><td>Fase / Kelas</td><td>: F / XI (Sebelas)</td></tr>
+    <tr><td>Bentuk Soal</td><td>: Penugasan Praktik Mandiri pada Mesin Virtual (VM)</td></tr>
+    <tr><td>Sistem Pengalamatan IP</td><td>: Alokasi Otomatis (DHCP Lab Sekolah)</td></tr>
+  </table>
+</div>
+<h2>Skenario Penugasan</h2>
+<p>Sebuah unit industri sekolah berencana meluncurkan sebuah server mini production lokal (VPS mandiri) yang berfungsi sebagai infrastruktur penyedia web portofolio siswa, sistem pencatatan database nilai, serta sistem pemantauan ketersediaan layanan (*uptime monitoring*). Anda ditugaskan sebagai <b>Junior Network and System Administrator</b> untuk membangun, mengamankan, dan menguji server tersebut dari nol (*bare-metal* / Virtual Machine) sesuai spesifikasi industri yang telah ditentukan.</p>
+<div class="co w">
+  ⚠️ <b>Petunjuk Pelaksanaan Praktik:</b>
+  <ul>
+    <li>Praktik dikerjakan secara mandiri pada komputer/laptop masing-masing menggunakan software virtualisasi (VirtualBox / Proxmox / VMware).</li>
+    <li>Server wajib terhubung ke jaringan Lab TKJ melalui mode <b>Bridged Adapter</b> agar menerima sewa alamat IP DHCP asli dari router sekolah.</li>
+    <li>Dokumentasikan setiap kriteria keberhasilan penugasan dalam bentuk tangkapan layar (*screenshot*) terminal untuk dilampirkan pada laporan akhir.</li>
+  </ul>
+</div>
+</section>
+
+<section class="tab" data-title="1. Ketentuan Jaringan">
+<h1>Ketentuan Jaringan &amp; Parameter Lab</h1>
+<div class="co">📋 <b>Ketentuan Umum:</b> Seluruh layanan server wajib dapat diakses dan diuji dari laptop klien melalui jaringan LAN laboratorium sekolah.</div>
+<h2>1. Skema Topologi Pengalamatan</h2>
+<p>Server peserta ujian <b>tidak diperkenankan</b> menggunakan alamat IP statis sembarangan. Antarmuka jaringan harus dikonfigurasi menggunakan mode sewa dinamis <b>DHCP Client</b> yang didistribusikan oleh Router Mikrotik Lab SMK Wikrama.</p>
+<div class="tw">
+  <table>
+    <tr><th>Node Jaringan</th><th>Karakteristik &amp; Peran</th><th>Sumber Alamat IP</th></tr>
+    <tr><td><b>Router Utama Lab</b></td><td>Gateway internet laboratorium sekolah &amp; DHCP Server</td><td><code>192.168.100.1 /24</code> (Default)</td></tr>
+    <tr><td><b>Server Debian Peserta</b></td><td>Node virtual yang melayani SSH, Web, DB, dan Monitoring</td><td><b>DHCP Pool Lab</b> (Catat IP yang didapat di laporan)</td></tr>
+    <tr><td><b>Laptop Penguji (Client)</b></td><td>Perangkat penguji akses browser, remote shell, dan audit port</td><td>Alamat IP lokal dalam satu segmen LAN yang sama</td></tr>
+  </table>
+</div>
+
+<h2>2. Matriks Spesifikasi Port &amp; Aksesibilitas</h2>
+<div class="tw">
+  <table>
+    <tr><th>Layanan Server</th><th>Port Akses</th><th>Protokol</th><th>Ketentuan Otorisasi Akses</th></tr>
+    <tr><td>OpenSSH Server</td><td><code>22</code> atau <code>2222</code></td><td>TCP</td><td>Wajib diizinkan dari klien lab (dilindungi rate-limiting).</td></tr>
+    <tr><td>Web Server Nginx</td><td><code>80</code> (HTTP)</td><td>TCP</td><td>Wajib terbuka untuk umum (diakses via IP lab atau domain internal).</td></tr>
+    <tr><td>Database MariaDB</td><td><code>3306</code></td><td>TCP</td><td><b>TERISOLASI:</b> Dilarang diakses sembarang host publik (hanya localhost / IP tertentu).</td></tr>
+    <tr><td>Uptime Kuma Core</td><td><code>3001</code></td><td>TCP</td><td><b>TERISOLASI:</b> Terikat ke <code>127.0.0.1</code>, hanya boleh diakses via Reverse Proxy Nginx.</td></tr>
+  </table>
+</div>
+</section>
+
+<section class="tab" data-title="Soal 1: Instalasi OS">
+<h1>Soal Tahap 1: Instalasi Sistem Operasi Headless</h1>
+<p>Pasang sistem operasi server pada mesin virtual Anda sesuai dengan spesifikasi teknis minimal produksi di bawah ini.</p>
+
+<div class="spec-box">
+  <h4>Spesifikasi Kebutuhan Sistem:</h4>
+  <ul>
+    <li><b>Distribusi Target:</b> Debian GNU/Linux 12 (Bookworm) 64-bit (*Netinst ISO* atau *Standard ISO*).</li>
+    <li><b>Mode Instalasi:</b> Teks (*Text-mode Install*), bukan Graphical Install.</li>
+    <li><b>Identitas Mesin (Hostname):</b> Wajib menggunakan pola penamaan: <code>srv-[namasiswa]</code> (contoh: <code>srv-fauzi</code>).</li>
+    <li><b>Domain Internal:</b> Tetapkan ke <code>lab.wikrama.sch.id</code> atau <code>projek.lan</code>.</li>
+    <li><b>Akun Administrator:</b> Kata sandi root dibuat dengan kompleksitas yang aman.</li>
+    <li><b>Akun Pengguna Reguler:</b> Nama akun pengguna wajib menggunakan nama Anda (misal: <code>fauzi</code> atau <code>siswa</code>).</li>
+  </ul>
+</div>
+
+<div class="spec-box">
+  <h4>Ketentuan Partisi Penyimpanan (Storage):</h4>
+  <ul>
+    <li>Gunakan sistem berkas <code>ext4</code> untuk partisi root (<code>/</code>).</li>
+    <li>Alokasikan partisi <code>swap</code> sebesar minimal 1 GB - 2 GB.</li>
+    <li>Bootloader <b>GRUB 2</b> wajib dipasang pada Master Boot Record drive utama (<code>/dev/sda</code> atau <code>/dev/vda</code>).</li>
+  </ul>
+</div>
+
+<div class="co w">
+  🚨 <b>Kriteria Kegagalan:</b> Pada tahap <i>Tasksel (Software Selection)</i>, Anda <b>WAJIB MENGHILANGKAN CENTANG [*]</b> pada <i>Debian desktop environment (GNOME/XFCE)</i>. Server yang terpasang antarmuka grafis desktop dianggap <b>GUGUR / DISKUALIFIKASI</b> pada aspek efisiensi memori server.
+</div>
+</section>
+
+<section class="tab" data-title="Soal 2: Jaringan & Sudo">
+<h1>Soal Tahap 2: Konfigurasi Jaringan DHCP &amp; Eskalasi Hak Akses</h1>
+<p>Pastikan sistem server yang baru terpasang terhubung ke jaringan laboratorium secara otomatis dan pengguna reguler memiliki wewenang administratif.</p>
+
+<div class="spec-box">
+  <h4>Kebutuhan Tugas:</h4>
+  <ul>
+    <li>Konfigurasikan antarmuka jaringan utama (contoh: <code>eth0</code> atau <code>enp0s3</code>) di berkas <code>/etc/network/interfaces</code> agar meminta sewa alamat IP dinamis secara otomatis melalui protokol DHCP.</li>
+    <li>Pastikan server memperoleh:
+      <ul>
+        <li>Alamat IP yang valid dari router laboratorium.</li>
+        <li>Subnet mask <code>/24</code> yang sesuai dengan lingkungan lab.</li>
+        <li>Default gateway yang mengarah ke IP Router Mikrotik lab.</li>
+      </ul>
+    </li>
+    <li>Pastikan resolver DNS pada <code>/etc/resolv.conf</code> dapat menerjemahkan nama domain publik.</li>
+    <li>Daftarkan akun pengguna non-root yang telah Anda buat ke dalam grup <code>sudo</code>.</li>
+  </ul>
+</div>
+
+<div class="co">
+  🎯 <b>Target Pengujian Siswa:</b>
+  <ul>
+    <li>Perintah <code>ip a</code> menampilkan antarmuka jaringan aktif dengan status <code>UP</code> dan memiliki IP dari segmen lab sekolah.</li>
+    <li>Perintah <code>ping -c 3 8.8.8.8</code> dan <code>ping -c 3 debian.org</code> menghasilkan respon 0% packet loss.</li>
+    <li>Pengguna reguler dapat mengeksekusi perintah <code>sudo whoami</code> dan menghasilkan output <code>root</code>.</li>
+  </ul>
+</div>
+</section>
+
+<section class="tab" data-title="Soal 3: Remote SSH">
+<h1>Soal Tahap 3: Keamanan Akses Jarak Jauh (OpenSSH Server)</h1>
+<p>Konfigurasikan daemon OpenSSH agar server dapat dikelola dari laptop klien tanpa perlu berada di depan komputer server fisik secara langsung.</p>
+
+<div class="spec-box">
+  <h4>Kebutuhan Tugas:</h4>
+  <ul>
+    <li>Pastikan service OpenSSH Server (<code>sshd</code>) terpasang dan berstatus aktif (<code>active running</code>).</li>
+    <li>Buat pasangan kunci kriptografi asimetris modern berjenis <b>Ed25519</b> (<code>ssh-keygen -t ed25519</code>) pada laptop klien.</li>
+    <li>Salin kunci publik (<code>id_ed25519.pub</code>) dari laptop klien ke server menggunakan utilitas transfer resmi.</li>
+    <li>Uji login remote dari klien hingga berhasil masuk tanpa dimintai password akun Linux.</li>
+    <li><b>Hardening Server:</b>
+      <ul>
+        <li>Kunci login password root langsung (<code>PermitRootLogin no</code> atau <code>prohibit-password</code>).</li>
+        <li>Nonaktifkan autentikasi password teks biasa (<code>PasswordAuthentication no</code>) setelah login kunci terverifikasi sukses.</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<div class="co">
+  🎯 <b>Target Pengujian Siswa:</b>
+  <ul>
+    <li>Koneksi remote dari terminal klien (<code>ssh [user]@[ip-server]</code>) berhasil terhubung secara instan tanpa prompt pengisian password.</li>
+    <li>Percobaan login jarak jauh sebagai akun <code>root</code> atau login tanpa menyertakan kunci privat otomatis ditolak dengan pesan: <i>Permission denied (publickey)</i>.</li>
+  </ul>
+</div>
+</section>
+
+<section class="tab" data-title="Soal 4: Web Nginx">
+<h1>Soal Tahap 4: Web Server &amp; Halaman Portofolio Siswa</h1>
+<p>Bangun layanan server web berbasis Nginx untuk mempublikasikan halaman profil portofolio unjuk kerja Anda.</p>
+
+<div class="spec-box">
+  <h4>Kebutuhan Tugas:</h4>
+  <ul>
+    <li>Pasang paket web server Nginx resmi dari repositori Debian.</li>
+    <li>Siapkan direktori dokumen web khusus di <code>/var/www/projek/</code> atau <code>/var/www/portofolio/</code>.</li>
+    <li>Buat berkas beranda <code>index.html</code> yang memuat identitas peserta:
+      <ul>
+        <li>Judul: <i>Server Produksi Mini TKJ - SMK Wikrama</i></li>
+        <li>Nama Lengkap Peserta, NIS, dan Rombel (Kelas).</li>
+        <li>Ringkasan status layanan server yang sedang dibangun.</li>
+      </ul>
+    </li>
+    <li>Atur kepemilikan direktori dokumen web kepada pengguna sistem <code>www-data:www-data</code> dengan mode izin akses <code>755</code>.</li>
+    <li>Konfigurasikan <b>Server Block (Virtual Host)</b> baru pada direktori <code>sites-available</code> yang mendengarkan port 80.</li>
+    <li>Aktifkan konfigurasi menggunakan metode <i>symbolic link (symlink)</i> ke <code>sites-enabled</code> dan pastikan validasi sintaks bebas dari galat.</li>
+    <li>Lakukan hardening dengan menyembunyikan informasi versi Nginx pada response header (<code>server_tokens off;</code>).</li>
+  </ul>
+</div>
+
+<div class="co">
+  🎯 <b>Target Pengujian Siswa:</b>
+  <ul>
+    <li>Browser pada laptop klien dapat membuka alamat IP lab server (<code>http://[ip-server]</code>) dan menampilkan halaman profil siswa secara sempurna.</li>
+    <li>Uji header via <code>curl -I http://[ip-server]</code> menunjukkan status <code>HTTP/1.1 200 OK</code> dengan header <code>Server: nginx</code> (tanpa nomor rilis versi).</li>
+  </ul>
+</div>
+</section>
+
+<section class="tab" data-title="Soal 5: Database MariaDB">
+<h1>Soal Tahap 5: Database Server &amp; Pengelolaan Data Siswa</h1>
+<p>Pasang dan kelola sistem basis data relasional (RDBMS) MariaDB untuk menyimpan rekaman data siswa secara terpusat.</p>
+
+<div class="spec-box">
+  <h4>Kebutuhan Tugas:</h4>
+  <ul>
+    <li>Pasang paket <code>mariadb-server</code> di server Anda.</li>
+    <li>Jalankan wizard pengamanan <code>mariadb-secure-installation</code>:
+      <ul>
+        <li>Hapus akun pengguna anonim (*anonymous users*).</li>
+        <li>Nonaktifkan login remote untuk superuser root (*disallow root login remotely*).</li>
+        <li>Hapus database pengujian bawaan (*test database*).</li>
+        <li>Muat ulang tabel hak akses (*reload privilege tables*).</li>
+      </ul>
+    </li>
+    <li>Masuk ke command line MariaDB, buat skema database baru bernama <code>db_sekolah</code>.</li>
+    <li>Buat tabel bernama <code>siswa</code> dengan kolom:
+      <ul>
+        <li><code>id</code> : INT, Primary Key, Auto Increment.</li>
+        <li><code>nis</code> : VARCHAR(10), Not Null.</li>
+        <li><code>nama</code> : VARCHAR(50), Not Null.</li>
+        <li><code>kelas</code> : VARCHAR(20), Not Null.</li>
+      </ul>
+    </li>
+    <li>Masukkan minimal 3 (tiga) baris data siswa ke dalam tabel tersebut.</li>
+    <li>Buat akun pengguna database khusus aplikasi (misal: <code>admin_sekolah</code>) yang memiliki wewenang penuh atas database <code>db_sekolah</code>.</li>
+    <li>Lakukan pencadangan struktur dan data database menjadi berkas cadangan SQL (<code>backup_sekolah.sql</code>).</li>
+  </ul>
+</div>
+
+<div class="co">
+  🎯 <b>Target Pengujian Siswa:</b>
+  <ul>
+    <li>Perintah SQL <code>SELECT * FROM db_sekolah.siswa;</code> menampilkan data tabel secara utuh dan terstruktur.</li>
+    <li>Berkas <code>backup_sekolah.sql</code> tersimpan pada direktori home pengguna dan memuat instruksi DDL/DML lengkap.</li>
+  </ul>
+</div>
+</section>
+
+<section class="tab" data-title="Soal 6: UFW & Fail2ban">
+<h1>Soal Tahap 6: Keamanan Jaringan (Firewall UFW &amp; IPS Fail2ban)</h1>
+<p>Bungkus seluruh layanan server Anda di dalam benteng pertahanan lapis ganda: pembatasan port via UFW dan pencegahan intrusi brute-force via Fail2ban.</p>
+
+<div class="spec-box">
+  <h4>Kebutuhan Tugas:</h4>
+  <ul>
+    <li>Pasang paket <code>ufw</code> dan <code>fail2ban</code>.</li>
+    <li><b>Konfigurasi Firewall UFW:</b>
+      <ul>
+        <li>Terapkan kebijakan bawaan: <code>default deny incoming</code> dan <code>default allow outgoing</code>.</li>
+        <li>Buka izin port SSH (22 atau port kustom Anda).</li>
+        <li>Terapkan pembatasan frekuensi koneksi (*rate limiting*) pada port SSH.</li>
+        <li>Buka izin port HTTP (80/tcp) untuk akses web profil.</li>
+        <li><b>ISOLASI PORT DATABASE:</b> Pastikan port 3306 <b>TIDAK DIBUKA</b> ke publik. Jika dibutuhkan, batasi hanya untuk IP tertentu.</li>
+        <li>Aktifkan firewall dan pastikan status bertuliskan <i>active</i>.</li>
+      </ul>
+    </li>
+    <li><b>Konfigurasi IPS Fail2ban:</b>
+      <ul>
+        <li>Buat salinan konfigurasi lokal pada <code>/etc/fail2ban/jail.local</code>.</li>
+        <li>Aktifkan jail <code>[sshd]</code> dengan parameter: <code>maxretry = 3</code> dan <code>bantime = 10m</code>.</li>
+        <li>Jalankan daemon dan pastikan service berstatus <code>active (running)</code>.</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<div class="co">
+  🎯 <b>Target Pengujian Siswa:</b>
+  <ul>
+    <li>Perintah <code>sudo ufw status numbered</code> menunjukkan status aktif dengan aturan port SSH dan HTTP terbuka.</li>
+    <li>Pengujian port database dari laptop klien menggunakan netcat/telnet (<code>nc -zv [ip-server] 3306</code>) menghasilkan status <b>Connection timed out / Refused</b> (terbukti terlindungi dari akses publik).</li>
+    <li>Perintah <code>sudo fail2ban-client status sshd</code> menampilkan jail aktif memantau log autentikasi.</li>
+  </ul>
+</div>
+</section>
+
+<section class="tab" data-title="Soal 7: Uptime Kuma">
+<h1>Soal Tahap 7: Sistem Pemantauan Layanan (Uptime Kuma)</h1>
+<p>Integrasikan dasbor monitoring real-time untuk memantau apakah web server, database, dan port SSH Anda beroperasi secara normal (UP) atau mengalami gangguan (DOWN).</p>
+
+<div class="spec-box">
+  <h4>Kebutuhan Tugas:</h4>
+  <ul>
+    <li>Jalankan aplikasi Uptime Kuma (menggunakan Docker container atau runtime Node.js native) yang mendengarkan pada port internal <code>3001</code>.</li>
+    <li>Pastikan aplikasi terikat ke loopback lokal (<code>127.0.0.1:3001</code>) dan tidak dibuka langsung pada firewall publik.</li>
+    <li><b>Reverse Proxy Nginx dengan WebSocket:</b>
+      <ul>
+        <li>Buat konfigurasi Server Block Nginx baru untuk domain lokal atau sub-path (misal: <code>status.lan</code> atau akses port 80).</li>
+        <li>Wajib mengonfigurasikan header WebSocket (<code>Upgrade $http_upgrade;</code> dan <code>Connection "upgrade";</code>) agar grafik latensi dasbor terupdate secara real-time.</li>
+      </ul>
+    </li>
+    <li>Buka dasbor Uptime Kuma dari peramban web laptop klien, buat akun administrator pemantauan.</li>
+    <li><b>Daftarkan minimal 3 (tiga) Target Probe Monitor:</b>
+      <ol>
+        <li>Monitor Web Profil (Tipe: HTTP(s), Target: <code>http://localhost:80</code>).</li>
+        <li>Monitor Database MariaDB (Tipe: TCP Port, Target: <code>127.0.0.1:3306</code>).</li>
+        <li>Monitor Remote SSH (Tipe: TCP Port, Target: <code>127.0.0.1:22</code>).</li>
+      </ol>
+    </li>
+    <li><b>Uji Penanganan Insiden (Downtime Simulation):</b>
+      <ul>
+        <li>Hentikan sementara layanan MariaDB (<code>systemctl stop mariadb</code>).</li>
+        <li>Buktikan indikator database di dasbor Uptime Kuma berubah warna menjadi merah (<b>DOWN</b>).</li>
+        <li>Hidupkan kembali layanan MariaDB dan buktikan status pulih menjadi hijau (<b>UP</b>).</li>
+      </ul>
+    </li>
+  </ul>
+</div>
+
+<div class="co">
+  🎯 <b>Target Pengujian Siswa:</b>
+  <ul>
+    <li>Dasbor Uptime Kuma dapat dibuka melalui peramban laptop klien tanpa galat koneksi WebSocket.</li>
+    <li>Seluruh target probe layanan (Web, DB, SSH) menampilkan status operasional 100% UP.</li>
+  </ul>
+</div>
+</section>
+
+<section class="tab" data-title="Lembar Penilaian">
+<h1>Lembar Verifikasi &amp; Rubrik Penilaian</h1>
+<div class="co">Berikut adalah indikator penilaian unjuk kerja yang akan diuji oleh guru penilai langsung pada mesin server Anda.</div>
+
+<h2>Matriks Skor Unjuk Kerja (Total 100 Poin)</h2>
+<div class="tw">
+  <table>
+    <tr><th>No</th><th>Komponen &amp; Indikator Kinerja</th><th>Bobot</th><th>Ketercapaian</th></tr>
+    <tr>
+      <td><b>1</b></td>
+      <td><b>Instalasi OS Debian 12 &amp; Jaringan DHCP Lab</b><br>
+      • Sistem operasi murni headless (tanpa GUI desktop).<br>
+      • Partisi disk ext4 dan swap terpasang proporsional.<br>
+      • Menerima alokasi sewa IP dinamis dari router lab sekolah.<br>
+      • Pengguna non-root terdaftar di grup sudoers.
+      </td>
+      <td>15 Poin</td>
+      <td>[ &nbsp; ] Ya &nbsp;&nbsp; [ &nbsp; ] Tidak</td>
+    </tr>
+    <tr>
+      <td><b>2</b></td>
+      <td><b>Remote Access &amp; Hardening SSH</b><br>
+      • Autentikasi SSH public key Ed25519 berfungsi tanpa password.<br>
+      • Login password root ditolak oleh server.<br>
+      • Password authentication dimatikan secara aman.
+      </td>
+      <td>15 Poin</td>
+      <td>[ &nbsp; ] Ya &nbsp;&nbsp; [ &nbsp; ] Tidak</td>
+    </tr>
+    <tr>
+      <td><b>3</b></td>
+      <td><b>Web Server Nginx &amp; Profil Siswa</b><br>
+      • Virtual host aktif menyajikan konten portofolio siswa.<br>
+      • Hak akses direktori dokumen web diatur ke <code>www-data</code>.<br>
+      • Respons HTTP 200 OK dan banner versi Nginx disembunyikan.
+      </td>
+      <td>15 Poin</td>
+      <td>[ &nbsp; ] Ya &nbsp;&nbsp; [ &nbsp; ] Tidak</td>
+    </tr>
+    <tr>
+      <td><b>4</b></td>
+      <td><b>Database Server MariaDB</b><br>
+      • Wizard pengamanan secure installation berhasil dijalankan.<br>
+      • Database <code>db_sekolah</code> dan tabel <code>siswa</code> terisi data.<br>
+      • Berkas backup SQL tersimpan dengan benar.
+      </td>
+      <td>15 Poin</td>
+      <td>[ &nbsp; ] Ya &nbsp;&nbsp; [ &nbsp; ] Tidak</td>
+    </tr>
+    <tr>
+      <td><b>5</b></td>
+      <td><b>Keamanan Lapis Ganda (UFW &amp; Fail2ban)</b><br>
+      • Kebijakan default deny incoming aktif.<br>
+      • Port SSH dan HTTP terbuka, sedangkan port MariaDB 3306 terisolasi.<br>
+      • Fail2ban aktif memantau log percobaan brute-force login.
+      </td>
+      <td>20 Poin</td>
+      <td>[ &nbsp; ] Ya &nbsp;&nbsp; [ &nbsp; ] Tidak</td>
+    </tr>
+    <tr>
+      <td><b>6</b></td>
+      <td><b>Sistem Monitoring Uptime Kuma</b><br>
+      • Reverse proxy WebSocket Nginx berfungsi tanpa galat koneksi.<br>
+      • Tiga probe monitor (Web, DB, SSH) berstatus UP (Hijau).<br>
+      • Mampu mendemonstrasikan transisi DOWN saat layanan diuji henti.
+      </td>
+      <td>20 Poin</td>
+      <td>[ &nbsp; ] Ya &nbsp;&nbsp; [ &nbsp; ] Tidak</td>
+    </tr>
+  </table>
+</div>
+
+<h2>Format Bukti Pelaporan Praktik</h2>
+<div class="card">
+  <b>Lampiran Bukti Tangkapan Layar (Screenshot) Wajib:</b>
+  <ol>
+    <li>Output terminal perintah <code>ip a</code> dan <code>ping -c 3 8.8.8.8</code> di server.</li>
+    <li>Output terminal klien saat melakukan koneksi <code>ssh [user]@[ip-server]</code> yang langsung masuk tanpa kata sandi.</li>
+    <li>Tampilan halaman web portofolio siswa yang diakses melalui peramban laptop klien.</li>
+    <li>Output kueri SQL <code>SELECT * FROM db_sekolah.siswa;</code> pada terminal MariaDB.</li>
+    <li>Output perintah <code>sudo ufw status numbered</code> dan pengujian <code>nc -zv [ip-server] 3306</code> dari klien (timed out).</li>
+    <li>Tangkapan layar dasbor Uptime Kuma dengan indikator seluruh probe aktif berwarna hijau.</li>
+  </ol>
+</div>
+</section>
+
+</main>
+
+<script>
+const tabs = Array.from(document.querySelectorAll('.tab'));
+const nav = document.getElementById('nav');
+
+function show(i) {
+  tabs.forEach((t, k) => {
+    if (k === i) t.classList.add('active');
+    else t.classList.remove('active');
+  });
+
+  const navBtns = nav.querySelectorAll('button');
+  navBtns.forEach((b, k) => {
+    b.classList.toggle('on', k === i);
+  });
+
+  const bar = document.getElementById('bar');
+  if (bar) bar.style.width = (i / (tabs.length - 1) * 100) + '%';
+  window.scrollTo(0, 0);
+}
+
+nav.innerHTML = '';
+tabs.forEach((t, k) => {
+  const b = document.createElement('button');
+  b.textContent = t.dataset.title;
+  b.onclick = () => show(k);
+  nav.appendChild(b);
+
+  const oldNv = t.querySelector('.nv');
+  if (oldNv) oldNv.remove();
+
+  const d = document.createElement('div');
+  d.className = 'nv';
+
+  const prevBtn = k > 0 ? '<button class="btn-prev">← Tahap Sebelumnya</button>' : '<div></div>';
+  const nextBtn = k < tabs.length - 1 ? '<button class="btn-next">Tahap Berikutnya →</button>' : '<div></div>';
+
+  d.innerHTML = prevBtn + nextBtn;
+  if (k > 0) d.querySelector('.btn-prev').onclick = () => show(k - 1);
+  if (k < tabs.length - 1) d.querySelector('.btn-next').onclick = () => show(k + 1);
+  t.appendChild(d);
+});
+
+document.getElementById('tg').onclick = () => {
+  const r = document.documentElement;
+  const isDark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+  r.dataset.theme = isDark ? 'light' : 'dark';
+};
+
+const btnFs = document.getElementById('btnFs');
+btnFs.onclick = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    btnFs.textContent = '✕ Exit Full';
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+    btnFs.textContent = '⛶ Fullscreen';
+  }
+};
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) btnFs.textContent = '⛶ Fullscreen';
+});
+
+show(0);
+</script>
+</body>
+</html>
