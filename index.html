@@ -290,15 +290,31 @@ footer {
       <h2>Daftar Modul Praktikum</h2>
       <p style="margin: 4px 0 0; color: var(--mut); font-size: 14.5px;">Pilih modul pembelajaran di bawah untuk membuka simulator dan materi.</p>
     </div>
-    <span class="badge" style="font-size: 13px; padding: 6px 12px;">5 Modul Tersedia</span>
+    <span class="badge" style="font-size: 13px; padding: 6px 12px;">7 Modul Tersedia</span>
   </div>
 
   <div class="grid">
-    <!-- Modul 01: SSH -->
+    <!-- Modul 01: NOS -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-icon">🐧</div>
+        <span class="badge">Modul 01</span>
+      </div>
+      <h3>Sistem Operasi Jaringan (NOS)</h3>
+      <p>Fondasi sistem operasi jaringan: arsitektur multi-user headless, hierarki direktori FHS Debian 12, hak akses POSIX (chmod/chown), kontrol proses systemd, dan manajemen paket APT.</p>
+      <div class="tags">
+        <span>kernel-fhs</span>
+        <span>permissions</span>
+        <span>apt-pkg</span>
+      </div>
+      <a href="nos.html" class="btn-go">Buka Modul NOS &rarr;</a>
+    </div>
+
+    <!-- Modul 02: SSH -->
     <div class="card">
       <div class="card-top">
         <div class="card-icon">⌨</div>
-        <span class="badge">Modul 01</span>
+        <span class="badge">Modul 02</span>
       </div>
       <h3>Remote Server (SSH)</h3>
       <p>Pengelolaan OpenSSH Server di Debian 12, login tanpa password via Public Key ed25519, hardening port &amp; firewall UFW, transfer file (SCP/SFTP/Rsync), serta SSH Tunneling.</p>
@@ -310,11 +326,11 @@ footer {
       <a href="ssh.html" class="btn-go">Buka Modul SSH &rarr;</a>
     </div>
 
-    <!-- Modul 02: Nginx -->
+    <!-- Modul 03: Nginx -->
     <div class="card">
       <div class="card-top">
         <div class="card-icon">🌐</div>
-        <span class="badge">Modul 02</span>
+        <span class="badge">Modul 03</span>
       </div>
       <h3>Web Server (Nginx)</h3>
       <p>Arsitektur asynchronous event-driven, konfigurasi Virtual Host Server Blocks, Reverse Proxy microservice, hardening banner identitas, dan sertifikat enkripsi SSL/HTTPS.</p>
@@ -326,11 +342,11 @@ footer {
       <a href="nginx.html" class="btn-go">Buka Modul Nginx &rarr;</a>
     </div>
 
-    <!-- Modul 03: MariaDB -->
+    <!-- Modul 04: MariaDB -->
     <div class="card">
       <div class="card-top">
         <div class="card-icon">🗄</div>
-        <span class="badge">Modul 03</span>
+        <span class="badge">Modul 04</span>
       </div>
       <h3>Database Server (MariaDB)</h3>
       <p>Pemasangan RDBMS, wizard mariadb-secure-installation, operasi DDL/DML, hak akses user remote, konfigurasi bind-address 0.0.0.0, serta pencadangan data mariadb-dump.</p>
@@ -342,11 +358,11 @@ footer {
       <a href="mariadb.html" class="btn-go">Buka Modul MariaDB &rarr;</a>
     </div>
 
-    <!-- Modul 04: UFW -->
+    <!-- Modul 05: UFW -->
     <div class="card">
       <div class="card-top">
         <div class="card-icon">🛡</div>
-        <span class="badge">Modul 04</span>
+        <span class="badge">Modul 05</span>
       </div>
       <h3>Firewall Server (UFW)</h3>
       <p>Konsep packet filtering, default deny policy, pembukaan port layanan (TCP/UDP), isolasi subnet IP, urutan rule, rate limiting brute-force, dan analisis ufw log.</p>
@@ -358,11 +374,11 @@ footer {
       <a href="ufw.html" class="btn-go">Buka Modul UFW &rarr;</a>
     </div>
 
-    <!-- Modul 05: Fail2ban -->
+    <!-- Modul 06: Fail2ban -->
     <div class="card">
       <div class="card-top">
         <div class="card-icon">🔒</div>
-        <span class="badge">Modul 05</span>
+        <span class="badge">Modul 06</span>
       </div>
       <h3>IPS Server (Fail2ban)</h3>
       <p>Pencegahan intrusi otomatis berbasis log, konfigurasi jail.local (bantime, findtime, maxretry), proteksi brute-force SSH &amp; Web, manajemen unban IP, serta audit log.</p>
@@ -373,12 +389,28 @@ footer {
       </div>
       <a href="fail2ban.html" class="btn-go">Buka Modul Fail2ban &rarr;</a>
     </div>
+
+    <!-- Modul 07: Uptime Kuma -->
+    <div class="card">
+      <div class="card-top">
+        <div class="card-icon">📊</div>
+        <span class="badge">Modul 07</span>
+      </div>
+      <h3>Monitoring (Uptime Kuma)</h3>
+      <p>Pemantauan layanan server proaktif (HTTP, TCP Port, Ping), konfigurasi reverse proxy Nginx WebSocket, simulasi insiden downtime, alert notifikasi, dan status page publik.</p>
+      <div class="tags">
+        <span>port 3001</span>
+        <span>websocket</span>
+        <span>proactive-probe</span>
+      </div>
+      <a href="kuma.html" class="btn-go">Buka Modul Kuma &rarr;</a>
+    </div>
   </div>
 
   <div class="guide-box">
     <h3>Petunjuk Belajar Mandiri Siswa</h3>
     <ol>
-      <li>Pilih materi modul secara bertahap mulai dari <strong>Modul 01</strong>.</li>
+      <li>Pilih materi modul secara bertahap mulai dari <strong>Modul 01 (Sistem Operasi Jaringan)</strong> hingga <strong>Modul 07 (Uptime Kuma)</strong>.</li>
       <li>Pelajari teori singkat pada setiap bab, lalu perhatikan tabel perintah yang disediakan.</li>
       <li>Gunakan tombol <strong>Coba</strong> di sebelah perintah untuk memasukkan sintaks langsung ke simulator terminal.</li>
       <li>Selesaikan seluruh target pada tab <strong>Lab Terminal</strong> sampai tanda centang hijau muncul di setiap misi.</li>
