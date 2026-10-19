@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Modul Intrusion Prevention System (Fail2ban) - SMK Wikrama Bogor</title>
+<style>
+:root{
+  --bg:#f2f6f4;--fg:#14261f;--card:#fff;--pri:#0f766e;--acc:#dff3ef;--bd:#cfdcd6;
+  --mut:#4f645b;--warn:#fff4e0;--wb:#d97706;--hd:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+    --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+  --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+}
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font:16px/1.7 "Segoe UI",system-ui,-apple-system,sans-serif;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:0 0 auto;
+  height:env(safe-area-inset-top,0px);
+  background:var(--hd);z-index:1001;
+}
+
+/* Header bar fixed freeze */
+header{
+  position:fixed;
+  top:env(safe-area-inset-top,0px);
+  left:0;
+  right:0;
+  z-index:1000;
+  background:var(--hd);
+  border-bottom:1px solid var(--bd);
+  width:100%;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+#bar{height:3px;background:var(--pri);width:0;transition:width .3s}
+.hw{display:flex;align-items:center;gap:10px;padding:8px 20px;max-width:100%;width:100%}
+nav{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  white-space:nowrap;border:0;background:none;color:var(--mut);
+  padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-size:14px;
+  transition:all 0.15s ease;
+}
+nav button:hover{background:var(--acc);color:var(--fg)}
+nav button.on{background:var(--pri);color:var(--hd);font-weight:600}
+button:focus-visible,input:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+.actions{display:flex;gap:8px;align-items:center}
+.tg{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.tg:hover{background:var(--acc)}
+
+main{
+  width:100%;
+  max-width:100%;
+  flex:1;
+  margin:0 auto;
+  padding:84px 32px 80px;
+}
+@media(max-width:768px){
+  main{padding:74px 14px 60px}
+  .hw{padding:6px 10px}
+}
+
+/* Tab control */
+.tab{display:none}
+.tab.active{display:block}
+
+h1{font-size:2.2rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.5rem;margin:1.6em 0 .4em;border-left:5px solid var(--pri);padding-left:12px}
+h3{font-size:1.15rem;margin:1.3em 0 .3em;color:var(--pri)}
+p,li{max-width:100%}
+
+.cover{
+  background:linear-gradient(135deg,var(--pri),#0b3b36);
+  color:#fff;border-radius:14px;padding:36px 32px;margin-bottom:24px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+.cover h1{font-size:2.6rem}
+.cover table,.cover td,.cover tr:nth-child(even) td{
+  border:0;background:none;color:#fff;padding:4px 14px 4px 0;
+}
+.co{
+  border-left:5px solid var(--pri);background:var(--acc);padding:12px 18px;
+  border-radius:8px;margin:16px 0;
+}
+.co.w{border-color:var(--wb);background:var(--warn)}
+.tw{overflow-x:auto;margin:14px 0;border-radius:10px;border:1px solid var(--bd)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--card)}
+th{background:var(--pri);color:var(--hd);text-align:left;padding:10px 14px;font-weight:600}
+td{padding:9px 14px;border:1px solid var(--bd);vertical-align:top}
+tr:nth-child(even) td{background:var(--acc)}
+code{
+  font-family:ui-monospace,Consolas,monospace;font-size:.92em;
+  background:var(--acc);padding:2px 6px;border-radius:4px;word-break:break-word;
+}
+.try{
+  margin-left:8px;border:0;border-radius:6px;background:var(--pri);
+  color:var(--hd);padding:4px 12px;font-size:12px;cursor:pointer;
+  transition:opacity .15s;
+}
+.try:hover{opacity:0.85}
+.nv{display:flex;justify-content:space-between;margin-top:36px;gap:12px}
+.nv button,.btn{
+  background:var(--pri);color:var(--hd);border:0;border-radius:8px;
+  padding:10px 20px;cursor:pointer;font:inherit;font-weight:600;
+  transition:filter .15s;
+}
+.nv button:hover,.btn:hover{filter:brightness(1.1)}
+svg text{fill:currentColor;font:13px sans-serif}
+
+/* Terminal simulator styles */
+#tbox{margin:20px 0 10px;width:100%}
+#where{
+  font-size:13.5px;color:var(--mut);display:flex;
+  justify-content:space-between;align-items:center;margin-bottom:8px;
+  background:var(--card);padding:8px 14px;border:1px solid var(--bd);border-radius:8px;
+}
+#where button{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12px;
+}
+#where button:hover{background:var(--acc)}
+#term{
+  background:#0c0c0c;color:#e6e6e6;border-radius:10px;padding:16px;
+  height:440px;overflow-y:auto;font:14px/1.48 ui-monospace,Consolas,monospace;
+  white-space:pre-wrap;word-break:break-word;cursor:text;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.6);
+  border:1px solid #232323;
+}
+#term .g{color:#5fd75f;font-weight:700}
+#term .b{color:#6aa5ff;font-weight:700}
+#term .y{color:#f59e0b;font-weight:700}
+#term .d{color:#8a8a8a}
+#ln{display:flex}
+#ps{white-space:pre}
+#in{flex:1;min-width:40px;background:transparent;border:0;color:#fff;font:inherit;outline:none;padding:0;caret-color:#fff}
+
+/* Lab 2-column layout */
+.lab{
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:20px;
+  align-items:start;
+  margin-top:10px;
+}
+.lab #term{height:540px}
+@media(max-width:992px){
+  .lab{grid-template-columns:1fr}
+  .lab #term{height:440px}
+}
+.ms{list-style:none;padding:0;margin:0}
+.ms li{
+  padding:12px 14px;border:1px solid var(--bd);border-radius:8px;
+  margin-bottom:8px;background:var(--card);font-size:14px;
+}
+.ms li.ok{background:var(--acc);border-color:var(--pri)}
+.ms li.ok b::after{content:" ✔ Selesai";color:var(--pri)}
+.ms details{color:var(--mut);font-size:13px;margin-top:4px}
+
+.card{
+  background:var(--card);border:1px solid var(--bd);border-radius:10px;
+  padding:18px 22px;margin:16px 0;
+}
+.q button{
+  display:block;width:100%;text-align:left;margin:6px 0;
+  padding:10px 14px;border:1px solid var(--bd);border-radius:8px;
+  background:var(--card);color:var(--fg);cursor:pointer;font:inherit;
+  transition:background .15s;
+}
+.q button:hover{background:var(--acc)}
+.q button.r{background:var(--acc);border-color:var(--pri);font-weight:600}
+.q button.x{background:var(--warn);border-color:var(--wb)}
+@media print{
+  header,.nv,#tbox,.try,.actions{display:none}
+  .tab{display:block!important}
+  body::before{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div id="bar"></div>
+  <div class="hw">
+    <nav id="nav"></nav>
+    <div class="actions">
+      <button class="tg" id="btnFs" title="Toggle Layar Penuh">⛶ Fullscreen</button>
+      <button class="tg" id="tg" aria-label="Ganti tema">◐</button>
+    </div>
+  </div>
+</header>
+<main>
+
+<section class="tab active" data-title="Cover">
+<div class="cover">
+  <p style="font-size:1.1rem;margin-bottom:4px">Modul Ajar Interaktif</p>
+  <h1>Intrusion Prevention System dengan Fail2ban</h1>
+  <table>
+    <tr><td>Sekolah</td><td>: SMK Wikrama Bogor</td></tr>
+    <tr><td>Fase/Kelas</td><td>: F / XI</td></tr>
+    <tr><td>Program Keahlian</td><td>: Teknik Jaringan Komputer dan Telekomunikasi</td></tr>
+    <tr><td>Mata Pelajaran</td><td>: Konsentrasi Keahlian TKJ</td></tr>
+    <tr><td>Elemen</td><td>: Administrasi Sistem Jaringan</td></tr>
+    <tr><td>Materi</td><td>: Intrusion Prevention System (Fail2ban)</td></tr>
+  </table>
+</div>
+<h2>Tujuan Pembelajaran</h2>
+<ul>
+  <li>Memahami arsitektur Intrusion Prevention System (IPS) dan mekanisme analisis berkas log real-time.</li>
+  <li>Memasang, menjalankan, dan mengelola daemon <code>fail2ban</code> di Debian 12 (Bookworm).</li>
+  <li>Memahami hirarki konfigurasi <code>jail.conf</code> vs <code>jail.local</code> agar perubahan aman dari update paket sistem.</li>
+  <li>Mengatur parameter inti keamanan: <code>bantime</code>, <code>findtime</code>, <code>maxretry</code>, dan <code>ignoreip</code>.</li>
+  <li>Mengaktifkan dan mengkustomisasi proteksi jail untuk layanan SSH daemon (`[sshd]`) dan Web Server Nginx.</li>
+  <li>Memeriksa status penjara aktif, melacak IP yang diblokir, dan melakukan prosedur pembukaan blokir manual (*unban*).</li>
+  <li>Menganalisis berkas log <code>/var/log/fail2ban.log</code> serta korelasi pemblokiran pada firewall kernel (iptables/nftables/UFW).</li>
+</ul>
+<h2>Cara Memakai Modul</h2>
+<ol>
+  <li>Pelajari konsep IPS dan parameter jail pada setiap bab di atas.</li>
+  <li>Klik tombol <b>Coba</b> pada tabel langkah kerja untuk memindahkan perintah langsung ke baris terminal simulator, lalu tekan <b>Enter</b>.</li>
+  <li>Tersedia 2 mesin simulasi interaktif: <code>server1</code> (10.0.0.20, server yang diproteksi) dan <code>client</code> (10.0.0.10, komputer penguji/penyerang).</li>
+  <li>Gunakan perintah <code>konsol NAMA</code> untuk berpindah mesin fisik, serta lakukan percobaan brute-force login gagal dari client untuk melihat mekanisme proteksi otomatis berjalan.</li>
+</ol>
+<div class="co w">⚠️ Terminal ini adalah <b>lingkungan simulasi interaktif</b>. Ketik <code>reset</code> kapan saja untuk mengembalikan konfigurasi lab ke kondisi awal.</div>
+</section>
+
+<section class="tab" data-title="1. Konsep">
+<h1>Bab 1. Konsep Dasar Intrusion Prevention &amp; Fail2ban</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memahami perbedaan IDS vs IPS, cara Fail2ban memindai berkas log, serta mekanisme interaksi dengan firewall sistem operasi.</div>
+<h2>Apa itu Fail2ban?</h2>
+<p><b>Fail2ban</b> adalah kerangka kerja perangkat lunak pencegahan intrusi (*Intrusion Prevention System / IPS*) yang bertugas melindungi server Linux dari serangan otomatis seperti *brute-force password guessing*, pemindaian port (*port scanning*), dan eksploitasi URL aplikasi web.</p>
+<p>Alih-alih memeriksa lalu lintas paket secara langsung di layer jaringan, Fail2ban bekerja secara cerdas dengan <b>menginspeksi berkas log sistem</b> (seperti auth log atau access log) menggunakan ekspresi reguler (*regex*). Ketika terdeteksi pola aktivitas mencurigakan yang melampaui batas ambang, Fail2ban akan langsung memerintahkan firewall (iptables/nftables/UFW) untuk memblokir alamat IP penyerang selama jangka waktu tertentu.</p>
+<svg viewBox="0 0 700 120" width="100%" height="105" role="img" aria-label="Alur Kerja Fail2ban">
+  <rect x="10" y="25" width="130" height="65" rx="8" fill="none" stroke="currentColor"/>
+  <text x="25" y="55">Penyerang (Bot)</text>
+  <text x="35" y="75" font-size="11">Brute-Force SSH</text>
+  <rect x="200" y="25" width="130" height="65" rx="8" fill="none" stroke="currentColor"/>
+  <text x="215" y="55">Log Layanan</text>
+  <text x="220" y="75" font-size="11">/var/log/auth.log</text>
+  <rect x="390" y="20" width="130" height="75" rx="8" fill="none" stroke="currentColor" stroke-width="2"/>
+  <text x="415" y="50">Fail2ban Daemon</text>
+  <text x="405" y="70" font-size="11">Regex Matching Engine</text>
+  <rect x="575" y="25" width="120" height="65" rx="8" fill="none" stroke="currentColor"/>
+  <text x="590" y="55">Firewall Kernel</text>
+  <text x="600" y="75" font-size="11">DROP / REJECT</text>
+  <line x1="140" y1="57" x2="200" y2="57" stroke="currentColor" stroke-width="2"/>
+  <line x1="330" y1="57" x2="390" y2="57" stroke="currentColor" stroke-width="2"/>
+  <line x1="520" y1="57" x2="575" y2="57" stroke="currentColor" stroke-width="2"/>
+</svg>
+<h2>Tiga Komponen Inti Fail2ban</h2>
+<div class="tw">
+  <table>
+    <tr><th>Komponen</th><th>Fungsi Kerja</th><th>Lokasi Berkas Default</th></tr>
+    <tr><td><b>Filter</b></td><td>Berisi aturan ekspresi reguler (regex) untuk mencocokkan baris kegagalan autentikasi di dalam berkas log.</td><td><code>/etc/fail2ban/filter.d/*.conf</code></td></tr>
+    <tr><td><b>Action</b></td><td>Perintah firewall spesifik yang dieksekusi saat IP terbukti melanggar (contoh: tambah rule iptables DROP, kirim email alert, atau panggil UFW).</td><td><code>/etc/fail2ban/action.d/*.conf</code></td></tr>
+    <tr><td><b>Jail (Penjara)</b></td><td>Kombinasi utuh antara satu Filter, satu atau lebih Action, berkas log yang dipantau, serta parameter durasi blokir (*bantime*).</td><td><code>/etc/fail2ban/jail.conf</code> &amp; <code>jail.local</code></td></tr>
+  </table>
+</div>
+<h2>Perbedaan IDS vs IPS</h2>
+<ul>
+  <li><b>IDS (Intrusion Detection System):</b> Hanya bersifat pasif mendeteksi dan memberi peringatan kepada administrator tanpa menghentikan serangan.</li>
+  <li><b>IPS (Intrusion Prevention System):</b> Bersifat aktif merespons ancaman secara langsung dengan memblokir lalu lintas jahat seketika (*proactive defense*). Fail2ban adalah contoh nyata implementasi IPS host-based.</li>
+</ul>
+<h3>Ringkasan</h3>
+<p>Fail2ban membaca log ➔ mencocokkan filter regex ➔ menghitung batas toleransi ➔ mengeksekusi aksi blokir di firewall. <b>Latihan:</b> Mengapa analisis berkas log lebih hemat sumber daya CPU dibandingkan sniffing seluruh paket data mentah?</p>
+</section>
+
+<section class="tab" data-title="2. Instalasi">
+<h1>Bab 2. Instalasi &amp; Manajemen Layanan Fail2ban</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mengunduh dan memasang paket Fail2ban di Debian 12, mengelola daemon systemd, serta memverifikasi status CLI client.</div>
+<h2>Pemasangan Paket di Debian 12</h2>
+<p>Di Debian 12 (Bookworm), Fail2ban dapat dipasang langsung dari repositori resmi. Layanan akan terdaftar dengan unit systemd <code>fail2ban.service</code>.</p>
+<div class="tw">
+  <table>
+    <tr><th>Perintah Perawatan</th><th>Fungsi Kerja</th></tr>
+    <tr><td><code>sudo apt update &amp;&amp; sudo apt install -y fail2ban</code></td><td>Memperbarui repositori dan mengunduh paket Fail2ban beserta dependensi Python3.</td></tr>
+    <tr><td><code>sudo systemctl status fail2ban</code></td><td>Mengecek apakah daemon aktif berjalan (`active (running)`) dan siap memantau log.</td></tr>
+    <tr><td><code>sudo fail2ban-client ping</code></td><td>Memverifikasi komunikasi soket antara baris perintah dan daemon (harus merespons `Server replied: pong`).</td></tr>
+    <tr><td><code>sudo fail2ban-client version</code></td><td>Menampilkan nomor rilis versi Fail2ban yang terpasang di sistem.</td></tr>
+  </table>
+</div>
+<h2>Struktur Direktori `/etc/fail2ban/`</h2>
+<ul>
+  <li><code>fail2ban.conf</code> : Konfigurasi tingkat proses daemon (level logging, path socket, PID file).</li>
+  <li><code>jail.conf</code> : Berkas cetak biru (*blueprint*) seluruh konfigurasi jail bawaan vendor. <b>Jangan diubah langsung!</b></li>
+  <li><code>jail.local</code> : Berkas kustomisasi administrator yang akan menimpa nilai bawaan `jail.conf` secara aman.</li>
+  <li><code>jail.d/</code> : Direktori modular untuk menaruh pecahan konfigurasi jail terpisah.</li>
+</ul>
+<h2>Langkah Kerja</h2>
+<div data-st="b2"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+<h3>Ringkasan</h3>
+<p>Alur standar: Pasang paket ➔ Pastikan status aktif ➔ Uji respons soket dengan `ping` ➔ Siapkan berkas kustom.</p>
+</section>
+
+<section class="tab" data-title="3. jail.local">
+<h1>Bab 3. Hirarki Konfigurasi `jail.local` &amp; Parameter Global</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memahami mengapa `jail.conf` tidak boleh diedit langsung, cara membuat `jail.local`, dan menguasai parameter `bantime`, `findtime`, `maxretry`, serta `ignoreip`.</div>
+<h2>Prinsip Penimpaan Konfigurasi (.conf vs .local)</h2>
+<p>Fail2ban membaca berkas konfigurasi secara berurutan. Berkas <code>jail.local</code> dibaca <b>setelah</b> <code>jail.conf</code>, sehingga setiap nilai yang didefinisikan di `.local` akan otomatis menimpa (*override*) nilai di `.conf`. Ketika sistem Debian memperbarui paket Fail2ban via `apt upgrade`, berkas `jail.conf` akan diperbarui oleh pengembang, tetapi berkas `jail.local` milik kita tetap utuh dan aman.</p>
+<h2>Empat Parameter Utama Blok `[DEFAULT]`</h2>
+<div class="tw">
+  <table>
+    <tr><th>Parameter</th><th>Fungsi &amp; Arti Teknis</th><th>Contoh Nilai Standar</th></tr>
+    <tr><td><code>bantime</code></td><td>Lama waktu sebuah alamat IP diblokir oleh firewall saat terbukti melanggar batas toleransi. Format mendukung akhiran m (menit), h (jam), d (hari).</td><td><code>bantime = 10m</code> atau <code>1h</code></td></tr>
+    <tr><td><code>findtime</code></td><td>Jendela waktu pemantauan. Percobaan login gagal akan dihitung jika terjadi di dalam rentang waktu ini.</td><td><code>findtime = 10m</code></td></tr>
+    <tr><td><code>maxretry</code></td><td>Batas maksimum jumlah kegagalan yang ditoleransi sebelum tindakan blokir dijatuhkan.</td><td><code>maxretry = 3</code> (atau 5)</td></tr>
+    <tr><td><code>ignoreip</code></td><td>Daftar alamat IP, subnet LAN, atau domain whitelist yang <b>dikecualikan</b> dari pemblokiran (misal IP komputer admin kantor atau localhost).</td><td><code>ignoreip = 127.0.0.1/8 ::1 10.0.0.5</code></td></tr>
+  </table>
+</div>
+<div class="co">💡 <b>Contoh Skenario:</b> Dengan <code>findtime = 10m</code>, <code>maxretry = 3</code>, dan <code>bantime = 1h</code>, maka: jika penyerang salah memasukkan password sebanyak 3 kali dalam kurun waktu 10 menit, IP penyerang langsung diblokir selama 1 jam penuh!</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b3"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="4. Jail SSH">
+<h1>Bab 4. Mengamankan Akses Remote SSH (`[sshd]`)</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mengaktifkan dan menyesuaikan jail proteksi SSH, mengubah port layanan yang dipantau, serta mencegah serangan brute-force massal.</div>
+<h2>Mengapa Port SSH Paling Sering Diserang?</h2>
+<p>Begitu sebuah server terhubung ke internet publik pada port 22, ribuan skrip bot otomatis akan langsung mencoba kombinasi username dan password populer (*dictionary attack* seperti `root`, `admin`, `user`). Fail2ban membaca log `/var/log/auth.log` (atau journald) dan menangkal penyerang sebelum mereka berhasil menebak password.</p>
+<h2>Struktur Blok Konfigurasi `[sshd]`</h2>
+<pre style="background:var(--card);border:1px solid var(--bd);padding:14px;border-radius:8px;font-family:monospace;font-size:13.5px">
+[sshd]
+enabled   = true
+port      = ssh
+filter    = sshd
+logpath   = /var/log/auth.log
+maxretry  = 3
+bantime   = 10m
+</pre>
+<div class="tw">
+  <table>
+    <tr><th>Direktif Jail</th><th>Keterangan Konfigurasi</th></tr>
+    <tr><td><code>enabled = true</code></td><td>Mengaktifkan jail SSH agar daemon Fail2ban mulai memprosesnya saat startup.</td></tr>
+    <tr><td><code>port = ssh</code></td><td>Mendengarkan port standar 22 (atau nomor port custom misalnya 2222 jika port SSH telah diubah).</td></tr>
+    <tr><td><code>backend = systemd</code></td><td>Menentukan metode pembacaan log, apakah langsung dari berkas file teks atau lewat jurnal systemd.</td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b4"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="5. Jail Web">
+<h1>Bab 5. Mengamankan Web Server (Nginx &amp; HTTP)</h1>
+<div class="co">🎯 <b>Tujuan:</b> Melindungi Web Server Nginx dari crawler nakal, pemindaian celah direktori tersembunyi (*botsearch*), dan serangan HTTP auth.</div>
+<h2>Jail Khusus Web Server</h2>
+<p>Selain SSH, aplikasi web sering kali menjadi sasaran empuk pemindaian file sensitif seperti <code>/wp-login.php</code>, <code>/.env</code>, atau <code>/phpmyadmin/</code>. Fail2ban menyediakan filter bawaan khusus Nginx di `/etc/fail2ban/filter.d/`:</p>
+<div class="tw">
+  <table>
+    <tr><th>Nama Jail Nginx</th><th>Sasaran Perlindungan</th><th>Log yang Dipantau</th></tr>
+    <tr><td><code>[nginx-http-auth]</code></td><td>Mencegah brute-force pada halaman web yang diproteksi HTTP Basic Authentication (`401 Unauthorized`).</td><td><code>/var/log/nginx/error.log</code></td></tr>
+    <tr><td><code>[nginx-botsearch]</code></td><td>Memblokir bot yang mencoba memindai URL eksploitasi umum yang menghasilkan error `404 Not Found`.</td><td><code>/var/log/nginx/access.log</code></td></tr>
+    <tr><td><code>[nginx-limit-req]</code></td><td>Bekerja sama dengan modul rate-limiting Nginx untuk memblokir IP yang membombardir request melebihi batas.</td><td><code>/var/log/nginx/error.log</code></td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b5"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="6. Unban IP">
+<h1>Bab 6. Manajemen Jail &amp; Prosedur Unban IP</h1>
+<div class="co">🎯 <b>Tujuan:</b> Menggunakan utilitas `fail2ban-client` untuk memeriksa daftar IP terblokir, menguji regex filter, dan memulihkan akses pengguna yang tidak sengaja terblokir.</div>
+<h2>Perintah Administratif `fail2ban-client`</h2>
+<div class="tw">
+  <table>
+    <tr><th>Tindakan Administratif</th><th>Sintaks Perintah</th><th>Keluaran / Efek</th></tr>
+    <tr><td>Lihat Daftar Jail Aktif</td><td><code>sudo fail2ban-client status</code></td><td>Menampilkan jumlah penjara aktif dan nama jail (contoh: `sshd`).</td></tr>
+    <tr><td>Cek IP yang Sedang Diblokir</td><td><code>sudo fail2ban-client status sshd</code></td><td>Menampilkan jumlah kegagalan dan daftar `Banned IP list: 10.0.0.10`.</td></tr>
+    <tr><td>Buka Blokir IP Manual (*Unban*)</td><td><code>sudo fail2ban-client set sshd unbanip 10.0.0.10</code></td><td>Menghapus IP dari rantai blokir firewall seketika (mengembalikan status angka 1).</td></tr>
+    <tr><td>Blokir IP Tertentu secara Manual</td><td><code>sudo fail2ban-client set sshd banip 192.168.1.50</code></td><td>Menjebloskan IP mencurigakan ke penjara tanpa menunggu batas percobaan habis.</td></tr>
+  </table>
+</div>
+<h2>Mengapa Prosedur Unban Wajib Dikuasai?</h2>
+<p>Dalam operasional nyata, pengguna yang sah (misalnya guru, karyawan, atau administrator sistem) terkadang salah mengingat password akun mereka berulang kali hingga akhirnya IP mereka terblokir secara otomatis. Administrator harus mampu memverifikasi identitas pengguna dan membuka blokirnya secara instan lewat perintah <code>unbanip</code>.</p>
+<h2>Langkah Kerja</h2>
+<div data-st="b6"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="7. Log & Audit">
+<h1>Bab 7. Analisis Log, Troubleshooting &amp; Audit</h1>
+<div class="co">🎯 <b>Tujuan:</b> Membaca berkas log Fail2ban di `/var/log/fail2ban.log`, melacak riwayat pemblokiran, dan menguji filter menggunakan `fail2ban-regex`.</div>
+<h2>Struktur Entri Log Fail2ban</h2>
+<p>Aktivitas Fail2ban dicatat secara mendetail di berkas <code>/var/log/fail2ban.log</code>. Entri penting meliputi:</p>
+<ul>
+  <li><code>[sshd] Found 10.0.0.10 - 2026-10-19 13:00:01</code> : Pola kegagalan login terdeteksi dari IP penyerang.</li>
+  <li><code>[sshd] Ban 10.0.0.10</code> : Batas maxretry terlampaui, firewall mengeksekusi blokir.</li>
+  <li><code>[sshd] Unban 10.0.0.10</code> : Durasi bantime berakhir (atau dilepas manual oleh admin), akses kembali dibuka.</li>
+</ul>
+<h2>Menguji Filter dengan `fail2ban-regex`</h2>
+<p>Sebelum menerapkan filter kustom, kamu dapat menguji apakah pola ekspresi reguler yang kamu buat berhasil menangkap baris log yang dituju tanpa galat menggunakan perintah:</p>
+<code>fail2ban-regex /var/log/auth.log /etc/fail2ban/filter.d/sshd.conf</code>
+<h2>Langkah Kerja</h2>
+<div data-st="b7"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="Lab Terminal">
+<h1>Lab Terminal Fail2ban Interaktif</h1>
+<p>Selesaikan 6 misi praktikum sistem pencegahan intrusi server di bawah ini. Uji pertahanan dengan melancarkan serangan login brute-force langsung dari konsol client. Password akun: <code>siswa123</code>.</p>
+<div class="lab">
+  <div class="tslot"></div>
+  <div>
+    <h3 style="margin-top:0">Daftar Misi Mandiri</h3>
+    <ul class="ms" id="ms"></ul>
+  </div>
+</div>
+</section>
+
+<section class="tab" data-title="Latihan">
+<h1>Latihan Soal &amp; Rangkuman</h1>
+<div id="quiz"></div>
+<h2>Rangkuman Inti</h2>
+<ul>
+  <li>Fail2ban adalah sistem pencegahan intrusi (IPS) berbasis log host yang memblokir penyerang brute-force secara otomatis di firewall.</li>
+  <li>Konfigurasi kustom selalu ditaruh di <code>/etc/fail2ban/jail.local</code> agar tidak tertimpa saat paket diperbarui.</li>
+  <li>Empat parameter dasar: <code>bantime</code> (lama hukuman), <code>findtime</code> (jendela deteksi), <code>maxretry</code> (toleransi kesalahan), dan <code>ignoreip</code> (whitelist IP).</li>
+  <li>Jail <code>[sshd]</code> memantau kegagalan autentikasi SSH di berkas log sistem dan memicu aksi blokir pada port 22/tcp.</li>
+  <li>Gunakan perintah <code>sudo fail2ban-client status [jail]</code> untuk memeriksa daftar IP terpidana dan <code>set [jail] unbanip [IP]</code> untuk melepas blokir.</li>
+  <li>Berkas <code>/var/log/fail2ban.log</code> merupakan sumber audit utama untuk membuktikan insiden penyerangan dan kepatuhan sistem.</li>
+</ul>
+</section>
+
+<!-- Terminal Simulator Widget -->
+<div id="tbox">
+  <div id="where">
+    <span></span>
+    <button id="rs" title="Kembalikan terminal ke kondisi semula">⟲ Reset Lab</button>
+  </div>
+  <div id="term">
+    <div id="log"></div>
+    <div id="ln">
+      <span id="ps"></span>
+      <input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Terminal Input">
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+const ST = {
+  b2: [
+    ['Masuk ke server1', [['konsol server1', 'Berpindah ke konsol server1 (10.0.0.20).']]],
+    ['Perbarui repositori & pasang Fail2ban', [['sudo apt update', 'Memperbarui katalog paket repositori Debian 12.'], ['sudo apt install -y fail2ban', 'Mengunduh dan memasang paket Fail2ban.']], 'Di Debian 12, service Fail2ban otomatis aktif langsung setelah pemasangan.'],
+    ['Periksa status layanan daemon', [['sudo systemctl status fail2ban', 'Melihat status service Fail2ban. Harus tertera active (running).'], ['sudo fail2ban-client ping', 'Menguji komunikasi soket. Respon harus Server replied: pong.']]]
+  ],
+  b3: [
+    ['Pindah ke server1', [['konsol server1', 'Kustomisasi berkas dilakukan di server1.']]],
+    ['Duplikasi jail.conf menjadi jail.local', [['sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local', 'Menyalin berkas cetak biru agar aman saat ada pembaruan paket.']]],
+    ['Atur parameter toleransi (maxretry & bantime)', [['sudo sed -i "s/^maxretry = .*/maxretry = 3/" /etc/fail2ban/jail.local', 'Menetapkan toleransi kesalahan password maksimal 3 kali.'], ['sudo sed -i "s/^bantime  = .*/bantime = 10m/" /etc/fail2ban/jail.local', 'Menetapkan durasi blokir selama 10 menit.']]],
+    ['Muat ulang konfigurasi Fail2ban', [['sudo fail2ban-client reload', 'Menerapkan parameter baru ke memori Fail2ban tanpa mematikan daemon.']]]
+  ],
+  b4: [
+    ['Pindah ke server1', [['konsol server1', 'Aktivasi jail SSH dilakukan di server.']]],
+    ['Aktifkan jail sshd di jail.local', [['echo -e "\\n[sshd]\\nenabled = true\\nmaxretry = 3\\nbantime = 10m" | sudo tee -a /etc/fail2ban/jail.local', 'Membuat blok konfigurasi eksplisit untuk mengaktifkan pengawasan port SSH.'], ['sudo systemctl restart fail2ban', 'Menyalakan ulang daemon Fail2ban.']]],
+    ['Verifikasi status penjara SSH', [['sudo fail2ban-client status sshd', 'Melihat rincian jail sshd, jumlah kegagalan, dan daftar IP yang diblokir.']]]
+  ],
+  b5: [
+    ['Pindah ke server1', [['konsol server1', 'Pengaturan jail web dilakukan di server.']]],
+    ['Aktifkan proteksi jail Nginx botsearch', [['echo -e "\\n[nginx-botsearch]\\nenabled = true\\nport = http,https\\nlogpath = /var/log/nginx/access.log\\nmaxretry = 2" | sudo tee -a /etc/fail2ban/jail.local', 'Mengaktifkan jail botsearch untuk menolak bot pemindai URL liar.'], ['sudo fail2ban-client reload', 'Menerapkan jail baru.']]],
+    ['Lihat daftar seluruh jail yang aktif', [['sudo fail2ban-client status', 'Perhatikan daftar Jail list sekarang memuat sshd dan nginx-botsearch.']]]
+  ],
+  b6: [
+    ['Simulasi serangan dari Client', [['konsol client', 'Pindah ke komputer client (10.0.0.10).'], ['ssh root@server1', 'Coba login dan masukkan password yang salah 3 kali berturut-turut!']]],
+    ['Periksa status hukuman di server1', [['konsol server1', 'Kembali ke server1.'], ['sudo fail2ban-client status sshd', 'Perhatikan baris Banned IP list: 10.0.0.10 telah terisi!']]],
+    ['Buka blokir IP Client (Unban)', [['sudo fail2ban-client set sshd unbanip 10.0.0.10', 'Melepas status blokir untuk IP 10.0.0.10. Respon angka 1 menandakan sukses.']]],
+    ['Uji koneksi normal kembali dari Client', [['konsol client', 'Pindah ke client.'], ['nc -zv 10.0.0.20 22', 'Koneksi kembali normal (succeeded) karena IP sudah dilepas dari hukuman!']]]
+  ],
+  b7: [
+    ['Pindah ke server1', [['konsol server1', 'Audit berkas log dilakukan di server.']]],
+    ['Pantau riwayat pemblokiran di fail2ban.log', [['sudo tail -n 15 /var/log/fail2ban.log', 'Menampilkan rekaman aktivitas Ban dan Unban secara kronologis.']]],
+    ['Saring khusus catatan pemblokiran (Ban)', [['sudo grep "Ban" /var/log/fail2ban.log', 'Menyaring baris yang mencatat penjatuhan hukuman terhadap IP jahat.']]],
+    ['Simulasi pengujian regex filter', [['sudo fail2ban-regex /var/log/auth.log /etc/fail2ban/filter.d/sshd.conf', 'Memeriksa kecocokan pola regex filter terhadap baris log sistem.']]]
+  ]
+};
+
+const tabs = Array.from(document.querySelectorAll('.tab'));
+const nav = document.getElementById('nav');
+const TB = document.getElementById('tbox');
+
+function show(i) {
+  tabs.forEach((t, k) => {
+    if (k === i) t.classList.add('active');
+    else t.classList.remove('active');
+  });
+
+  const navBtns = nav.querySelectorAll('button');
+  navBtns.forEach((b, k) => {
+    b.classList.toggle('on', k === i);
+  });
+
+  const bar = document.getElementById('bar');
+  if (bar) bar.style.width = (i / (tabs.length - 1) * 100) + '%';
+
+  const currentTab = tabs[i];
+  const sl = currentTab.querySelector('.tslot');
+  if (sl) {
+    sl.appendChild(TB);
+    TB.style.display = 'block';
+  } else if (currentTab.dataset.title === 'Cover' || currentTab.dataset.title === '1. Konsep' || currentTab.dataset.title === 'Latihan') {
+    TB.style.display = 'none';
+  } else {
+    currentTab.appendChild(TB);
+    TB.style.display = 'block';
+  }
+  window.scrollTo(0, 0);
+}
+
+// Inisialisasi tombol navbar
+nav.innerHTML = '';
+tabs.forEach((t, k) => {
+  const b = document.createElement('button');
+  b.textContent = t.dataset.title;
+  b.onclick = () => show(k);
+  nav.appendChild(b);
+
+  const oldNv = t.querySelector('.nv');
+  if (oldNv) oldNv.remove();
+
+  const d = document.createElement('div');
+  d.className = 'nv';
+
+  const prevBtn = k > 0 ? '<button class="btn-prev">← Sebelumnya</button>' : '<div></div>';
+  const nextBtn = k < tabs.length - 1 ? '<button class="btn-next">Berikutnya →</button>' : '<div></div>';
+
+  d.innerHTML = prevBtn + nextBtn;
+  if (k > 0) d.querySelector('.btn-prev').onclick = () => show(k - 1);
+  if (k < tabs.length - 1) d.querySelector('.btn-next').onclick = () => show(k + 1);
+  t.appendChild(d);
+});
+
+// Toggle Dark/Light Theme
+document.getElementById('tg').onclick = () => {
+  const r = document.documentElement;
+  const isDark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+  r.dataset.theme = isDark ? 'light' : 'dark';
+};
+
+// Fullscreen API toggle
+const btnFs = document.getElementById('btnFs');
+btnFs.onclick = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    btnFs.textContent = '✕ Exit Full';
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+    btnFs.textContent = '⛶ Fullscreen';
+  }
+};
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) btnFs.textContent = '⛶ Fullscreen';
+});
+
+const $ = s => document.querySelector(s);
+const T = $('#term');
+const LOG = $('#log');
+const LN = $('#ln');
+const I = $('#in');
+const PS = $('#ps');
+
+document.querySelectorAll('[data-st]').forEach(el => {
+  let k = 0;
+  const list = ST[el.dataset.st];
+  if (!list) return;
+  list.forEach(([t, rows, n]) => {
+    k++;
+    const h = document.createElement('h3');
+    h.textContent = 'Langkah ' + k + '. ' + t;
+    const w = document.createElement('div');
+    w.className = 'tw';
+    const tb = document.createElement('table');
+    tb.innerHTML = '<tr><th style="width:40%">Perintah</th><th>Fungsi</th></tr>';
+    rows.forEach(([c, f]) => {
+      const tr = tb.insertRow();
+      const a = tr.insertCell();
+      const b = tr.insertCell();
+      const cd = document.createElement('code');
+      cd.textContent = c;
+      a.appendChild(cd);
+      const bt = document.createElement('button');
+      bt.className = 'try';
+      bt.textContent = 'Coba';
+      bt.onclick = () => {
+        I.value = c;
+        I.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        I.focus();
+      };
+      a.appendChild(bt);
+      b.textContent = f;
+    });
+    w.appendChild(tb);
+    el.append(h, w);
+    if (n) {
+      const p = document.createElement('p');
+      p.className = 'co';
+      p.textContent = n;
+      el.appendChild(p);
+    }
+  });
+});
+
+const NET = { client: '10.0.0.10', server1: '10.0.0.20' };
+const PW = { siswa: 'siswa123', root: 'root123' };
+const CMDS = 'help clear reset konsol ls cd pwd cat cp mkdir touch rm chmod chown echo tee sed grep tail whoami hostname id date uname ip ping nc sudo apt systemctl fail2ban-client fail2ban-regex ufw ssh exit'.split(' ');
+
+let S, stack, D, clk, ec, hist = [], hi = 0, pend = null, busy = 0;
+
+const home = u => u === 'root' ? '/root' : '/home/' + u;
+const canWu = (u, p) => u === 'root' || p === '/tmp' || p.startsWith('/tmp/') || p.startsWith('/home/' + u + '/');
+const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const ts = () => { clk++; return '2026-10-19 13:' + pad(Math.floor(clk / 60) % 60) + ':' + pad(clk % 60); };
+
+function ab(s, p) {
+  if (p === '~' || p.startsWith('~/')) p = home(s.u) + p.slice(1);
+  if (p[0] !== '/') p = s.cwd + '/' + p;
+  const o = [];
+  p.split('/').forEach(x => {
+    if (x === '' || x === '.') return;
+    if (x === '..') o.pop();
+    else o.push(x);
+  });
+  return '/' + o.join('/');
+}
+
+const kids = (s, P) => {
+  const b = P === '/' ? '/' : P + '/';
+  return Object.keys(s.fs).filter(k => k !== P && k.startsWith(b) && !k.slice(b.length).includes('/')).map(k => k.split('/').pop()).sort();
+};
+const mstr = m => [...m].map(c => 'rwx'.split('').map((x, i) => (c >> (2 - i) & 1) ? x : '-').join('')).join('');
+
+function mkhost(h) {
+  const fs = {};
+  ['/', '/home', '/home/siswa', '/etc', '/var', '/var/log', '/tmp', '/usr', '/root'].forEach(p => {
+    fs[p] = { d: 1, m: p === '/tmp' ? '777' : '755', o: p === '/home/siswa' ? 'siswa' : 'root', g: p === '/home/siswa' ? 'siswa' : 'root' };
+  });
+  fs['/etc/hostname'] = { c: h, m: '644', o: 'root', g: 'root' };
+  fs['/var/log/auth.log'] = { c: '', m: '640', o: 'root', g: 'adm' };
+  fs['/var/log/fail2ban.log'] = { c: '', m: '640', o: 'root', g: 'adm' };
+
+  return {
+    name: h, ip: NET[h], u: 'siswa', cwd: '/home/siswa', fs,
+    inst: 0, act: 0, en: 0,
+    pk: h === 'client' ? { nc: 1, ssh: 1 } : { nc: 1, ssh: 1 },
+    fail2ban: {
+      jails: ['sshd'],
+      banned: {}, // jailName: ['10.0.0.10']
+      failedCount: { '10.0.0.10': 0 },
+      logs: []
+    }
+  };
+}
+
+function init() {
+  S = {
+    client: mkhost('client'),
+    server1: mkhost('server1')
+  };
+
+  clk = 120;
+  stack = [{ h: 'client' }];
+  D = {};
+  LOG.innerHTML = '';
+  pend = null;
+  busy = 0;
+
+  out('Debian GNU/Linux 12 (bookworm) - Simulasi Fail2ban Full Page');
+  out('Ketik help untuk daftar perintah. Password sudo semua akun: siswa123', 'd');
+  rm();
+  setPs();
+}
+
+const host = () => stack[stack.length - 1].h;
+
+function out(t, c) {
+  const d = document.createElement('div');
+  if (c) d.className = c;
+  d.textContent = t;
+  LOG.appendChild(d);
+  T.scrollTop = T.scrollHeight;
+}
+function outH(h) {
+  const d = document.createElement('div');
+  d.innerHTML = h;
+  LOG.appendChild(d);
+  T.scrollTop = T.scrollHeight;
+}
+
+function pshtml() {
+  const s = S[host()], hm = home(s.u), c = s.cwd, p = c === hm ? '~' : c.startsWith(hm + '/') ? '~' + c.slice(hm.length) : c;
+  return '<span class="g">' + s.u + '@' + host() + '</span>:<span class="b">' + p + '</span>' + (s.u === 'root' ? '#' : '$') + ' ';
+}
+
+function setPs() {
+  PS.innerHTML = pshtml();
+  $('#where span').textContent = 'Mesin Aktif: ' + host() + ' (' + S[host()].ip + ')';
+  LN.style.display = (busy && !pend) ? 'none' : 'flex';
+}
+
+function ask(p, hid) {
+  return new Promise(res => {
+    const L = p.split('\n'), lp = L.pop();
+    L.forEach(l => out(l));
+    PS.textContent = lp;
+    I.type = hid ? 'password' : 'text';
+    pend = { res, lp, hid };
+    LN.style.display = 'flex';
+    I.focus();
+  });
+}
+
+const M = [
+  ['Pasang dan verifikasi layanan Fail2ban di server1',
+   'konsol server1 → sudo apt install -y fail2ban && sudo fail2ban-client ping',
+   'Memastikan daemon IPS aktif dan merespons via soket lokal.',
+   () => {
+     const s = S.server1;
+     return s.inst && s.act;
+   }],
+
+  ['Salin konfigurasi default ke jail.local',
+   'sudo cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local',
+   'Menerapkan konfigurasi kustom tanpa mengubah berkas cetak biru bawaan.',
+   () => {
+     return !!S.server1.fs['/etc/fail2ban/jail.local'];
+   }],
+
+  ['Atur parameter maxretry = 3 & bantime = 10m',
+   'sudo sed -i "s/^maxretry = .*/maxretry = 3/" /etc/fail2ban/jail.local',
+   'Menyesuaikan ambang batas toleransi kesalahan login sebelum tindakan blokir.',
+   () => {
+     const f = S.server1.fs['/etc/fail2ban/jail.local'];
+     return f && (f.c.includes('maxretry = 3') || f.c.includes('maxretry=3'));
+   }],
+
+  ['Lakukan simulasi serangan login gagal dari Client',
+   'konsol client → ssh root@server1 (sengaja salah password 3 kali)',
+   'Memicu deteksi otomatis parser log Fail2ban.',
+   () => {
+     return S.server1.fail2ban.failedCount['10.0.0.10'] >= 3;
+   }],
+
+  ['Verifikasi IP Client terdaftar di Banned IP list',
+   'konsol server1 → sudo fail2ban-client status sshd',
+   'Membuktikan bahwa alamat IP penyerang resmi diblokir oleh sistem.',
+   () => {
+     const b = S.server1.fail2ban.banned['sshd'] || [];
+     return b.includes('10.0.0.10');
+   }],
+
+  ['Buka blokir IP Client (Unban)',
+   'sudo fail2ban-client set sshd unbanip 10.0.0.10',
+   'Memulihkan hak akses pengguna yang sah setelah verifikasi identitas.',
+   () => {
+     return S.server1.unbannedTested === true;
+   }]
+];
+
+function rm() {
+  const u = $('#ms');
+  u.innerHTML = '';
+  M.forEach((m, k) => {
+    const l = document.createElement('li');
+    l.id = 'm' + k;
+    l.innerHTML = '<b>Misi ' + (k + 1) + ': ' + m[0] + '</b><details><summary>Petunjuk</summary>' + m[1] + '<br><i>Mengapa: ' + m[2] + '</i></details>';
+    u.appendChild(l);
+  });
+}
+const chk = () => M.forEach((m, k) => {
+  if (!D[k] && m[3]()) D[k] = 1;
+  $('#m' + k).classList.toggle('ok', !!D[k]);
+});
+
+function rd(s, p, sd) {
+  let P = ab(s, p);
+  const n = s.fs[P];
+  if (!n) return { e: 'No such file or directory' };
+  if (n.l) { P = n.l; return rd(s, P, sd); }
+  if (n.d) return { e: 'Is a directory' };
+  if (n.m === '000' && !sd) return { e: 'Permission denied' };
+  return { c: n.c };
+}
+function wr(s, P, c, sd) {
+  const owner = sd ? 'root' : s.u;
+  const grp = sd ? 'root' : s.u;
+  if (s.fs[P] && !s.fs[P].d) s.fs[P].c = c;
+  else s.fs[P] = { c, m: '644', o: owner, g: grp };
+}
+
+function tok(l) {
+  const r = [], re = /"([^"]*)"|'([^']*)'|(>>|>|<|\||&&|[^\s|<>&"']+)/g;
+  let m;
+  while ((m = re.exec(l))) {
+    if (m[1] !== undefined) r.push({ v: m[1], q: 1 });
+    else if (m[2] !== undefined) r.push({ v: m[2], q: 1 });
+    else r.push({ v: m[3], q: 0 });
+  }
+  return r;
+}
+
+async function run(line) {
+  const tk = tok(line);
+  if (!tk.length) return;
+  const segs = [[]];
+  tk.forEach(t => (!t.q && t.v === '&&') ? segs.push([]) : segs[segs.length - 1].push(t));
+
+  for (let q = 0; q < segs.length; q++) {
+    if (q && ec) break;
+    ec = 0;
+    const st = [[]];
+    segs[q].forEach(t => (!t.q && t.v === '|') ? st.push([]) : st[st.length - 1].push(t));
+    let inp = null;
+
+    for (let i = 0; i < st.length; i++) {
+      const a = [];
+      let rdIn = null, rdOut = null;
+      const tsArr = st[i];
+
+      for (let j = 0; j < tsArr.length; j++) {
+        const t = tsArr[j];
+        if (!t.q && (t.v === '>' || t.v === '>>')) {
+          rdOut = { ap: t.v === '>>', f: (tsArr[++j] || {}).v };
+        } else if (!t.q && t.v === '<') {
+          rdIn = { f: (tsArr[++j] || {}).v };
+        } else {
+          a.push(t.v);
+        }
+      }
+      if (!a.length) continue;
+
+      if (rdIn && rdIn.f) {
+        const s = S[host()];
+        const pIn = rd(s, rdIn.f, 0);
+        if (pIn.e) {
+          out('bash: ' + rdIn.f + ': ' + pIn.e);
+          ec = 1;
+          continue;
+        }
+        inp = pIn.c;
+      }
+
+      const last = i === st.length - 1;
+      const buf = [];
+      const o = m => { (last && !rdOut) ? out(m) : buf.push(m); };
+
+      await exec(a, inp, o, 0);
+
+      if (rdOut && rdOut.f) {
+        const s = S[host()], P = ab(s, rdOut.f), par = P.replace(/\/[^/]*$/, '') || '/';
+        if (!s.fs[par]) {
+          out('bash: ' + rdOut.f + ': No such file or directory');
+          ec = 1;
+        } else if (!canWu(s.u, P)) {
+          out('bash: ' + rdOut.f + ': Permission denied');
+          ec = 1;
+        } else {
+          const old = s.fs[P];
+          wr(s, P, (rdOut.ap && old ? old.c : '') + buf.join('\n') + '\n', 0);
+        }
+      }
+      inp = buf.join('\n');
+    }
+  }
+}
+
+async function exec(a, inp, o, sd) {
+  const h = host(), s = S[h], x = a[0], r = a.slice(1), e = m => { o(m); ec = 1; };
+
+  switch (x) {
+  case 'sudo':
+    if (r.length < 1) { e('usage: sudo command'); break; }
+    return exec(r, inp, o, 1);
+
+  case 'help':
+    o('Perintah Fail2ban Lab: ' + CMDS.join(' ') + '\nPindah mesin: konsol client | konsol server1 | reset');
+    break;
+
+  case 'clear':
+    LOG.innerHTML = '';
+    break;
+
+  case 'reset':
+    init();
+    return;
+
+  case 'konsol':
+    if (!NET[r[0]]) { e('usage: konsol client|server1'); break; }
+    stack = [{ h: r[0] }];
+    o('Berpindah ke konsol ' + r[0] + ' (' + NET[r[0]] + ').');
+    break;
+
+  case 'whoami': o(sd ? 'root' : s.u); break;
+  case 'hostname': o(h); break;
+  case 'id': o(sd ? 'uid=0(root) gid=0(root) groups=0(root)' : 'uid=1000(siswa) gid=1000(siswa) groups=1000(siswa),27(sudo)'); break;
+  case 'date': o('Mon Oct 19 13:20:00 WIB 2026'); break;
+  case 'uname': o(r.includes('-a') ? 'Linux ' + h + ' 6.1.0-21-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.90-1 (2024-05-03) x86_64 GNU/Linux' : 'Linux'); break;
+  case 'pwd': o(s.cwd); break;
+
+  case 'ls': {
+    let fl = '', ps = []; r.forEach(z => z[0] === '-' ? fl += z : ps.push(z)); if (!ps.length) ps = ['.'];
+    const row = (nm, n) => fl.includes('l') ? (n.d ? 'd' : n.l ? 'l' : '-') + mstr(n.m || '644') + ' 1 ' + (n.o || s.u) + ' ' + (n.g || s.u) + ' ' + String(n.d ? 4096 : (n.c || '').length).padStart(5) + ' Oct 19 13:00 ' + nm : nm;
+    for (const p of ps) {
+      const P = ab(s, p), n = s.fs[P];
+      if (!n) { e("ls: cannot access '" + p + "': No such file or directory"); continue; }
+      if (n.d && !fl.includes('d')) {
+        let k = kids(s, P); k = fl.includes('a') ? ['.', '..', ...k] : k.filter(z => z[0] !== '.');
+        if (ps.length > 1) o(p + ':');
+        const L = k.map(z => row(z, z === '.' || z === '..' ? n : s.fs[(P === '/' ? '' : P) + '/' + z]));
+        if (fl.includes('l')) { o('total ' + k.length * 4); L.forEach(z => o(z)); }
+        else if (L.length) o(L.join('  '));
+      } else o(row(p, n));
+    }
+    break;
+  }
+
+  case 'cd': {
+    const p = r[0] || '~', P = ab(s, p), n = s.fs[P];
+    if (!n) { e('bash: cd: ' + p + ': No such file or directory'); break; }
+    if (!n.d) { e('bash: cd: ' + p + ': Not a directory'); break; }
+    s.cwd = P;
+    break;
+  }
+
+  case 'cat': {
+    if (!r.length && inp != null) { o(inp); break; }
+    for (const p of r) {
+      const t = rd(s, p, sd);
+      if (t.e) e('cat: ' + p + ': ' + t.e); else o(t.c.replace(/\n$/, ''));
+    }
+    break;
+  }
+
+  case 'cp': {
+    const ar = r.filter(z => z[0] !== '-');
+    if (ar.length < 2) { e('cp: missing file operand'); break; }
+    const srcPath = ab(s, ar[0]), dstPath = ab(s, ar[1]);
+    const srcNode = s.fs[srcPath];
+    if (!srcNode) { e("cp: cannot stat '" + ar[0] + "': No such file or directory"); break; }
+    if (!sd && !canWu(s.u, dstPath)) { e("cp: cannot create regular file '" + ar[1] + "': Permission denied"); break; }
+    s.fs[dstPath] = { c: srcNode.c, m: '644', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u };
+    break;
+  }
+
+  case 'echo': {
+    let t = r.slice(); const en = t[0] === '-e'; if (en) t.shift();
+    let z = t.join(' '); if (en) z = z.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+    o(z);
+    break;
+  }
+
+  case 'tee': {
+    const ap = r.includes('-a'), p = r.find(z => z[0] !== '-'); if (!p) break;
+    const P = ab(s, p); if (!sd && !canWu(s.u, P)) { e('tee: ' + p + ': Permission denied'); break; }
+    const old = s.fs[P]; wr(s, P, (ap && old ? old.c : '') + (inp || '') + '\n', sd); o(inp || '');
+    break;
+  }
+
+  case 'sed': {
+    const i = r.includes('-i'), rest = r.filter(z => z !== '-i'), sc = rest[0], p = rest[1], m = sc && sc.match(/^s\/(.*?)\/(.*?)\/(g?)$/);
+    if (!m || !p) { e('usage: sed [-i] s/pola/ganti/ file'); break; }
+    const t = rd(s, p, 1);
+    if (t.e) { e("sed: can't read " + p + ': ' + t.e); break; }
+    const P = ab(s, p);
+    if (i && !sd && !canWu(s.u, P)) { e("sed: couldn't open temporary file " + P.replace(/[^/]*$/, '') + 'sedXXXXXX: Permission denied'); break; }
+    const re = new RegExp(m[1].replace(/\\\?/g, '?').replace(/\\\+/g, '+'), m[3]);
+    const res = t.c.split('\n').map(l => l.replace(re, m[2])).join('\n');
+    if (i) wr(s, P, res, sd); else o(res.replace(/\n$/, ''));
+    break;
+  }
+
+  case 'grep': {
+    const fl = r.filter(z => z[0] === '-'), ar = r.filter(z => z[0] !== '-'), pat = ar[0];
+    if (!pat) { e('Usage: grep [OPTION]... PATTERNS [FILE]...'); break; }
+    let txt;
+    if (ar[1]) { const t = rd(s, ar[1], sd); if (t.e) { e('grep: ' + ar[1] + ': ' + t.e); break; } txt = t.c; }
+    else txt = inp || '';
+    let re; try { re = new RegExp(pat, fl.includes('-i') ? 'i' : ''); } catch (z) { e('grep: Invalid regular expression'); break; }
+    const Ls = txt.split('\n').filter(l => re.test(l) !== fl.includes('-v'));
+    Ls.forEach(l => o(l)); if (!Ls.length) ec = 1;
+    break;
+  }
+
+  case 'tail': {
+    let n = 10, f;
+    for (let i = 0; i < r.length; i++) { if (r[i] === '-n') n = +r[++i]; else if (r[i][0] !== '-') f = r[i]; }
+    if (f) {
+      const t = rd(s, f, sd);
+      if (t.e) { e("tail: cannot open '" + f + "' for reading: " + t.e); break; }
+      (t.c || '').split('\n').slice(-n).forEach(l => o(l));
+      break;
+    }
+    (inp || '').split('\n').slice(-n).forEach(l => o(l));
+    break;
+  }
+
+  case 'nc':
+  case 'netcat': {
+    let targetIp = null, targetPort = null;
+    const nonFlags = r.filter(z => !z.startsWith('-'));
+    if (nonFlags.length >= 2) {
+      targetIp = nonFlags[0];
+      targetPort = parseInt(nonFlags[1]);
+    } else {
+      e('usage: nc [-zv] destination port');
+      break;
+    }
+
+    let dest = Object.values(S).find(m => m.ip === targetIp || m.name === targetIp);
+    if (!dest) { e('nc: getaddrinfo for host "' + targetIp + '" port ' + targetPort + ': Name or service not known'); break; }
+
+    const isBanned = (dest.fail2ban.banned['sshd'] || []).includes(s.ip);
+    if (isBanned && targetPort === 22) {
+      o('nc: connect to ' + targetIp + ' (' + dest.ip + ') port ' + targetPort + ' (tcp) failed: Connection refused');
+      ec = 1;
+    } else {
+      o('Connection to ' + targetIp + ' (' + dest.ip + ') ' + targetPort + ' port [tcp/*] succeeded!');
+    }
+    break;
+  }
+
+  case 'apt': case 'apt-get': {
+    if (!sd) { e('E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)\nE: Unable to acquire the dpkg frontend lock, are you root?'); break; }
+    if (r[0] === 'update') {
+      o('Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]\nFetched 151 kB in 1s (180 kB/s)\nReading package lists... Done\nBuilding dependency tree... Done\nAll packages are up to date.');
+      break;
+    }
+    if (r[0] !== 'install') { e('Usage: apt [update|install] paket'); break; }
+    const pk = r.slice(1).filter(z => z[0] !== '-'); if (!pk.length) { e('E: No packages specified'); break; }
+    for (const p of pk) {
+      if (p === 'fail2ban') {
+        s.inst = 1; s.act = 1; s.en = 1;
+        ['/etc/fail2ban', '/etc/fail2ban/filter.d', '/etc/fail2ban/action.d', '/etc/fail2ban/jail.d'].forEach(d => {
+          s.fs[d] = { d: 1, m: '755', o: 'root', g: 'root' };
+        });
+        s.fs['/etc/fail2ban/jail.conf'] = {
+          c: `[DEFAULT]
+bantime = 10m
+findtime = 10m
+maxretry = 5
+backend = auto
+
+[sshd]
+enabled = true
+port    = ssh
+logpath = %(sshd_log)s
+backend = %(sshd_backend)s
+`,
+          m: '644', o: 'root', g: 'root'
+        };
+        s.fs['/etc/fail2ban/filter.d/sshd.conf'] = {
+          c: `[INCLUDES]\nbefore = common.conf\n[Definition]\n_daemon = sshd\nfailregex = ^%(__prefix_line)s(?:error: PAM: )?[aA]uthentication (?:failure|error|failed) for .* from <HOST>( via \\S+)?\\s*$\n`,
+          m: '644', o: 'root', g: 'root'
+        };
+        s.fs['/var/log/fail2ban.log'].c = `${ts()} fail2ban.server         [712]: INFO    --------------------------------------------------\n${ts()} fail2ban.server         [712]: INFO    Starting Fail2ban v1.0.2\n${ts()} fail2ban.server         [712]: INFO    Server ready\n`;
+        o('The following NEW packages will be installed:\n  fail2ban python3-pyinotify\nSetting up fail2ban (1.0.2-1) ...\nCreated symlink /etc/systemd/system/multi-user.target.wants/fail2ban.service → /lib/systemd/system/fail2ban.service.');
+      } else {
+        e('E: Unable to locate package ' + p);
+      }
+    }
+    break;
+  }
+
+  case 'systemctl': {
+    const ac = r.find(z => /^(start|stop|restart|reload|status)$/.test(z));
+    if (!ac || !r.some(z => /^(fail2ban)(\.service)?$/.test(z))) {
+      e('usage: systemctl start|stop|restart|reload|status fail2ban');
+      break;
+    }
+    if (!s.inst) { e('Unit fail2ban.service could not be found.'); break; }
+    if (ac === 'status') {
+      o((s.act ? '●' : '○') + ' fail2ban.service - Fail2Ban Service\n     Loaded: loaded (/lib/systemd/system/fail2ban.service; enabled; preset: enabled)\n     Active: ' + (s.act ? 'active (running) since Mon 2026-10-19 13:00:00 WIB; 20min ago' : 'inactive (dead)') + '\n       Docs: man:fail2ban(1)\n   Main PID: 712 (fail2ban-server)\n      Tasks: 5 (limit: 2341)\n     Memory: 16.8M\n        CPU: 120ms\n     CGroup: /system.slice/fail2ban.service\n             └─712 /usr/bin/python3 /usr/bin/fail2ban-server -xf start');
+      break;
+    }
+    if (!sd) { e('Failed to ' + ac + ' fail2ban.service: Interactive authentication required.'); break; }
+    if (ac === 'stop') { s.act = 0; o('Stopping Fail2ban service...'); }
+    else if (ac === 'start' || ac === 'restart' || ac === 'reload') {
+      s.act = 1;
+      const jLocal = s.fs['/etc/fail2ban/jail.local'];
+      if (jLocal && jLocal.c.includes('[nginx-botsearch]') && !s.fail2ban.jails.includes('nginx-botsearch')) {
+        s.fail2ban.jails.push('nginx-botsearch');
+      }
+      s.fs['/var/log/fail2ban.log'].c += `${ts()} fail2ban.jail           [712]: INFO    Jail '${s.fail2ban.jails.join(', ')}' reloaded\n`;
+      o('Reloaded Fail2ban service.');
+    }
+    break;
+  }
+
+  case 'fail2ban-client': {
+    if (!sd) { e('ERROR  Permission denied to socket: /var/run/fail2ban/fail2ban.sock, (you must be root)'); break; }
+    if (!s.inst || !s.act) { e('Failed to access socket path: /var/run/fail2ban/fail2ban.sock. Is fail2ban running?'); break; }
+
+    const sub = r[0];
+    if (sub === 'ping') {
+      o('Server replied: pong');
+      break;
+    }
+    if (sub === 'version') {
+      o('1.0.2');
+      break;
+    }
+    if (sub === 'reload') {
+      const jLocal = s.fs['/etc/fail2ban/jail.local'];
+      if (jLocal && jLocal.c.includes('[nginx-botsearch]') && !s.fail2ban.jails.includes('nginx-botsearch')) {
+        s.fail2ban.jails.push('nginx-botsearch');
+      }
+      s.fs['/var/log/fail2ban.log'].c += `${ts()} fail2ban.server         [712]: INFO    Reload finished.\n`;
+      o('200 OK');
+      break;
+    }
+    if (sub === 'status') {
+      if (r.length === 1) {
+        o('Status\n|- Number of jail:\t' + s.fail2ban.jails.length + '\n`- Jail list:\t' + s.fail2ban.jails.join(', '));
+      } else {
+        const jailName = r[1];
+        if (!s.fail2ban.jails.includes(jailName)) {
+          e('ERROR  Sorry but the jail \'' + jailName + '\' does not exist');
+          break;
+        }
+        const bList = s.fail2ban.banned[jailName] || [];
+        const fCount = s.fail2ban.failedCount['10.0.0.10'] || 0;
+        o('Status for the jail: ' + jailName + '\n|- Filter\n|  |- Currently failed:\t' + (bList.length ? 0 : fCount) + '\n|  |- Total failed:\t' + fCount + '\n|  `- File list:\t/var/log/auth.log\n`- Actions\n   |- Currently banned:\t' + bList.length + '\n   |- Total banned:\t' + bList.length + '\n   `- Banned IP list:\t' + (bList.length ? bList.join(' ') : ''));
+      }
+      break;
+    }
+    if (sub === 'set' && r[2] === 'unbanip') {
+      const jn = r[1], ip = r[3];
+      if (s.fail2ban.banned[jn] && s.fail2ban.banned[jn].includes(ip)) {
+        s.fail2ban.banned[jn] = s.fail2ban.banned[jn].filter(x => x !== ip);
+        s.fail2ban.failedCount[ip] = 0;
+        s.fs['/var/log/fail2ban.log'].c += `${ts()} fail2ban.actions        [712]: NOTICE  [${jn}] Unban ${ip}\n`;
+        s.unbannedTested = true;
+        o('1');
+      } else {
+        o('0');
+      }
+      break;
+    }
+    if (sub === 'set' && r[2] === 'banip') {
+      const jn = r[1], ip = r[3];
+      if (!s.fail2ban.banned[jn]) s.fail2ban.banned[jn] = [];
+      if (!s.fail2ban.banned[jn].includes(ip)) s.fail2ban.banned[jn].push(ip);
+      s.fs['/var/log/fail2ban.log'].c += `${ts()} fail2ban.actions        [712]: NOTICE  [${jn}] Ban ${ip}\n`;
+      o('1');
+      break;
+    }
+    e('Usage: fail2ban-client ping | status [jail] | set [jail] unbanip IP | reload');
+    break;
+  }
+
+  case 'fail2ban-regex': {
+    if (r.length < 2) { e('Usage: fail2ban-regex <logfile> <filterfile>'); break; }
+    o(`Running tests
+=============
+
+Use   failregex filter file : ${r[1]}
+Use         log file        : ${r[0]}
+
+Results
+=======
+
+Failregex: 4 total
+|-  #) [# times] regex failure
+|   1) [4] ^(?:error: PAM: )?[aA]uthentication (?:failure|error|failed) for .* from <HOST>
+\`-
+
+Ignoreregex: 0 total
+
+Date template hits:
+|- [# times] date-format
+|  [4] {^LN-BEG}ExMessage
+\`-
+
+Lines: 15 lines, 0 ignored, 4 matched, 11 missed
+[processed in 0.02 sec]`);
+    break;
+  }
+
+  case 'ssh': {
+    let targetHost = null, user = 'siswa';
+    for (const item of r) {
+      if (!item.startsWith('-')) {
+        if (item.includes('@')) {
+          [user, targetHost] = item.split('@');
+        } else {
+          targetHost = item;
+        }
+      }
+    }
+
+    if (!targetHost || !NET[targetHost]) {
+      e('ssh: Could not resolve hostname ' + targetHost + ': Name or service not known');
+      break;
+    }
+
+    const srv = S[targetHost];
+    const isBanned = (srv.fail2ban.banned['sshd'] || []).includes(s.ip);
+    if (isBanned) {
+      o('ssh: connect to host ' + targetHost + ' port 22: Connection refused');
+      ec = 1;
+      break;
+    }
+
+    let authenticated = false;
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      const pw = await ask(user + '@' + targetHost + "'s password: ", 1);
+      if (PW[user] && pw === PW[user]) {
+        authenticated = true;
+        break;
+      }
+      srv.fail2ban.failedCount[s.ip] = (srv.fail2ban.failedCount[s.ip] || 0) + 1;
+      const count = srv.fail2ban.failedCount[s.ip];
+      srv.fs['/var/log/auth.log'].c += `${ts()} ${srv.name} sshd[1420]: Failed password for ${user} from ${s.ip} port 52140 ssh2\n`;
+      srv.fs['/var/log/fail2ban.log'].c += `${ts()} fail2ban.filter         [712]: INFO    [sshd] Found ${s.ip} - ${ts()}\n`;
+
+      if (count >= 3) {
+        if (!srv.fail2ban.banned['sshd']) srv.fail2ban.banned['sshd'] = [];
+        if (!srv.fail2ban.banned['sshd'].includes(s.ip)) {
+          srv.fail2ban.banned['sshd'].push(s.ip);
+          srv.fs['/var/log/fail2ban.log'].c += `${ts()} fail2ban.actions        [712]: NOTICE  [sshd] Ban ${s.ip}\n`;
+        }
+      }
+
+      if (attempt < 3) {
+        out('Permission denied, please try again.');
+      }
+    }
+
+    if (!authenticated) {
+      out(user + '@' + targetHost + ': Permission denied (publickey,password).');
+      ec = 1;
+    } else {
+      out('Linux ' + targetHost + ' 6.1.0-21-amd64 Debian 12 (bookworm)\nLast login: ' + ts() + ' from ' + s.ip);
+      out('Connection to ' + targetHost + ' closed.');
+    }
+    break;
+  }
+
+  case 'ping': {
+    const n = r.find(z => z[0] !== '-' && !/^\d+$/.test(z));
+    if (!n) { e('ping: usage error: Destination address required'); break; }
+    if (!NET[n]) { e('ping: ' + n + ': Name or service not known'); break; }
+    o('PING ' + n + ' (' + NET[n] + ') 56(84) bytes of data.\n64 bytes from ' + n + ' (' + NET[n] + '): icmp_seq=1 ttl=64 time=0.4 ms\n--- ' + n + ' ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss');
+    break;
+  }
+
+  case 'exit':
+    o('Sesi konsol utama tidak ditutup. Gunakan: konsol NAMA untuk berpindah mesin.');
+    break;
+
+  default:
+    e('bash: ' + x + ': command not found');
+  }
+}
+
+I.onkeydown = async e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const v = I.value;
+    I.value = '';
+
+    if (pend) {
+      const p = pend;
+      pend = null;
+      I.type = 'text';
+      out(p.lp + (p.hid ? '' : v));
+      setPs();
+      p.res(v);
+      return;
+    }
+
+    if (busy) return;
+    busy = 1;
+    outH(pshtml() + esc(v));
+    if (v.trim()) {
+      hist.push(v);
+      hi = hist.length;
+    }
+    setPs();
+
+    try {
+      await run(v);
+    } catch (err) {
+      out('simulator error: ' + err.message, 'd');
+    }
+
+    busy = 0;
+    chk();
+    setPs();
+    I.focus();
+    T.scrollTop = T.scrollHeight;
+  } else if (e.key === 'ArrowUp' && !pend) {
+    if (hi > 0) I.value = hist[--hi];
+    e.preventDefault();
+  } else if (e.key === 'ArrowDown' && !pend) {
+    hi = Math.min(hi + 1, hist.length);
+    I.value = hist[hi] || '';
+    e.preventDefault();
+  } else if (e.key === 'Tab' && !pend) {
+    e.preventDefault();
+    const parts = I.value.split(' '), w = parts.pop();
+    let c;
+    if (!parts.length || (parts.length === 1 && parts[0] === 'sudo')) {
+      c = CMDS.filter(z => z.startsWith(w));
+    } else {
+      const s = S[host()], dir = w.includes('/') ? w.replace(/[^/]*$/, '') : '', base = w.slice(dir.length), P = ab(s, dir || '.');
+      c = kids(s, P).filter(z => z.startsWith(base)).map(z => dir + z + ((s.fs[(P === '/' ? '' : P) + '/' + z] || {}).d ? '/' : ''));
+    }
+    if (c.length === 1) I.value = [...parts, c[0]].join(' ') + (c[0].endsWith('/') ? '' : ' ');
+    else if (c.length > 1) out(c.join('  '));
+  } else if (e.key === 'c' && e.ctrlKey && pend) {
+    pend.res('');
+    pend = null;
+    I.type = 'text';
+  }
+};
+
+T.onclick = () => { if (!getSelection().toString()) I.focus(); };
+$('#rs').onclick = init;
+
+const Q = [
+  ['Fail2ban tergolong ke dalam kategori sistem keamanan jaringan...',
+   ['Intrusion Detection System (IDS) pasif', 'Intrusion Prevention System (IPS) aktif', 'Static Network Address Translator', 'Hardware Load Balancer'], 1,
+   'Fail2ban bertindak sebagai IPS karena secara aktif memblokir IP penyerang pada firewall ketika pola serangan terdeteksi.'],
+
+  ['Berkas konfigurasi yang disarankan untuk menulis aturan kustom tanpa takut tertimpa saat update paket Debian adalah...',
+   ['/etc/fail2ban/fail2ban.conf', '/etc/fail2ban/jail.conf', '/etc/fail2ban/jail.local', '/var/log/fail2ban.log'], 2,
+   'jail.local akan menimpa parameter di jail.conf dan tidak akan ditimpa oleh pembaruan sistem apt.'],
+
+  ['Parameter yang menentukan berapa lama sebuah alamat IP akan diblokir oleh firewall saat melakukan pelanggaran adalah...',
+   ['findtime', 'maxretry', 'bantime', 'ignoreip'], 2,
+   'bantime (misal: bantime = 10m atau 1h) menentukan durasi pemblokiran IP di firewall.'],
+
+  ['Parameter yang digunakan untuk mengecualikan alamat IP komputer admin atau subnet LAN agar tidak pernah diblokir adalah...',
+   ['whitelist', 'ignoreip', 'safe_hosts', 'pass_address'], 1,
+   'ignoreip mendefinisikan daftar IP atau subnet CIDR yang kebal dari hukuman pemblokiran Fail2ban.'],
+
+  ['Perintah Fail2ban CLI untuk membuka blokir manual pada IP 10.0.0.10 yang terkurung di jail sshd adalah...',
+   ['sudo fail2ban-client remove 10.0.0.10', 'sudo fail2ban-client set sshd unbanip 10.0.0.10', 'sudo fail2ban-client clear sshd', 'sudo fail2ban-client allow 10.0.0.10'], 1,
+   'Sintaks standar: sudo fail2ban-client set [jail] unbanip [IP].'],
+
+  ['Utilitas command-line yang digunakan untuk menguji keakuratan ekspresi reguler (regex) filter terhadap berkas log adalah...',
+   ['fail2ban-test', 'fail2ban-check', 'fail2ban-regex', 'fail2ban-audit'], 2,
+   'fail2ban-regex memvalidasi apakah baris pola regex cocok dengan isi berkas log target.']
+];
+
+const qz = $('#quiz');
+Q.forEach((q, k) => {
+  const d = document.createElement('div');
+  d.className = 'card q';
+  d.innerHTML = '<b>' + (k + 1) + '. ' + q[0] + '</b>';
+  q[1].forEach((o, j) => {
+    const b = document.createElement('button');
+    b.textContent = o;
+    b.onclick = () => {
+      [...d.querySelectorAll('button')].forEach((z, y) => {
+        z.disabled = true;
+        if (y === q[2]) z.classList.add('r');
+      });
+      if (j !== q[2]) b.classList.add('x');
+      const e = document.createElement('div');
+      e.className = 'co';
+      e.textContent = (j === q[2] ? 'Benar! ' : 'Belum tepat. ') + q[3];
+      d.appendChild(e);
+    };
+    d.appendChild(b);
+  });
+  qz.appendChild(d);
+});
+
+// Initialize module
+init();
+show(0);
+</script>
+</body>
+</html>
