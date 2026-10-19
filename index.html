@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Portal Modul Ajar Interaktif ASJ - SMK Wikrama Bogor</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script>
+  tailwind.config = {
+    darkMode: 'class',
+    theme: {
+      extend: {
+        fontFamily: {
+          sans: ['Inter', 'sans-serif'],
+          mono: ['JetBrains Mono', 'monospace'],
+        },
+        colors: {
+          pri: {
+            DEFAULT: '#0f766e',
+            light: '#14b8a6',
+            dark: '#0d5952'
+          }
+        }
+      }
+    }
+  }
+</script>
+<style>
+  /* Efek blur kartu dan transisi halus */
+  .card-hover {
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+  }
+</style>
+</head>
+<body class="bg-slate-50 dark:bg-[#0c1412] text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans antialiased transition-colors duration-200">
+
+  <!-- Header & Navigasi -->
+  <header class="sticky top-0 z-50 backdrop-blur-md bg-white/80 dark:bg-[#121e1a]/80 border-b border-slate-200 dark:border-slate-800">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-teal-700 to-teal-500 flex items-center justify-center text-white font-bold text-xl shadow-md shadow-teal-700/20">
+          W
+        </div>
+        <div>
+          <h1 class="text-base font-bold leading-tight text-slate-900 dark:text-white">SMK Wikrama Bogor</h1>
+          <p class="text-xs text-slate-500 dark:text-teal-400/80 font-medium tracking-wide">Konsentrasi Keahlian TJKT / TKJ</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Tombol Ganti Tema -->
+        <button id="themeToggle" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" aria-label="Ganti Tema">
+          <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          <svg id="moonIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <main class="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-800 via-teal-900 to-slate-900 text-white p-6 sm:p-10 shadow-xl shadow-teal-900/10 mb-10">
+      <div class="relative z-10 max-w-2xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-200 border border-teal-400/30 mb-4 backdrop-blur-sm">
+          <span>🎯 Modul Ajar Interaktif</span> • <span>Fase F (Kelas XI)</span>
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight mb-3">
+          Laboratorium Administrasi Sistem Jaringan
+        </h2>
+        <p class="text-sm sm:text-base text-teal-100/90 leading-relaxed mb-6 font-normal">
+          Pelajari konsep server Linux Debian 12 secara langsung melalui simulator terminal interaktif. Tanpa perlu install virtual machine, cukup buka tautan modul untuk mulai belajar dan mengerjakan misi mandiri.
+        </p>
+
+        <!-- Search Bar Sederhana -->
+        <div class="relative max-w-md">
+          <input 
+            type="text" 
+            id="searchInput"
+            placeholder="Cari materi modul (contoh: ssh, nginx, sql)..." 
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/10 dark:bg-black/30 border border-white/20 text-white placeholder-teal-200/60 focus:outline-none focus:ring-2 focus:ring-teal-400 backdrop-blur-md text-sm"
+          >
+          <svg class="w-4 h-4 text-teal-200/70 absolute left-3.5 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+      </div>
+
+      <!-- Aksen Visual Latar -->
+      <div class="absolute -right-10 -bottom-10 w-72 h-72 rounded-full bg-teal-500/10 blur-3xl pointer-events-none"></div>
+    </div>
+
+    <!-- Bagian Grid Modul -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Daftar Modul Praktikum</h3>
+        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400">Pilih modul pembelajaran di bawah untuk membuka simulator dan materi.</p>
+      </div>
+      <span id="moduleCount" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-teal-100 dark:bg-teal-900/40 text-teal-800 dark:text-teal-300">3 Modul Tersedia</span>
+    </div>
+
+    <div id="moduleGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Kartu 1: SSH Remote Server -->
+      <div class="module-card card-hover bg-white dark:bg-[#15231f] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-400/50 group" data-keywords="ssh remote server openssh terminal putty terminal kunci pubkey scp sftp rsync tunnel port 22 2222">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+            </span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              Modul 01
+            </span>
+          </div>
+          <h4 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors mb-2">
+            Remote Server (SSH)
+          </h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+            Pengelolaan OpenSSH Server di Debian 12, login tanpa password via Public Key ed25519, hardening port & firewall UFW, transfer file (SCP/SFTP/Rsync), serta SSH Tunneling.
+          </p>
+          <div class="flex flex-wrap gap-1.5 mb-6">
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">port 22</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">ed25519</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">tunneling</span>
+          </div>
+        </div>
+        <div>
+          <!-- Sesuaikan nama file jika modul SSH Anda bernama ssh.html atau modul_ssh.html -->
+          <a href="ssh.html" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-medium text-sm transition shadow-sm shadow-teal-700/20">
+            <span>Buka Modul SSH</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Kartu 2: Nginx Web Server -->
+      <div class="module-card card-hover bg-white dark:bg-[#15231f] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-400/50 group" data-keywords="nginx web server http https virtual host server blocks reverse proxy ssl tls certbot ufw port 80 443">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+            </span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              Modul 02
+            </span>
+          </div>
+          <h4 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors mb-2">
+            Web Server (Nginx)
+          </h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+            Arsitektur asynchronous event-driven, konfigurasi Virtual Host Server Blocks, Reverse Proxy microservice, hardening banner identitas, dan sertifikat enkripsi SSL/HTTPS.
+          </p>
+          <div class="flex flex-wrap gap-1.5 mb-6">
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">port 80/443</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">vhost</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">reverse-proxy</span>
+          </div>
+        </div>
+        <div>
+          <a href="nginx.html" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-medium text-sm transition shadow-sm shadow-teal-700/20">
+            <span>Buka Modul Nginx</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Kartu 3: MariaDB Database Server -->
+      <div class="module-card card-hover bg-white dark:bg-[#15231f] rounded-2xl border border-slate-200 dark:border-slate-800 p-6 flex flex-col justify-between shadow-sm hover:shadow-lg hover:border-teal-500/50 dark:hover:border-teal-400/50 group" data-keywords="mariadb mysql database server rdbms sql ddl dml grant privileges bind-address backup restore dump port 3306">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <span class="p-2.5 rounded-xl bg-teal-50 dark:bg-teal-950/60 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-900">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+            </span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
+              Modul 03
+            </span>
+          </div>
+          <h4 class="text-lg font-bold text-slate-900 dark:text-white group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors mb-2">
+            Database Server (MariaDB)
+          </h4>
+          <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed mb-4">
+            Instalasi & hardening wizard, operasi SQL DDL/DML tabel, hak akses pengguna (least privilege), konfigurasi remote access bind-address 0.0.0.0, serta backup/restore dump SQL.
+          </p>
+          <div class="flex flex-wrap gap-1.5 mb-6">
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">port 3306</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">sql-cli</span>
+            <span class="text-[11px] font-mono px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">mariadb-dump</span>
+          </div>
+        </div>
+        <div>
+          <a href="mariadb.html" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-teal-700 hover:bg-teal-800 text-white font-medium text-sm transition shadow-sm shadow-teal-700/20">
+            <span>Buka Modul MariaDB</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Petunjuk Singkat Pembelajaran untuk Siswa -->
+    <div class="mt-12 bg-white dark:bg-[#15231f] border border-slate-200 dark:border-slate-800 rounded-2xl p-6 sm:p-8">
+      <h4 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+        <span>🚀</span> Petunjuk Belajar Praktikum Mandiri
+      </h4>
+      <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-6">
+        Gunakan simulator browser ini untuk mengasah keterampilan administrasi sistem jaringan Linux tanpa memerlukan aplikasi tambahan:
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs sm:text-sm">
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200/70 dark:border-slate-800">
+          <div class="font-bold text-teal-700 dark:text-teal-400 mb-1">1. Baca Konsep & Alur</div>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            Pahami fungsi layanan, arsitektur protokol, dan alur konfigurasi sebelum mengeksekusi perintah.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200/70 dark:border-slate-800">
+          <div class="font-bold text-teal-700 dark:text-teal-400 mb-1">2. Klik "Coba" ke Terminal</div>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            Tekan tombol <b>Coba</b> pada tabel perintah untuk memasukkan sintaks langsung ke terminal simulator.
+          </p>
+        </div>
+
+        <div class="p-4 rounded-xl bg-slate-50 dark:bg-black/20 border border-slate-200/70 dark:border-slate-800">
+          <div class="font-bold text-teal-700 dark:text-teal-400 mb-1">3. Tuntaskan Misi & Kuis</div>
+          <p class="text-slate-600 dark:text-slate-400 text-xs leading-relaxed">
+            Selesaikan 6 misi mandiri di tab Lab Terminal dan uji pemahaman kamu pada kuis pilihan ganda.
+          </p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="mt-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-[#121e1a] py-6">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500 dark:text-slate-400">
+      <p>© 2026 SMK Wikrama Bogor • Konsentrasi Keahlian Teknik Komputer dan Jaringan</p>
+      <div class="flex items-center gap-4">
+        <span>Debian 12 Bookworm Emulation</span>
+        <span>•</span>
+        <span>Standalone Web Artifacts</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Penanganan Tema Gelap & Terang
+    const themeToggleBtn = document.getElementById('themeToggle');
+    const sunIcon = document.getElementById('sunIcon');
+    const moonIcon = document.getElementById('moonIcon');
+
+    function applyTheme(isDark) {
+      if (isDark) {
+        document.documentElement.classList.add('dark');
+        sunIcon.classList.remove('hidden');
+        moonIcon.classList.add('hidden');
+      } else {
+        document.documentElement.classList.remove('dark');
+        sunIcon.classList.add('hidden');
+        moonIcon.classList.remove('hidden');
+      }
+    }
+
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const initialDark = savedTheme ? savedTheme === 'dark' : systemPrefersDark;
+    applyTheme(initialDark);
+
+    themeToggleBtn.addEventListener('click', () => {
+      const isCurrentlyDark = document.documentElement.classList.contains('dark');
+      const newDarkState = !isCurrentlyDark;
+      applyTheme(newDarkState);
+      localStorage.setItem('theme', newDarkState ? 'dark' : 'light');
+    });
+
+    // Fitur Live Search Modul Sederhana
+    const searchInput = document.getElementById('searchInput');
+    const moduleCards = document.querySelectorAll('.module-card');
+    const moduleCount = document.getElementById('moduleCount');
+
+    searchInput.addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase().trim();
+      let visible = 0;
+
+      moduleCards.forEach(card => {
+        const title = card.querySelector('h4').textContent.toLowerCase();
+        const desc = card.querySelector('p').textContent.toLowerCase();
+        const kw = card.dataset.keywords ? card.dataset.keywords.toLowerCase() : '';
+
+        if (title.includes(q) || desc.includes(q) || kw.includes(q)) {
+          card.style.display = 'flex';
+          visible++;
+        } else {
+          card.style.display = 'none';
+        }
+      });
+
+      moduleCount.textContent = visible + ' Modul Ditemukan';
+    });
+  </script>
+</body>
+</html>
