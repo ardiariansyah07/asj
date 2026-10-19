@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Modul Remote Server (SSH) - SMK Wikrama Bogor (Full Page)</title>
+<style>
+:root{
+  --bg:#f2f6f4;--fg:#14261f;--card:#fff;--pri:#0f766e;--acc:#dff3ef;--bd:#cfdcd6;
+  --mut:#4f645b;--warn:#fff4e0;--wb:#d97706;--hd:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+    --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+  --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+}
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 60px)}
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font:16px/1.7 "Segoe UI",system-ui,-apple-system,sans-serif;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:0 0 auto;
+  height:env(safe-area-inset-top,0px);
+  background:var(--hd);z-index:1001;
+}
+header{
+  position:fixed;
+  top:env(safe-area-inset-top,0px);
+  left:0;
+  right:0;
+  z-index:1000;
+  background:var(--hd);
+  border-bottom:1px solid var(--bd);
+  width:100%;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+#bar{height:3px;background:var(--pri);width:0;transition:width .3s}
+.hw{display:flex;align-items:center;gap:10px;padding:8px 20px;max-width:100%;width:100%}
+nav{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  white-space:nowrap;border:0;background:none;color:var(--mut);
+  padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-size:14px;
+  transition:all 0.15s ease;
+}
+nav button:hover{background:var(--acc);color:var(--fg)}
+nav button.on{background:var(--pri);color:var(--hd);font-weight:600}
+button:focus-visible,input:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+.actions{display:flex;gap:8px;align-items:center}
+.tg{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.tg:hover{background:var(--acc)}
+
+/* Full-width container styling dengan offset header fixed */
+main{
+  width:100%;
+  max-width:100%;
+  flex:1;
+  margin:0 auto;
+  padding:84px 32px 80px;
+}
+@media(max-width:768px){
+  main{padding:74px 14px 60px}
+  .hw{padding:6px 10px}
+}
+
+h1{font-size:2.2rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.5rem;margin:1.6em 0 .4em;border-left:5px solid var(--pri);padding-left:12px}
+h3{font-size:1.15rem;margin:1.3em 0 .3em;color:var(--pri)}
+p,li{max-width:100%}
+
+.cover{
+  background:linear-gradient(135deg,var(--pri),#0b3b36);
+  color:#fff;border-radius:14px;padding:36px 32px;margin-bottom:24px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+.cover h1{font-size:2.6rem}
+.cover table,.cover td,.cover tr:nth-child(even) td{
+  border:0;background:none;color:#fff;padding:4px 14px 4px 0;
+}
+.co{
+  border-left:5px solid var(--pri);background:var(--acc);padding:12px 18px;
+  border-radius:8px;margin:16px 0;
+}
+.co.w{border-color:var(--wb);background:var(--warn)}
+.tw{overflow-x:auto;margin:14px 0;border-radius:10px;border:1px solid var(--bd)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--card)}
+th{background:var(--pri);color:var(--hd);text-align:left;padding:10px 14px;font-weight:600}
+td{padding:9px 14px;border:1px solid var(--bd);vertical-align:top}
+tr:nth-child(even) td{background:var(--acc)}
+code{
+  font-family:ui-monospace,Consolas,monospace;font-size:.92em;
+  background:var(--acc);padding:2px 6px;border-radius:4px;word-break:break-word;
+}
+.try{
+  margin-left:8px;border:0;border-radius:6px;background:var(--pri);
+  color:var(--hd);padding:4px 12px;font-size:12px;cursor:pointer;
+  transition:opacity .15s;
+}
+.try:hover{opacity:0.85}
+.nv{display:flex;justify-content:space-between;margin-top:36px;gap:12px}
+.nv button,.btn{
+  background:var(--pri);color:var(--hd);border:0;border-radius:8px;
+  padding:10px 20px;cursor:pointer;font:inherit;font-weight:600;
+  transition:filter .15s;
+}
+.nv button:hover,.btn:hover{filter:brightness(1.1)}
+svg text{fill:currentColor;font:13px sans-serif}
+
+/* Terminal style Debian 12 (Full-width adaptive) */
+#tbox{
+  margin:20px 0 10px;
+  width:100%;
+}
+#where{
+  font-size:13.5px;color:var(--mut);display:flex;
+  justify-content:space-between;align-items:center;margin-bottom:8px;
+  background:var(--card);padding:8px 14px;border:1px solid var(--bd);border-radius:8px;
+}
+#where button{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12px;
+}
+#where button:hover{background:var(--acc)}
+#term{
+  background:#0c0c0c;color:#e6e6e6;border-radius:10px;padding:16px;
+  height:440px;overflow-y:auto;font:14px/1.48 ui-monospace,Consolas,monospace;
+  white-space:pre-wrap;word-break:break-word;cursor:text;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.6);
+  border:1px solid #232323;
+}
+#term .g{color:#5fd75f;font-weight:700}
+#term .b{color:#6aa5ff;font-weight:700}
+#term .d{color:#8a8a8a}
+#ln{display:flex}
+#ps{white-space:pre}
+#in{flex:1;min-width:40px;background:transparent;border:0;color:#fff;font:inherit;outline:none;padding:0;caret-color:#fff}
+
+/* Layout khusus Lab Terminal: full page 2-kolom seimbang */
+.lab{
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:20px;
+  align-items:start;
+  margin-top:10px;
+}
+.lab #term{height:540px}
+@media(max-width:992px){
+  .lab{grid-template-columns:1fr}
+  .lab #term{height:440px}
+}
+.ms{list-style:none;padding:0;margin:0}
+.ms li{
+  padding:12px 14px;border:1px solid var(--bd);border-radius:8px;
+  margin-bottom:8px;background:var(--card);font-size:14px;
+}
+.ms li.ok{background:var(--acc);border-color:var(--pri)}
+.ms li.ok b::after{content:" ✔ Selesai";color:var(--pri)}
+.ms details{color:var(--mut);font-size:13px;margin-top:4px}
+
+.card{
+  background:var(--card);border:1px solid var(--bd);border-radius:10px;
+  padding:18px 22px;margin:16px 0;
+}
+.q button{
+  display:block;width:100%;text-align:left;margin:6px 0;
+  padding:10px 14px;border:1px solid var(--bd);border-radius:8px;
+  background:var(--card);color:var(--fg);cursor:pointer;font:inherit;
+  transition:background .15s;
+}
+.q button:hover{background:var(--acc)}
+.q button.r{background:var(--acc);border-color:var(--pri);font-weight:600}
+.q button.x{background:var(--warn);border-color:var(--wb)}
+@media print{
+  header,.nv,#tbox,.try,.actions{display:none}
+  .tab{display:block!important}
+  body::before{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div id="bar"></div>
+  <div class="hw">
+    <nav id="nav"></nav>
+    <div class="actions">
+      <button class="tg" id="btnFs" title="Toggle Layar Penuh">⛶ Fullscreen</button>
+      <button class="tg" id="tg" aria-label="Ganti tema">◐</button>
+    </div>
+  </div>
+</header>
+<main>
+
+<section class="tab" data-title="Cover">
+<div class="cover">
+  <p style="font-size:1.1rem;margin-bottom:4px">Modul Ajar Interaktif</p>
+  <h1>Remote Server dengan SSH</h1>
+  <table>
+    <tr><td>Sekolah</td><td>: SMK Wikrama Bogor</td></tr>
+    <tr><td>Fase/Kelas</td><td>: F / XI</td></tr>
+    <tr><td>Program Keahlian</td><td>: Teknik Jaringan Komputer dan Telekomunikasi</td></tr>
+    <tr><td>Mata Pelajaran</td><td>: Konsentrasi Keahlian TKJ</td></tr>
+    <tr><td>Elemen</td><td>: Administrasi Sistem Jaringan</td></tr>
+    <tr><td>Materi</td><td>: Remote Server</td></tr>
+  </table>
+</div>
+<h2>Tujuan Pembelajaran</h2>
+<ul>
+  <li>Menjelaskan cara kerja SSH secara sederhana dan komprehensif.</li>
+  <li>Memasang dan mengatur OpenSSH server di sistem operasi Debian 12.</li>
+  <li>Login memakai kunci publik, mengamankan SSH server, mentransfer file, dan membuat tunnel port forwarding.</li>
+  <li>Mencari penyebab SSH gagal lewat pesan error dan analisis log sistem.</li>
+</ul>
+<h2>Cara Memakai Modul</h2>
+<ol>
+  <li>Baca konsep dan teori ringkas di tiap bab.</li>
+  <li>Pada bagian <b>Langkah</b>, tiap perintah disertai penjelasan detail. Klik <b>Coba</b> untuk mengisi perintah langsung ke terminal, lalu tekan <b>Enter</b>.</li>
+  <li>Terminal berada di bagian bawah modul. Ketik langsung perintah seperti pada sistem Debian asli. Posisi mesin aktif (<code>client</code>, <code>server1</code>, <code>db</code>) tertera di atas terminal.</li>
+  <li>Tersedia 3 mesin virtual simulasi: <code>client</code> (PC siswa), <code>server1</code> (server baru tanpa SSH), dan <code>db</code> (server basis data). Kata sandi semua akun: <code>siswa123</code>.</li>
+</ol>
+<div class="co w">⚠️ Terminal ini adalah <b>lingkungan simulasi</b> interaktif. Perintah khusus <code>konsol NAMA</code> berguna untuk berpindah komputer (seperti duduk di depan fisiknya). Ketik <code>reset</code> kapan saja untuk mengembalikan lab ke status awal.</div>
+</section>
+
+<section class="tab" data-title="1. Konsep">
+<h1>Bab 1. Konsep Dasar SSH</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memahami apa itu SSH, cara SSH melindungi data secara kriptografis, dan mengapa protokol lawas seperti Telnet sudah tidak aman digunakan.</div>
+<h2>Client dan Server</h2>
+<p><b>SSH (Secure Shell)</b> digunakan untuk mengendalikan komputer lain dari jarak jauh melalui jaringan secara terenkripsi (RFC 4251). Server menjalankan daemon <code>sshd</code> yang standarnya mendengarkan di port 22 TCP. Komputer client memanfaatkan program <code>ssh</code> untuk menghubungi server tersebut.</p>
+<p><i>Analogi:</i> Daemon <code>sshd</code> bertindak layaknya petugas keamanan di pintu masuk gedung, sedangkan perintah <code>ssh</code> adalah tamu yang berkunjung. Petugas memeriksa identitas tamu sebelum gerbang dibuka.</p>
+<svg viewBox="0 0 640 100" width="100%" height="90" role="img" aria-label="Alur client ke server">
+  <rect x="10" y="20" width="160" height="60" rx="8" fill="none" stroke="currentColor"/>
+  <text x="35" y="55">client (ssh)</text>
+  <rect x="460" y="20" width="160" height="60" rx="8" fill="none" stroke="currentColor"/>
+  <text x="475" y="55">server (sshd:22)</text>
+  <line x1="170" y1="50" x2="460" y2="50" stroke="currentColor" stroke-width="3" stroke-dasharray="6 4"/>
+  <text x="250" y="42">terowongan terenkripsi</text>
+</svg>
+<h2>Bagaimana SSH Mengamankan Data</h2>
+<div class="tw">
+  <table>
+    <tr><th>Tahap</th><th>Yang terjadi</th><th>Tujuan</th></tr>
+    <tr><td>1. Negosiasi Algoritma</td><td>Client dan server menyepakati standar enkripsi yang didukung bersama.</td><td>Menyepakati cipher dan hash terbaik.</td></tr>
+    <tr><td>2. Pertukaran Kunci (Diffie-Hellman)</td><td>Kedua host menghitung rahasia bersama (shared secret) tanpa mengirimkannya lewat kabel.</td><td>Menghasilkan kunci sesi simetris yang aman dari penyadapan.</td></tr>
+    <tr><td>3. Verifikasi Host Server</td><td>Client mencocokkan sidik jari (fingerprint) host key server.</td><td>Mencegah serangan Man-in-the-Middle (MitM) dari server palsu.</td></tr>
+    <tr><td>4. Autentikasi Pengguna</td><td>Verifikasi identitas via password atau pasangan kunci publik/privat.</td><td>Membuktikan hak akses pengguna.</td></tr>
+    <tr><td>5. Sesi Terenkripsi</td><td>Data ditransmisikan menggunakan enkripsi simetris cepat dengan integritas MAC/HMAC.</td><td>Menjaga kerahasiaan dan keutuhan data.</td></tr>
+  </table>
+</div>
+<div class="co">💡 <b>Analogi Diffie-Hellman:</b> Dua pihak mencampurkan cat rahasia masing-masing dengan cat publik yang sama, lalu bertukar campuran warna tersebut. Setelah menambahkan warna rahasianya masing-masing, warna akhir yang diperoleh keduanya identik, padahal warna rahasia murni tidak pernah diserahkan satu sama lain.</div>
+<h2>Perbandingan: Telnet, RSH, dan SSH</h2>
+<div class="tw">
+  <table>
+    <tr><th>Protokol</th><th>Port Standar</th><th>Enkripsi</th><th>Autentikasi</th><th>Tingkat Risiko</th><th>Rekomendasi</th></tr>
+    <tr><td>Telnet</td><td>23</td><td>Tidak Ada</td><td>Plaintext (Teks biasa)</td><td>Sangat Tinggi (Data & password terbaca sniffer)</td><td>Tinggalkan</td></tr>
+    <tr><td>RSH</td><td>514</td><td>Tidak Ada</td><td>IP / Host trust</td><td>Tinggi (Mudah di-spoofing)</td><td>Tinggalkan</td></tr>
+    <tr><td>SSH</td><td>22</td><td>Enkripsi Kuat</td><td>Password / Kunci Kriptografi</td><td>Aman (Bila dikonfigurasi tepat)</td><td>Standar Industri</td></tr>
+  </table>
+</div>
+<h3>Ringkasan</h3>
+<p>SSH membentuk saluran terenkripsi end-to-end antara <code>ssh</code> (client) dan <code>sshd</code> (server). <b>Latihan:</b> Jelaskan dengan pemahamanmu mengapa pengiriman kredensial lewat Telnet sangat berbahaya di jaringan publik.</p>
+</section>
+
+<section class="tab" data-title="2. Instalasi">
+<h1>Bab 2. Instalasi &amp; Konfigurasi Dasar</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memasang OpenSSH server di distro Debian 12, mengelola status service dengan systemd, serta memahami struktur berkas <code>sshd_config</code>.</div>
+<div class="tw">
+  <table>
+    <tr><th>Aspek</th><th>Debian / Ubuntu (digunakan di modul ini)</th><th>RHEL / Rocky / AlmaLinux</th></tr>
+    <tr><td>Pemasangan Paket</td><td><code>apt install openssh-server</code></td><td><code>dnf install openssh-server</code></td></tr>
+    <tr><td>Nama Unit Service</td><td><code>ssh</code> (atau alias <code>sshd</code>)</td><td><code>sshd</code></td></tr>
+  </table>
+</div>
+<h2>File Konfigurasi /etc/ssh/sshd_config</h2>
+<div class="tw">
+  <table>
+    <tr><th>Parameter Direktif</th><th>Fungsi Utama</th><th>Nilai Default</th></tr>
+    <tr><td>Port</td><td>Menentukan nomor port TCP yang didengarkan oleh daemon sshd</td><td>22</td></tr>
+    <tr><td>PermitRootLogin</td><td>Menentukan apakah pengguna root diperbolehkan login langsung</td><td>prohibit-password</td></tr>
+    <tr><td>PasswordAuthentication</td><td>Mengizinkan atau menolak autentikasi berbasis kata sandi</td><td>yes</td></tr>
+  </table>
+</div>
+<p>Tanda <code>#</code> di baris awal adalah komentar yang menunjukkan nilai bawaan sistem. Konfigurasi yang diubah baru akan aktif setelah service dimuat ulang (<code>reload</code> atau <code>restart</code>).</p>
+<h2>Langkah Kerja</h2>
+<div data-st="b2"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+<h3>Ringkasan</h3>
+<p>Prosedur standar: Pasang paket ➔ Periksa status service ➔ Edit konfigurasi ➔ Validasi sintaks via <code>sshd -t</code> ➔ Muat ulang via <code>systemctl reload ssh</code>.</p>
+</section>
+
+<section class="tab" data-title="3. Kunci">
+<h1>Bab 3. Login dengan Kunci Publik</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mengimplementasikan autentikasi kunci publik (Public Key Authentication) tanpa password yang kebal dari serangan tebak kata sandi.</div>
+<div class="tw">
+  <table>
+    <tr><th>Aspek Keamanan</th><th>Autentikasi Password</th><th>Autentikasi Kunci Publik (Ed25519/RSA)</th></tr>
+    <tr><td>Metode</td><td>Mengetik karakter rahasia secara manual</td><td>Kriptografi asimetris (Public & Private key)</td></tr>
+    <tr><td>Ketahanan Brute-Force</td><td>Rentan diserang dengan kamus password</td><td>Sangat kuat, secara komputasi mustahil ditebak</td></tr>
+    <tr><td>Data ke Jaringan</td><td>Hash password dikirim dalam tunnel</td><td>Kunci privat tidak pernah keluar dari mesin client</td></tr>
+  </table>
+</div>
+<p><i>Analogi:</i> Kunci publik (public key) berfungsi sebagai gembok yang dapat disalin ke banyak server. Kunci privat (private key) adalah anak kuncinya yang harus disimpan rapat di komputer milikmu.</p>
+<h3>Izin Akses (Permission File) Linux yang Benar</h3>
+<div class="tw">
+  <table>
+    <tr><th>Objek Direktori/File</th><th>Mode Akses</th><th>Penjelasan Keamanan</th></tr>
+    <tr><td>Direktori <code>~/.ssh</code></td><td>700 (drwx------)</td><td>Hanya pengguna pemilik yang berhak melihat dan masuk.</td></tr>
+    <tr><td>Kunci privat (<code>id_ed25519</code>)</td><td>600 (-rw-------)</td><td>SSH menolak bekerja jika file ini dapat dibaca oleh user lain.</td></tr>
+    <tr><td>Kunci publik (<code>id_ed25519.pub</code>)</td><td>644 (-rw-r--r--)</td><td>Aman dibaca siapa saja karena bersifat publik.</td></tr>
+    <tr><td>Daftar <code>authorized_keys</code></td><td>600 (-rw-------)</td><td>Daftar otoritas kunci; dilarang keras dapat dimodifikasi pihak lain.</td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b3"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+<div class="co">💡 Format kunci modern yang direkomendasikan adalah <b>Ed25519</b> karena cepat dan aman. Bila memerlukan format legacy RSA, gunakan panjang minimal 4096-bit (<code>ssh-keygen -t rsa -b 4096</code>).</div>
+</section>
+
+<section class="tab" data-title="4. Keamanan">
+<h1>Bab 4. Mengamankan SSH (Hardening)</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memperkuat pertahanan server SSH terhadap ancaman brute-force dan pemindaian bot otomatis di internet.</div>
+<div class="co w">⚠️ Selalu pastikan login berbasis kunci telah teruji berhasil <b>sebelum</b> menonaktifkan <code>PasswordAuthentication</code>. Jika tidak, kamu berisiko terkunci dari server. Pada simulasi, gunakan <code>reset</code> jika terkunci.</div>
+<div class="tw">
+  <table>
+    <tr><th>Tindakan Hardening</th><th>Manfaat & Proteksi</th></tr>
+    <tr><td><code>PermitRootLogin no</code></td><td>Mencegah penyerang langsung menargetkan akun berkekuasaan tertinggi (root).</td></tr>
+    <tr><td><code>PasswordAuthentication no</code></td><td>Mengeliminasi 100% risiko serangan tebak password kamus otomatis.</td></tr>
+    <tr><td>Ubah Port Default (misal 2222) + Firewall (UFW)</td><td>Menghindari bot scanner otomatis yang menyisir port default 22 di internet.</td></tr>
+    <tr><td><code>AllowUsers siswa</code></td><td>Membatasi akses whitelist hanya untuk akun yang memang berhak login.</td></tr>
+    <tr><td>Memasang Fail2ban</td><td>Memantau kegagalan login berulang dan memblokir IP penyerang secara otomatis.</td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b4"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+<h3>Checklist Pengamanan Server</h3>
+<div class="tw">
+  <table>
+    <tr><th>Status</th><th>Langkah Hardening</th></tr>
+    <tr><td><input type="checkbox"></td><td>Kunci publik sudah terpasang dan login tanpa password berhasil diuji.</td></tr>
+    <tr><td><input type="checkbox"></td><td>Login langsung sebagai root telah dimatikan (PermitRootLogin no).</td></tr>
+    <tr><td><input type="checkbox"></td><td>Autentikasi kata sandi telah dimatikan (PasswordAuthentication no).</td></tr>
+    <tr><td><input type="checkbox"></td><td>Firewall UFW aktif dan port khusus telah dibuka.</td></tr>
+    <tr><td><input type="checkbox"></td><td>Fail2ban aktif memantau percobaan penyusupan.</td></tr>
+  </table>
+</div>
+</section>
+
+<section class="tab" data-title="5. Transfer">
+<h1>Bab 5. Transfer File Terenkripsi</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mentransfer dan menyinkronkan file antar-komputer secara aman melalui protokol SSH.</div>
+<div class="tw">
+  <table>
+    <tr><th>Utilitas</th><th>Karakteristik & Kegunaan Utama</th></tr>
+    <tr><td><code>scp</code> (Secure Copy)</td><td>Menyalin file atau direktori tunggal dengan cepat sekali jalan via shell.</td></tr>
+    <tr><td><code>sftp</code> (SSH File Transfer)</td><td>Sesi interaktif berbasis prompt mirip FTP untuk eksplorasi folder remote.</td></tr>
+    <tr><td><code>rsync</code> (Remote Sync)</td><td>Sinkronisasi cerdas; hanya mentransfer delta perbedaan data (cocok untuk backup berkala).</td></tr>
+  </table>
+</div>
+<div class="co">ℹ️ Jika port SSH server telah diubah ke port khusus (misal 2222), sesuaikan argumen port: <code>scp -P 2222 ...</code>, <code>sftp -P 2222 ...</code>, atau <code>rsync -e "ssh -p 2222" ...</code>.</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b5"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="6. Lanjutan">
+<h1>Bab 6. Tunnel &amp; File Config</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mengakses layanan internal jaringan yang terisolasi lewat SSH Port Forwarding dan membuat shortcut di client via berkas <code>~/.ssh/config</code>.</div>
+<h2>SSH Tunnel (Port Forwarding)</h2>
+<p>Tunneling menyalurkan lalu lintas TCP tertentu melalui sambungan SSH yang aman. Contoh skenario: Service basis data di host <code>db</code> diblokir dari akses luar, namun dapat dijangkau oleh <code>server1</code>. Melalui tunnel, client bisa mengaksesnya secara lokal.</p>
+<svg viewBox="0 0 640 100" width="100%" height="90" role="img" aria-label="Local port forwarding">
+  <rect x="5" y="25" width="140" height="50" rx="8" fill="none" stroke="currentColor"/>
+  <text x="25" y="55">client :3306</text>
+  <rect x="250" y="25" width="140" height="50" rx="8" fill="none" stroke="currentColor"/>
+  <text x="290" y="55">server1</text>
+  <rect x="495" y="25" width="140" height="50" rx="8" fill="none" stroke="currentColor"/>
+  <text x="525" y="55">db :3306</text>
+  <line x1="145" y1="50" x2="250" y2="50" stroke="currentColor" stroke-width="3" stroke-dasharray="5 3"/>
+  <line x1="390" y1="50" x2="495" y2="50" stroke="currentColor" stroke-width="2"/>
+</svg>
+<div class="tw">
+  <table>
+    <tr><th>Tipe Port Forwarding</th><th>Mekanisme Kerja</th><th>Kasus Penggunaan Nyata</th></tr>
+    <tr><td><code>-L</code> (Local Forwarding)</td><td>Membuka port di mesin client dan meneruskannya ke host tujuan via remote server.</td><td>Membuka port MySQL/PostgreSQL server privat langsung dari laptop.</td></tr>
+    <tr><td><code>-R</code> (Remote Forwarding)</td><td>Membuka port di remote server dan meneruskannya balik ke layanan di client.</td><td>Mengekspos web lokal port 80 ke server internet untuk sesi demo.</td></tr>
+    <tr><td><code>-D</code> (Dynamic Forwarding)</td><td>Membuka port lokal client sebagai proxy SOCKS5 terowongan penuh.</td><td>Browsing internet aman melalui jaringan server.</td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b6"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="7. Troubleshooting">
+<h1>Bab 7. Troubleshooting &amp; Log</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mendiagnosis kendala koneksi SSH, memahami kode galat (error), dan mengaudit jejak login di sistem.</div>
+<div class="tw">
+  <table>
+    <tr><th>Pesan Galat</th><th>Kemungkinan Akar Masalah</th><th>Solusi Rekomendasi</th></tr>
+    <tr><td><code>Connection refused</code></td><td>Daemon <code>sshd</code> tidak berjalan atau salah menentukan nomor port.</td><td>Jalankan <code>systemctl status ssh</code> dan periksa direktif <code>Port</code>.</td></tr>
+    <tr><td><code>Connection timed out</code></td><td>Firewall (UFW/iptables) memblokir port atau host offline.</td><td>Buka aturan firewall dengan <code>ufw allow</code>.</td></tr>
+    <tr><td><code>Permission denied (publickey)</code></td><td>Kunci publik belum terdaftar di <code>authorized_keys</code> atau izin direktori salah.</td><td>Periksa isi dan mode izin direktori (700 untuk .ssh, 600 untuk file kunci).</td></tr>
+    <tr><td><code>Host key verification failed</code></td><td>Sidik jari host server berubah atau terindikasi serangan spoofing.</td><td>Pastikan keabsahan host lalu hapus catatan usang via <code>ssh-keygen -R host</code>.</td></tr>
+  </table>
+</div>
+<div class="co">ℹ️ Pada Debian 12 (Bookworm), log SSH dikelola langsung oleh <code>systemd-journald</code> (baca dengan <code>journalctl -u ssh</code>). Berkas <code>/var/log/auth.log</code> baru aktif jika paket <code>rsyslog</code> dipasang.</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b7"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="Lab Terminal">
+<h1>Lab Terminal Praktik Interaktif</h1>
+<p>Selesaikan 6 misi panduan di bawah ini untuk menguji kemahiran sistem administrasi jaringan Anda. Password akun: <code>siswa123</code>. Gunakan perintah <code>help</code> untuk bantuan daftar perintah.</p>
+<div class="lab">
+  <div class="tslot"></div>
+  <div>
+    <h3 style="margin-top:0">Daftar Misi Mandiri</h3>
+    <ul class="ms" id="ms"></ul>
+  </div>
+</div>
+</section>
+
+<section class="tab" data-title="Latihan">
+<h1>Latihan Soal &amp; Rangkuman</h1>
+<div id="quiz"></div>
+<h2>Rangkuman Inti</h2>
+<ul>
+  <li>SSH mengenkripsi seluruh komunikasi data menggunakan sesi simetris yang diamankan dengan pertukaran Diffie-Hellman.</li>
+  <li>Kunci publik (asymmetric key) jauh lebih tangguh dan terbebas dari ancaman brute-force password.</li>
+  <li>Langkah wajib pengamanan: Nonaktifkan login root, matikan autentikasi password, atur firewall, dan pantau dengan fail2ban.</li>
+  <li>Tool transfer file terenkripsi seperti <code>scp</code>, <code>sftp</code>, serta <code>rsync</code> bekerja di atas infrastruktur SSH.</li>
+  <li>Troubleshooting efektif mengandalkan mode verbose (<code>ssh -v</code>), status daemon, dan analisis riwayat log.</li>
+</ul>
+</section>
+
+<!-- Terminal Simulator Widget -->
+<div id="tbox">
+  <div id="where">
+    <span></span>
+    <button id="rs" title="Kembalikan terminal ke kondisi semula">⟲ Reset Lab</button>
+  </div>
+  <div id="term">
+    <div id="log"></div>
+    <div id="ln">
+      <span id="ps"></span>
+      <input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Terminal Input">
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+/* ===== Data langkah per bab ===== */
+const ST={
+b2:[
+[`Masuk ke konsol server1`,[[`konsol server1`,`Berpindah ke konsol server1, seolah duduk di depan komputernya. Server1 belum punya SSH, jadi belum bisa diakses jarak jauh.`]]],
+[`Perbarui daftar paket`,[[`sudo apt update`,`Mengunduh daftar paket terbaru. sudo menjalankan perintah sebagai root, wajib untuk mengelola paket.`]]],
+[`Pasang OpenSSH server`,[[`sudo apt install -y openssh-server`,`Memasang paket openssh-server yang berisi daemon sshd. Opsi -y menjawab ya otomatis.`]],`Di Debian, service langsung berjalan setelah pemasangan.`],
+[`Periksa dan atur service`,[[`systemctl status ssh`,`Melihat status service. active (running) berarti sshd siap menerima koneksi.`],[`sudo systemctl stop ssh`,`Menghentikan service sekarang.`],[`sudo systemctl start ssh`,`Menjalankan service sekarang.`],[`sudo systemctl enable ssh`,`Menjalankan service otomatis setiap komputer booting.`]]],
+[`Lihat konfigurasi`,[[`cat /etc/ssh/sshd_config`,`Menampilkan isi file konfigurasi SSH server.`]]],
+[`Uji dan terapkan konfigurasi`,[[`sudo sshd -t`,`Menguji sintaks sshd_config. Tidak ada output berarti konfigurasi benar.`],[`sudo systemctl reload ssh`,`Membaca ulang konfigurasi tanpa memutus sesi yang sedang berjalan.`]]],
+[`Coba masuk dari client`,[[`konsol client`,`Kembali ke komputer client.`],[`ssh siswa@server1`,`Masuk ke server1 sebagai siswa. Jawab yes saat ditanya fingerprint, lalu isi password siswa123.`],[`exit`,`Menutup sesi SSH dan kembali ke client.`]]]],
+b3:[
+[`Pindah ke client`,[[`konsol client`,`Kunci dibuat di komputer client.`]]],
+[`Buat pasangan kunci`,[[`ssh-keygen -t ed25519`,`Membuat kunci dengan algoritma ed25519. Tekan Enter tiga kali (lokasi default dan tanpa passphrase).`],[`ls -l ~/.ssh`,`Melihat isi folder .ssh beserta permission. id_ed25519 adalah kunci privat, id_ed25519.pub kunci publik.`]]],
+[`Kirim kunci publik ke server1`,[[`ssh-copy-id siswa@server1`,`Menyalin kunci publik ke ~/.ssh/authorized_keys di server1. Minta password siswa123 sekali ini saja.`]]],
+[`Login tanpa password`,[[`ssh siswa@server1`,`Sekarang login langsung berhasil memakai kunci.`],[`cat ~/.ssh/authorized_keys`,`Menampilkan daftar kunci publik yang diizinkan login (dijalankan di server1).`],[`exit`,`Kembali ke client.`]]],
+[`Atur permission`,[[`chmod 700 ~/.ssh`,`Hanya pemilik yang boleh masuk ke folder .ssh.`],[`chmod 600 ~/.ssh/id_ed25519`,`Hanya pemilik yang boleh membaca atau mengubah kunci privat.`],[`ls -ld ~/.ssh`,`Melihat permission folder .ssh. drwx------ berarti 700.`]]],
+[`Simpan kunci di ssh-agent`,[[`eval "$(ssh-agent -s)"`,`Menjalankan ssh-agent, program yang menyimpan kunci di memori.`],[`ssh-add ~/.ssh/id_ed25519`,`Memasukkan kunci ke agent. Jika kunci punya passphrase, cukup diketik sekali.`],[`ssh-add -l`,`Melihat daftar kunci yang tersimpan di agent.`]]]],
+b4:[
+[`Pindah ke server1`,[[`konsol server1`,`Pengaturan keamanan dilakukan di server.`]]],
+[`Matikan login root dan password`,[[`sudo sed -i 's/^#\\?PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config`,`sed -i mengubah file langsung. Perintah ini mengganti baris PermitRootLogin (dengan atau tanpa #) menjadi no.`],[`sudo sed -i 's/^#\\?PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config`,`Mengganti baris PasswordAuthentication menjadi no, sehingga hanya login kunci yang diterima.`],[`grep -E '^(PermitRootLogin|PasswordAuthentication)' /etc/ssh/sshd_config`,`Menampilkan baris yang cocok untuk memastikan perubahan sudah benar.`],[`sudo sshd -t`,`Menguji konfigurasi sebelum diterapkan.`],[`sudo systemctl reload ssh`,`Menerapkan perubahan.`]]],
+[`Pasang firewall dan ubah port`,[[`sudo apt install -y ufw`,`Memasang ufw, firewall yang mudah dipakai.`],[`sudo ufw allow 2222/tcp`,`Membuka port 2222 di firewall. Lakukan ini sebelum mengubah port agar tidak terkunci.`],[`sudo ufw enable`,`Mengaktifkan firewall. Port lain yang tidak diizinkan akan diblokir. Jawab y saat ditanya.`],[`sudo sed -i 's/^#Port 22/Port 2222/' /etc/ssh/sshd_config`,`Mengganti port SSH dari 22 menjadi 2222.`],[`sudo systemctl restart ssh`,`Menjalankan ulang service agar memakai port baru.`],[`sudo ufw status`,`Melihat aturan firewall yang aktif.`]],`Setelah ini, login dari client memakai: ssh -p 2222 siswa@server1`],
+[`Batasi pengguna`,[[`echo "AllowUsers siswa" | sudo tee -a /etc/ssh/sshd_config`,`Menambah baris AllowUsers ke akhir file. tee -a dipakai agar penulisan berjalan dengan hak root. Hanya akun siswa yang boleh login.`]]],
+[`Pasang Fail2ban`,[[`sudo apt install -y fail2ban`,`Memasang Fail2ban yang memblokir IP penyerang otomatis.`],[`sudo fail2ban-client status sshd`,`Melihat jumlah percobaan gagal dan daftar IP yang diblokir.`],[`sudo fail2ban-client set sshd unbanip 10.0.0.99`,`Membuka blokir sebuah IP.`]]]],
+b5:[
+[`Pindah ke client`,[[`konsol client`,`File akan dikirim dari client ke server1.`],[`ls`,`Melihat file di folder rumah. Ada laporan.txt dan folder proyek.`]]],
+[`SCP`,[[`scp laporan.txt siswa@server1:/home/siswa/`,`Menyalin file laporan.txt ke folder /home/siswa di server1.`],[`scp -r proyek siswa@server1:/tmp/`,`-r menyalin folder beserta isinya.`],[`scp siswa@server1:/etc/hostname .`,`Mengambil file dari server1 ke folder saat ini (tanda titik).`]]],
+[`SFTP (interaktif)`,[[`sftp siswa@server1`,`Membuka sesi SFTP. Prompt berubah menjadi sftp>.`],[`ls`,`Melihat isi folder di server (ketik di prompt sftp>).`],[`put laporan.txt`,`Mengunggah file dari client ke server.`],[`get /etc/hostname`,`Mengunduh file dari server ke client.`],[`bye`,`Menutup sesi SFTP.`]]],
+[`Rsync`,[[`rsync -avz -e ssh proyek/ siswa@server1:/home/siswa/proyek/`,`-a menjaga atribut file, -v menampilkan proses, -z mengompres, -e ssh memakai SSH sebagai jalur.`],[`rsync -avz -e ssh proyek/ siswa@server1:/home/siswa/proyek/`,`Jalankan lagi: tidak ada file yang dikirim karena tidak ada yang berubah. Itulah kelebihan rsync.`],[`rsync -avz --dry-run -e ssh proyek/ siswa@server1:/tmp/proyek/`,`--dry-run hanya mensimulasikan, tidak menyalin apa pun.`]]]],
+b6:[
+[`Pindah ke client`,[[`konsol client`,`Tunnel dibuat dari client.`]]],
+[`Buat tunnel -L ke db`,[[`ssh -f -N -L 3306:db:3306 siswa@server1`,`-L 3306:db:3306 membuka port 3306 di client yang diteruskan ke db lewat server1. -N tidak membuka shell. -f menjalankan di latar belakang.`],[`nc -zv localhost 3306`,`Menguji apakah port 3306 di client terbuka. succeeded berarti tunnel bekerja.`]],`Jika port SSH server1 sudah kamu ubah, tambahkan -p 2222 setelah ssh.`],
+[`Tunnel -R dan -D`,[[`ssh -f -N -R 8080:localhost:80 siswa@server1`,`-R membuka port 8080 di server1 yang diteruskan ke port 80 di client.`],[`ssh -f -N -D 1080 siswa@server1`,`-D membuat proxy SOCKS5 di port 1080 pada client.`],[`nc -zv localhost 1080`,`Menguji bahwa port proxy sudah terbuka.`]]],
+[`Buat alias di ~/.ssh/config`,[[`mkdir -p ~/.ssh`,`Membuat folder .ssh jika belum ada.`],[`echo -e "Host web\\n  HostName server1\\n  User siswa" > ~/.ssh/config`,`Menulis file config berisi alias web. echo -e mengubah \\n menjadi baris baru, tanda > menulis ke file.`],[`cat ~/.ssh/config`,`Memeriksa isi file config.`],[`ssh web`,`Login memakai alias. Cukup tiga huruf, tanpa menulis user dan host.`],[`exit`,`Kembali ke client.`]]]],
+b7:[
+[`Lihat proses koneksi`,[[`konsol client`,`Mulai dari client.`],[`ssh -v siswa@server1`,`-v menampilkan detail proses koneksi. Baca baris Authentications that can continue dan Authentication succeeded.`],[`exit`,`Kembali ke client.`]]],
+[`Buat percobaan login gagal`,[[`ssh root@server1`,`Coba login sebagai root, lalu isi password yang salah tiga kali. Percobaan ini akan tercatat di log server.`]],`Jika port sudah kamu ubah, tambahkan -p 2222. Jika PasswordAuthentication sudah no, tidak ada prompt password; log tetap berisi percobaan penyerang dari 10.0.0.99.`],
+[`Baca log di server1`,[[`konsol server1`,`Pindah ke server1 untuk membaca log-nya.`],[`sudo journalctl -u ssh -n 10`,`Menampilkan 10 baris terakhir log service ssh dari journal.`],[`sudo journalctl -u ssh | grep "Failed password"`,`Menyaring baris login gagal. Tanda | mengirim hasil perintah kiri ke grep.`]]],
+[`Pasang rsyslog agar ada auth.log`,[[`sudo apt install -y rsyslog`,`Memasang rsyslog yang menulis log ke file seperti /var/log/auth.log.`],[`sudo tail -n 5 /var/log/auth.log`,`Menampilkan 5 baris terakhir log autentikasi.`],[`sudo grep "Failed password" /var/log/auth.log`,`Mencari baris yang mengandung Failed password.`]]],
+[`Pantau sesi login`,[[`w`,`Menampilkan siapa yang sedang login dan apa yang dikerjakan.`],[`who`,`Daftar singkat pengguna yang sedang login.`],[`last`,`Riwayat login yang berhasil.`],[`sudo lastb`,`Riwayat login yang gagal (butuh sudo).`]]]]
+};
+
+/* ===== Navigasi tab & Fullscreen control ===== */
+const tabs=[...document.querySelectorAll('.tab')],nav=document.getElementById('nav'),TB=document.getElementById('tbox');
+function show(i){
+  tabs.forEach((t,k)=>t.hidden=k!=i);
+  [...nav.children].forEach((b,k)=>b.classList.toggle('on',k==i));
+  document.getElementById('bar').style.width=(i/(tabs.length-1)*100)+'%';
+  const sl=tabs[i].querySelector('.tslot');
+  if(sl)sl.appendChild(TB);
+  window.scrollTo(0,0);
+}
+
+tabs.forEach((t,k)=>{
+  const b=document.createElement('button');
+  b.textContent=t.dataset.title;
+  b.onclick=()=>show(k);
+  nav.appendChild(b);
+  
+  const d=document.createElement('div');
+  d.className='nv';
+  
+  const prevBtn = k > 0 ? '<button>← Sebelumnya</button>' : '<div></div>';
+  const nextBtn = k < tabs.length - 1 ? '<button>Berikutnya →</button>' : '<div></div>';
+  
+  d.innerHTML = prevBtn + nextBtn;
+  if(k > 0) d.querySelector('button').onclick = () => show(k - 1);
+  if(k < tabs.length - 1) d.querySelectorAll('button')[k > 0 ? 1 : 0].onclick = () => show(k + 1);
+  t.appendChild(d);
+});
+
+// Tema Switcher
+document.getElementById('tg').onclick=()=>{
+  const r=document.documentElement;
+  const isDark=r.dataset.theme ? r.dataset.theme=='dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+  r.dataset.theme=isDark ? 'light' : 'dark';
+};
+
+// Fullscreen Toggle
+const btnFs=document.getElementById('btnFs');
+btnFs.onclick=()=>{
+  if(!document.fullscreenElement){
+    document.documentElement.requestFullscreen().catch(()=>{});
+    btnFs.textContent='✕ Exit Full';
+  }else{
+    if(document.exitFullscreen) document.exitFullscreen();
+    btnFs.textContent='⛶ Fullscreen';
+  }
+};
+document.addEventListener('fullscreenchange',()=>{
+  if(!document.fullscreenElement) btnFs.textContent='⛶ Fullscreen';
+});
+
+const $=s=>document.querySelector(s),T=$('#term'),LOG=$('#log'),LN=$('#ln'),I=$('#in'),PS=$('#ps');
+
+/* ===== Render langkah praktikum ===== */
+document.querySelectorAll('[data-st]').forEach(el=>{
+  let k=0;
+  ST[el.dataset.st].forEach(([t,rows,n])=>{
+    k++;
+    const h=document.createElement('h3');
+    h.textContent='Langkah '+k+'. '+t;
+    const w=document.createElement('div');
+    w.className='tw';
+    const tb=document.createElement('table');
+    tb.innerHTML='<tr><th style="width:38%">Perintah</th><th>Fungsi</th></tr>';
+    rows.forEach(([c,f])=>{
+      const tr=tb.insertRow(),a=tr.insertCell(),b=tr.insertCell(),cd=document.createElement('code');
+      cd.textContent=c;
+      a.appendChild(cd);
+      const bt=document.createElement('button');
+      bt.className='try';
+      bt.textContent='Coba';
+      bt.onclick=()=>{
+        I.value=c;
+        I.scrollIntoView({block:'center',behavior:'smooth'});
+        I.focus();
+      };
+      a.appendChild(bt);
+      b.textContent=f;
+    });
+    w.appendChild(tb);
+    el.append(h,w);
+    if(n){
+      const p=document.createElement('p');
+      p.className='co';
+      p.textContent=n;
+      el.appendChild(p);
+    }
+  });
+});
+
+/* ===== Simulator Debian 12 ===== */
+const NET={client:'10.0.0.10',server1:'10.0.0.20',db:'10.0.0.30'},FP='SHA256:3kQ9vXe1sJ7mZpL0aTq8RwYb2cUfN5dHgKoE4iVxM6A',PW={siswa:'siswa123',root:'root123'};
+const KNOWN='Include Port ListenAddress PermitRootLogin PubkeyAuthentication PasswordAuthentication KbdInteractiveAuthentication UsePAM X11Forwarding Subsystem AllowUsers AllowGroups MaxAuthTries PrintMotd AcceptEnv'.split(' ');
+const SSHD0=`Include /etc/ssh/sshd_config.d/*.conf
+
+#Port 22
+#ListenAddress 0.0.0.0
+#PermitRootLogin prohibit-password
+#PubkeyAuthentication yes
+#PasswordAuthentication yes
+KbdInteractiveAuthentication no
+UsePAM yes
+X11Forwarding yes
+Subsystem sftp /usr/lib/openssh/sftp-server`;
+const CMDS='help clear reset konsol ls cd pwd cat mkdir touch rm cp chmod echo sed grep tail whoami hostname id date uname ip ping nc sudo apt systemctl sshd ufw fail2ban-client journalctl ssh ssh-keygen ssh-copy-id ssh-agent ssh-add scp sftp rsync w who last lastb eval exit'.split(' ');
+let S,stack,F,D,TN,clk,LG,ec,hist=[],hi=0,pend=null,busy=0,sid=0;
+const home=u=>u=='root'?'/root':'/home/'+u;
+const canWu=(u,p)=>u=='root'||p=='/tmp'||p.startsWith('/tmp/')||p.startsWith('/home/'+u+'/');
+const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+const pad=n=>String(n).padStart(2,'0'),ts=()=>{clk++;return 'Oct 19 08:'+pad(Math.floor(clk/60)%60)+':'+pad(clk%60)};
+const rp=()=>40000+Math.floor(Math.random()*20000),rid=()=>Math.random().toString(36).slice(2,14);
+function ab(s,p){
+  if(p=='~'||p.startsWith('~/'))p=home(s.u)+p.slice(1);
+  if(p[0]!='/')p=s.cwd+'/'+p;
+  const o=[];
+  p.split('/').forEach(x=>{
+    if(x==''||x=='.')return;
+    if(x=='..')o.pop();
+    else o.push(x);
+  });
+  return '/'+o.join('/');
+}
+const kids=(s,P)=>{
+  const b=P=='/'?'/':P+'/';
+  return Object.keys(s.fs).filter(k=>k!=P&&k.startsWith(b)&&!k.slice(b.length).includes('/')).map(k=>k.split('/').pop()).sort();
+};
+const mstr=m=>[...m].map(c=>'rwx'.split('').map((x,i)=>(c>>(2-i)&1)?x:'-').join('')).join('');
+function mkhost(h){
+  const fs={};
+  ['/','/home','/home/siswa','/etc','/var','/var/log','/tmp','/usr','/root'].forEach(p=>fs[p]={d:1,m:p=='/tmp'?'777':'755',o:p=='/home/siswa'?'siswa':'root'});
+  fs['/etc/hostname']={c:h,m:'644',o:'root'};
+  return {name:h,ip:NET[h],u:'siswa',cwd:'/home/siswa',fs,inst:0,act:0,en:0,live:null,ufw:{on:0,allow:[]},pk:{},log:[],sess:[],lh:[],fl:[],known:{},ag:[],agent:0,banned:[]};
+}
+function lg(s,m){s.log.push(ts()+' '+s.name+' sshd['+(600+s.log.length)+']: '+m)}
+function cfg(s){
+  const t=(s.fs['/etc/ssh/sshd_config']||{c:''}).c,o={Port:'22',PermitRootLogin:'prohibit-password',PasswordAuthentication:'yes',AllowUsers:''},seen={};
+  t.split('\n').forEach(l=>{
+    const m=l.match(/^\s*(Port|PermitRootLogin|PasswordAuthentication|AllowUsers)\s+(.+)$/);
+    if(m&&!seen[m[1]]){seen[m[1]]=1;o[m[1]]=m[2].trim();}
+  });
+  return o;
+}
+function cfgErr(s){
+  const L=(s.fs['/etc/ssh/sshd_config']||{c:''}).c.split('\n'),f='/etc/ssh/sshd_config';
+  for(let i=0;i<L.length;i++){
+    const l=L[i].trim();if(!l||l[0]=='#')continue;
+    const w=l.split(/\s+/);
+    if(!KNOWN.includes(w[0]))return f+' line '+(i+1)+': Bad configuration option: '+w[0]+'\n'+f+': terminating, 1 bad configuration options';
+    if(w[0]=='Port'&&!(+w[1]>0&&+w[1]<65536))return f+' line '+(i+1)+": Bad port '"+w[1]+"'.\n"+f+': terminating, 1 bad configuration options';
+  }
+  return '';
+}
+function instSsh(s){
+  s.inst=1;s.act=1;s.en=1;s.fs['/etc/ssh']={d:1,m:'755',o:'root'};
+  s.fs['/etc/ssh/sshd_config']={c:SSHD0,m:'644',o:'root'};
+  s.live=cfg(s);
+  lg(s,'Server listening on 0.0.0.0 port 22.');
+  lg(s,'Server listening on :: port 22.');
+  for(let i=0;i<3;i++){
+    lg(s,'Failed password for root from 10.0.0.99 port '+(51120+i)+' ssh2');
+    s.fl.push({u:'root',from:'10.0.0.99'});
+  }
+}
+function mkssh(s){const p=home(s.u)+'/.ssh';if(!s.fs[p])s.fs[p]={d:1,m:'700',o:s.u}}
+
+function init(){
+  S={client:mkhost('client'),server1:mkhost('server1'),db:mkhost('db')};
+  const c=S.client.fs;
+  c['/home/siswa/laporan.txt']={c:'Laporan praktik SSH\nNama: siswa\n',m:'644',o:'siswa'};
+  c['/home/siswa/proyek']={d:1,m:'755',o:'siswa'};
+  c['/home/siswa/proyek/index.html']={c:'<h1>Halo</h1>\n',m:'644',o:'siswa'};
+  c['/home/siswa/proyek/style.css']={c:'body{margin:0}\n',m:'644',o:'siswa'};
+  S.client.pk={rsync:1,nc:1};S.server1.pk={rsync:1};S.db.pk={rsync:1};
+  instSsh(S.db);
+  clk=120;stack=[{h:'client',sid:0}];F={};D={};TN=[];LOG.innerHTML='';pend=null;busy=0;
+  out('Debian GNU/Linux 12 (bookworm)  -  simulasi terminal full page');
+  out('Ketik help untuk daftar perintah. Password semua akun: siswa123','d');
+  rm();setPs();
+}
+
+const host=()=>stack[stack.length-1].h;
+function out(t,c){
+  const d=document.createElement('div');
+  if(c)d.className=c;
+  d.textContent=t;
+  LOG.appendChild(d);
+  T.scrollTop=T.scrollHeight;
+}
+function outH(h){
+  const d=document.createElement('div');
+  d.innerHTML=h;
+  LOG.appendChild(d);
+  T.scrollTop=T.scrollHeight;
+}
+function pshtml(){
+  const s=S[host()],hm=home(s.u),c=s.cwd,p=c==hm?'~':c.startsWith(hm+'/')?'~'+c.slice(hm.length):c;
+  return '<span class="g">'+s.u+'@'+host()+'</span>:<span class="b">'+p+'</span>'+(s.u=='root'?'#':'$')+' ';
+}
+function setPs(){
+  PS.innerHTML=pshtml();
+  $('#where span').textContent='Mesin Aktif: '+stack.map(x=>x.h).join(' ➔ ')+(stack.length>1?' (Sesi SSH)':' (Konsol Langsung)');
+  LN.style.display=(busy&&!pend)?'none':'flex';
+}
+function ask(p,hid){
+  return new Promise(res=>{
+    const L=p.split('\n'),lp=L.pop();
+    L.forEach(l=>out(l));
+    PS.textContent=lp;
+    I.type=hid?'password':'text';
+    pend={res,lp,hid};
+    LN.style.display='flex';
+    I.focus();
+  });
+}
+
+/* ===== Misi Lab ===== */
+const M=[
+['Pasang openssh-server di server1','konsol server1 → sudo apt install -y openssh-server','Tanpa sshd, server tidak bisa diakses jarak jauh.',()=>S.server1.inst&&S.server1.act],
+['Ubah port ke 2222 dan buka di firewall','sed pada sshd_config, ufw allow 2222/tcp, restart ssh','Port baru harus dibuka di firewall agar tidak timeout.',()=>S.server1.act&&S.server1.live.Port=='2222'&&S.server1.ufw.allow.includes(2222)],
+['Buat kunci ed25519 dan salin ke server1','ssh-keygen -t ed25519 di client, lalu ssh-copy-id siswa@server1','Kunci publik membuktikan identitas tanpa password.',()=>{const k=S.client.fs['/home/siswa/.ssh/id_ed25519.pub'],a=S.server1.fs['/home/siswa/.ssh/authorized_keys'];return k&&a&&a.c.includes(k.c.split(' ')[1])}],
+['Nonaktifkan login root dan password','sed ... PermitRootLogin no dan PasswordAuthentication no, lalu reload','Menutup dua celah utama serangan tebak password.',()=>S.server1.inst&&S.server1.live.PermitRootLogin=='no'&&S.server1.live.PasswordAuthentication=='no'],
+['Buat tunnel -L ke db','ssh -f -N -L 3306:db:3306 siswa@server1','Mengakses layanan privat lewat host perantara.',()=>F.L],
+['Temukan login gagal di log','sudo journalctl -u ssh | grep "Failed password"','Log adalah bukti percobaan serangan.',()=>F.G]];
+
+function rm(){
+  const u=$('#ms');
+  u.innerHTML='';
+  M.forEach((m,k)=>{
+    const l=document.createElement('li');
+    l.id='m'+k;
+    l.innerHTML='<b>Misi '+(k+1)+': '+m[0]+'</b><details><summary>Petunjuk</summary>'+m[1]+'<br><i>Mengapa: '+m[2]+'</i></details>';
+    u.appendChild(l);
+  });
+}
+const chk=()=>M.forEach((m,k)=>{
+  if(!D[k]&&m[3]())D[k]=1;
+  $('#m'+k).classList.toggle('ok',!!D[k]);
+});
+
+/* ===== File system mock operations ===== */
+function rd(s,p,sd){
+  const P=ab(s,p);
+  if(P=='/var/log/auth.log'){
+    if(!s.pk.rsyslog)return{e:'No such file or directory'};
+    if(!sd)return{e:'Permission denied'};
+    LG=1;return{c:s.log.join('\n')};
+  }
+  const n=s.fs[P];
+  if(!n)return{e:'No such file or directory'};
+  if(n.d)return{e:'Is a directory'};
+  return{c:n.c};
+}
+function wr(s,P,c,sd){
+  if(s.fs[P]&&!s.fs[P].d)s.fs[P].c=c;
+  else s.fs[P]={c,m:'644',o:sd?'root':s.u};
+}
+function xfer(A,ap,B,bp,u,rec){
+  const n=A.fs[ap];
+  if(!n)return 'ENOENT';
+  if(n.d&&!rec)return 'EISDIR';
+  if(B.fs[bp]&&B.fs[bp].d)bp=(bp+'/'+ap.split('/').pop()).replace('//','/');
+  const par=bp.replace(/\/[^/]*$/,'')||'/';
+  if(!B.fs[par])return 'ENOENT';
+  if(!canWu(u,bp))return 'EACCES';
+  const r=[],cn=(x,y)=>{
+    const m=A.fs[x];
+    if(m.d)B.fs[y]={d:1,m:m.m,o:u};
+    else{B.fs[y]={c:m.c,m:m.m,o:u};r.push([y.split('/').pop(),m.c.length]);}
+  };
+  cn(ap,bp);
+  if(n.d)Object.keys(A.fs).filter(k=>k.startsWith(ap+'/')).sort().forEach(k=>cn(k,bp+k.slice(ap.length)));
+  return r;
+}
+const EM={ENOENT:'No such file or directory',EACCES:'Permission denied',EISDIR:'not a regular file'};
+function spec(x){
+  const m=x.match(/^(?:([\w.-]+)@)?([\w.-]+):(.*)$/);
+  return m&&!x.startsWith('/')&&!x.startsWith('.')?{u:m[1],h:m[2],p:m[3]}:null;
+}
+function hcfg(s,name){
+  const c=(s.fs[home(s.u)+'/.ssh/config']||{c:''}).c;
+  let cur=0,o={};
+  c.split('\n').forEach(l=>{
+    const m=l.trim().match(/^(\w+)\s+(.+)$/);if(!m)return;
+    if(m[1]=='Host')cur=m[2].split(/\s+/).includes(name);
+    else if(cur&&!o[m[1]])o[m[1]]=m[2];
+  });
+  return o;
+}
+
+/* ===== SSH Authentication Simulator ===== */
+async function auth(src,u,n,port,op){
+  const d=S[n],v=op.v||0,dl=(l,m)=>{if(v>=l)out('debug'+l+': '+m,'d')};
+  if(!d)return out('ssh: Could not resolve hostname '+n+': Name or service not known'),0;
+  dl(1,'Connecting to '+n+' ['+d.ip+'] port '+port+'.');
+  if(d.ufw.on&&!d.ufw.allow.includes(port))return out('ssh: connect to host '+n+' port '+port+': Connection timed out'),0;
+  if(!d.inst||!d.act||String(port)!=d.live.Port)return out('ssh: connect to host '+n+' port '+port+': Connection refused'),0;
+  dl(1,'Connection established.');
+  dl(1,'Remote protocol version 2.0, remote software version OpenSSH_9.2p1 Debian-2+deb12u3');
+  dl(2,'kex: algorithm: sntrup761x25519-sha512@openssh.com');
+  dl(2,'kex: host key algorithm: ssh-ed25519');
+  
+  if(!src.known[n]){
+    const a=await ask("The authenticity of host '"+n+' ('+d.ip+")' can't be established.\nED25519 key fingerprint is "+FP+".\nThis key is not known by any other names.\nAre you sure you want to continue connecting (yes/no/[fingerprint])? ");
+    if(a!='yes'&&a!=FP)return out('Host key verification failed.'),0;
+    src.known[n]=1;mkssh(src);
+    out("Warning: Permanently added '"+n+"' (ED25519) to the list of known hosts.");
+  }
+  dl(1,'Server host key: ssh-ed25519 '+FP);
+  const L=d.live,hd=home(u),wok=m=>!(parseInt(m,8)&18),allowed=!L.AllowUsers||L.AllowUsers.split(/\s+/).includes(u),sd=d.fs[hd+'/.ssh'],af=d.fs[hd+'/.ssh/authorized_keys'];
+  dl(1,'Authentications that can continue: publickey'+(L.PasswordAuthentication=='yes'?',password':''));
+  
+  if(!op.nokey){
+    const sh=home(src.u)+'/.ssh/',ks=op.id?[ab(src,op.id)]:[sh+'id_ed25519',sh+'id_rsa'];
+    for(const kp of ks){
+      const k=src.fs[kp];if(!k)continue;
+      if(parseInt(k.m,8)&63){
+        out('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\nPermissions 0'+k.m+" for '"+kp+"' are too open.\nIt is required that your private key files are NOT accessible by others.\nThis private key will be ignored.");
+        continue;
+      }
+      dl(1,'Offering public key: '+kp);
+      if(k.pp&&!src.ag.includes(kp)){
+        const pw=await ask("Enter passphrase for key '"+kp+"': ",1);
+        if(pw!==k.pp)continue;
+      }
+      const pub=(src.fs[kp+'.pub']||{c:' '}).c.split(' ')[1];
+      if(allowed&&af&&sd&&af.c.includes(pub)&&wok(sd.m)&&wok(af.m)&&PW[u]){
+        dl(1,'Authentication succeeded (publickey).');
+        lg(d,'Accepted publickey for '+u+' from '+src.ip+' port '+rp()+' ssh2: ED25519 '+FP.slice(0,24));
+        return 1;
+      }
+    }
+  }
+  if(L.PasswordAuthentication!='yes'){
+    out(u+'@'+n+': Permission denied (publickey).');
+    return 0;
+  }
+  for(let i=0;i<3;i++){
+    const pw=await ask(u+'@'+n+"'s password: ",1);
+    if(PW[u]&&pw===PW[u]&&allowed&&!(u=='root'&&L.PermitRootLogin!='yes')){
+      dl(1,'Authentication succeeded (password).');
+      lg(d,'Accepted password for '+u+' from '+src.ip+' port '+rp()+' ssh2');
+      return 1;
+    }
+    lg(d,'Failed password for '+(PW[u]?'':'invalid user ')+u+' from '+src.ip+' port '+rp()+' ssh2');
+    d.fl.push({u,from:src.ip});
+    if(i<2)out('Permission denied, please try again.');
+  }
+  out(u+'@'+n+': Permission denied (publickey,password).');
+  return 0;
+}
+
+async function target(s,t,port,op){
+  let u,n;
+  if(t.includes('@'))[u,n]=t.split('@');else n=t;
+  const c=hcfg(s,n);
+  n=c.HostName||n;
+  u=u||c.User||s.u;
+  port=port||+c.Port||22;
+  if(n=='localhost')n='client';
+  return{u,n,port,ok:await auth(s,u,n,port,op)};
+}
+
+function reg(d,u,from){
+  const tty='pts/'+d.sess.length;
+  const e={u,tty,from:from.ip,t:'08:'+pad(Math.floor(clk/60)%60)};
+  d.sess.push(e);
+  d.lh.push(e);
+  return e;
+}
+
+async function ssh(a){
+  const s=S[host()];
+  let p=0,t=null,v=0,Ls=[],f=0,N=0,id=null,R=[],Dd=[],rest=[];
+  for(let i=0;i<a.length;i++){
+    const x=a[i];
+    if(x=='-p')p=+a[++i];
+    else if(x=='-i')id=a[++i];
+    else if(x=='-L')Ls.push(a[++i]);
+    else if(x=='-R')R.push(a[++i]);
+    else if(x=='-D')Dd.push(a[++i]);
+    else if(x=='-f')f=1;
+    else if(x=='-N')N=1;
+    else if(/^-v+$/.test(x))v=x.length-1;
+    else if(x[0]!='-'){if(!t)t=x;else rest.push(x)}
+  }
+  if(!t){
+    ec=1;
+    return out('usage: ssh [-vfN] [-i identity] [-p port] [-L lokal:host:port] [-R ...] [-D port] [user@]host [perintah]');
+  }
+  const r=await target(s,t,p,{id,v});
+  if(!r.ok){ec=1;return}
+  const d=S[r.n],sidn=(f||N)?0:++sid;
+  Ls.forEach(l=>{
+    const m=(l||'').split(':');
+    TN.push({k:'L',lp:+m[0],h:m[1],rp:+m[2],sid:sidn});
+    F.L=1;
+  });
+  R.forEach(l=>TN.push({k:'R',lp:+(l||'').split(':')[0],sid:sidn}));
+  Dd.forEach(l=>TN.push({k:'D',lp:+l,sid:sidn}));
+  if(N||(f&&!rest.length))return;
+  
+  d.u=r.u;
+  d.cwd=home(r.u);
+  if(!d.fs[d.cwd])d.fs[d.cwd]={d:1,m:'755',o:r.u};
+  if(rest.length){
+    stack.push({h:r.n,sid:-1});
+    await run(rest.join(' '));
+    stack.pop();
+    return;
+  }
+  const e=reg(d,r.u,s);
+  stack.push({h:r.n,sid:sidn,e});
+  out('Linux '+r.n+' 6.1.0-21-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.90-1 (2024-05-03) x86_64\n\nThe programs included with the Debian GNU/Linux system are free software;\nthe exact distribution terms for each program are described in the\nindividual files in /usr/share/doc/*/copyright.\n\nLast login: Mon Oct 19 08:00:00 2026 from '+s.ip);
+}
+
+async function scp(a){
+  const s=S[host()];let port=22,rec=0,ar=[];
+  for(let i=0;i<a.length;i++){
+    if(a[i]=='-P')port=+a[++i];
+    else if(a[i]=='-r')rec=1;
+    else if(a[i][0]!='-')ar.push(a[i]);
+  }
+  if(ar.length<2){ec=1;return out('usage: scp [-r] [-P port] source ... target')}
+  const dst=ar.pop(),pd=spec(dst);
+  const prog=(r)=>r.forEach(([nm,sz])=>out(nm.padEnd(46)+'100%'+String(sz).padStart(5)+'   1.0KB/s   00:00'));
+  if(pd){
+    const g=await target(s,(pd.u?pd.u+'@':'')+pd.h,port,{});if(!g.ok){ec=1;return}
+    const B=S[g.n],fk={u:g.u,cwd:home(g.u)};
+    for(const x of ar){
+      const res=xfer(s,ab(s,x),B,ab(fk,pd.p||'.'),g.u,rec);
+      if(typeof res=='string'){ec=1;out('scp: '+(res=='EISDIR'?ab(s,x):res=='EACCES'?pd.p:x)+': '+EM[res]);if(res!='EISDIR')break}
+      else prog(res);
+    }
+    return;
+  }
+  const ps=spec(ar[0]);
+  if(!ps){
+    for(const x of ar){
+      const res=xfer(s,ab(s,x),s,ab(s,dst),s.u,rec);
+      if(typeof res=='string'){ec=1;out('scp: '+x+': '+EM[res])}else prog(res);
+    }
+    return;
+  }
+  const g=await target(s,(ps.u?ps.u+'@':'')+ps.h,port,{});if(!g.ok){ec=1;return}
+  const A=S[g.n],fk={u:g.u,cwd:home(g.u)};
+  for(const x of ar){
+    const q=spec(x),res=xfer(A,ab(fk,q.p||'.'),s,ab(s,dst),s.u,rec);
+    if(typeof res=='string'){ec=1;out('scp: '+q.p+': '+EM[res])}else prog(res);
+  }
+}
+
+async function sftp(a){
+  const s=S[host()];let port=22,t=null;
+  for(let i=0;i<a.length;i++){if(a[i]=='-P')port=+a[++i];else if(a[i][0]!='-')t=a[i]}
+  if(!t){ec=1;return out('usage: sftp [-P port] [user@]host')}
+  const g=await target(s,t,port,{});if(!g.ok){ec=1;return}
+  const A=S[g.n],R={u:g.u,cwd:home(g.u),fs:A.fs};out('Connected to '+g.n+'.');
+  for(;;){
+    const l=(await ask('sftp> ')).trim().split(/\s+/),c=l[0],x=l[1];if(!c)continue;
+    if(['bye','exit','quit'].includes(c))break;
+    if(c=='help')out('Perintah sftp: ls cd pwd lls lcd lpwd get put mkdir bye');
+    else if(c=='pwd')out('Remote working directory: '+R.cwd);
+    else if(c=='lpwd')out('Local working directory: '+s.cwd);
+    else if(c=='ls'){const k=kids(A,x?ab(R,x):R.cwd).filter(z=>z[0]!='.');if(k.length)out(k.join('  '))}
+    else if(c=='lls'){const k=kids(s,x?ab(s,x):s.cwd).filter(z=>z[0]!='.');if(k.length)out(k.join('  '))}
+    else if(c=='cd'){const P=ab(R,x||'~');if(A.fs[P]&&A.fs[P].d)R.cwd=P;else out('Couldn\'t stat remote file: No such file or directory')}
+    else if(c=='lcd'){const P=ab(s,x||'~');if(s.fs[P]&&s.fs[P].d)s.cwd=P;else out('local: '+x+': No such file or directory')}
+    else if(c=='get'||c=='put'){
+      if(!x){out('usage: '+c+' file');continue}
+      const up=c=='put',res=up?xfer(s,ab(s,x),A,ab(R,x.split('/').pop()),g.u,0):xfer(A,ab(R,x),s,ab(s,x.split('/').pop()),s.u,0);
+      if(typeof res=='string')out(up?'stat '+x+': No such file or directory':'File "'+ab(R,x)+'" not found.');
+      else{
+        out((up?'Uploading '+x+' to '+ab(R,x.split('/').pop()):'Fetching '+ab(R,x)+' to '+x.split('/').pop()));
+        res.forEach(([nm,sz])=>out(nm.padEnd(46)+'100%'+String(sz).padStart(5)+'   1.0KB/s   00:00'));
+      }
+    }
+    else if(c=='mkdir'){if(x)A.fs[ab(R,x)]={d:1,m:'755',o:g.u}}
+    else out('Invalid command.');
+  }
+}
+
+async function rsync(a){
+  const s=S[host()];let dry=0,port=22,del=0,ar=[];
+  for(let i=0;i<a.length;i++){
+    const x=a[i];
+    if(x=='-e'){const m=(a[++i]||'').match(/-p\s*(\d+)/);if(m)port=+m[1]}
+    else if(x=='--dry-run'||/^-[a-z]*n[a-z]*$/.test(x))dry=1;
+    else if(x=='--delete')del=1;
+    else if(x[0]!='-')ar.push(x);
+  }
+  if(ar.length<2){ec=1;return out('Usage: rsync [OPTION]... SRC... [DEST]')}
+  const ps=spec(ar[0]),pd=spec(ar[1]);let A=s,B=s,ap,bp,u=s.u;
+  if(pd){
+    const g=await target(s,(pd.u?pd.u+'@':'')+pd.h,port,{});if(!g.ok){ec=1;return}
+    B=S[g.n];u=g.u;bp=ab({u,cwd:home(u)},pd.p||'.');ap=ab(s,ar[0]);
+  }else if(ps){
+    const g=await target(s,(ps.u?ps.u+'@':'')+ps.h,port,{});if(!g.ok){ec=1;return}
+    A=S[g.n];ap=ab({u:g.u,cwd:home(g.u)},ps.p||'.');bp=ab(s,ar[1]);
+  }else{
+    ap=ab(s,ar[0]);bp=ab(s,ar[1]);
+  }
+  const src=ap,n=A.fs[src];
+  if(!n){ec=1;return out('rsync: [sender] link_stat "'+src+'" failed: No such file or directory (2)')}
+  const slash=ar[0].endsWith('/'),root=n.d&&!slash?bp+'/'+src.split('/').pop():bp,pairs=[];
+  if(n.d){
+    pairs.push(['./',null]);
+    Object.keys(A.fs).filter(k=>k.startsWith(src+'/')).sort().forEach(k=>pairs.push([k.slice(src.length+1),A.fs[k]]));
+  }else pairs.push([src.split('/').pop(),n]);
+  const lines=[];let tot=0;
+  if(!B.fs[bp.replace(/\/[^/]*$/,'')||'/']){ec=1;return out('rsync: [Receiver] mkdir "'+bp+'" failed: No such file or directory (2)')}
+  if(!canWu(u,root+'/x')&&!canWu(u,root)){ec=1;return out('rsync: [Receiver] mkstemp failed: Permission denied (13)')}
+  pairs.forEach(([r,nd])=>{
+    const T2=n.d?(r=='./'?root:root+'/'+r):(root==''?bp:(B.fs[bp]&&B.fs[bp].d?bp+'/'+r:bp)),ex=B.fs[T2],isd=nd?nd.d:1;
+    if(nd&&!nd.d)tot+=nd.c.length;
+    if(!ex||(!isd&&ex.c!==nd.c)){
+      lines.push(isd&&r!='./'?r+'/':r);
+      if(!dry){
+        if(isd)B.fs[T2]={d:1,m:'755',o:u};
+        else B.fs[T2]={c:nd.c,m:nd.m,o:u};
+      }
+    }
+  });
+  if(del&&n.d)Object.keys(B.fs).filter(k=>k.startsWith(root+'/')).forEach(k=>{
+    if(!pairs.some(([r])=>root+'/'+r==k)){lines.push('deleting '+k.slice(root.length+1));if(!dry)delete B.fs[k]}
+  });
+  const sent=lines.length?tot+120+lines.length*20:120;
+  out('sending incremental file list');
+  lines.forEach(l=>out(l));
+  out('\nsent '+sent+' bytes  received 35 bytes  '+(sent*2)+'.00 bytes/sec'+(dry?' (DRY RUN)':''));
+  out('total size is '+tot+'  speedup is '+(tot/(sent+35)).toFixed(2)+(dry?' (DRY RUN)':''));
+}
+
+function tok(l){
+  const r=[],re=/"([^"]*)"|'([^']*)'|(>>|>|\||&&|[^\s|>&"']+)/g;
+  let m;
+  while(m=re.exec(l)){
+    if(m[1]!==undefined)r.push({v:m[1],q:1});
+    else if(m[2]!==undefined)r.push({v:m[2],q:1});
+    else r.push({v:m[3],q:0});
+  }
+  return r;
+}
+
+async function run(line){
+  LG=0;
+  const tk=tok(line);
+  if(!tk.length)return;
+  const segs=[[]];
+  tk.forEach(t=>(!t.q&&t.v=='&&')?segs.push([]):segs[segs.length-1].push(t));
+  for(let q=0;q<segs.length;q++){
+    if(q&&ec)break;
+    ec=0;
+    const st=[[]];
+    segs[q].forEach(t=>(!t.q&&t.v=='|')?st.push([]):st[st.length-1].push(t));
+    let inp=null;
+    for(let i=0;i<st.length;i++){
+      const a=[];let rd=null;const ts=st[i];
+      for(let j=0;j<ts.length;j++){
+        const t=ts[j];
+        if(!t.q&&(t.v=='>'||t.v=='>>'))rd={ap:t.v=='>>',f:(ts[++j]||{}).v};
+        else a.push(t.v);
+      }
+      if(!a.length)continue;
+      const last=i==st.length-1,buf=[],o=m=>{(last&&!rd)?out(m):buf.push(m)};
+      await exec(a,inp,o,0);
+      if(rd&&rd.f){
+        const s=S[host()],P=ab(s,rd.f),par=P.replace(/\/[^/]*$/,'')||'/';
+        if(!s.fs[par]){out('bash: '+rd.f+': No such file or directory');ec=1;}
+        else if(!canWu(s.u,P)){out('bash: '+rd.f+': Permission denied');ec=1;}
+        else{const old=s.fs[P];wr(s,P,(rd.ap&&old?old.c:'')+buf.join('\n')+'\n',0);}
+      }
+      inp=buf.join('\n');
+    }
+  }
+}
+
+async function exec(a,inp,o,sd){
+  const h=host(),s=S[h],x=a[0],r=a.slice(1),e=m=>{o(m);ec=1};
+  switch(x){
+  case'sudo':if(r.length<1){e('usage: sudo command');break}return exec(r,inp,o,1);
+  case'help':o('Perintah: '+CMDS.join(' ')+'\nKhusus simulasi: konsol NAMA (pindah ke client/server1/db), reset');break;
+  case'clear':LOG.innerHTML='';break;
+  case'reset':init();return;
+  case'konsol':if(!NET[r[0]]){e('usage: konsol client|server1|db');break}stack=[{h:r[0],sid:0}];o('Masuk ke konsol '+r[0]+'.');break;
+  case'whoami':o(s.u);break;case'hostname':o(h);break;
+  case'id':o('uid=1000(siswa) gid=1000(siswa) groups=1000(siswa),27(sudo)');break;
+  case'date':o('Mon Oct 19 08:05:00 WIB 2026');break;
+  case'uname':o(r.includes('-a')?'Linux '+h+' 6.1.0-21-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.90-1 (2024-05-03) x86_64 GNU/Linux':'Linux');break;
+  case'pwd':o(s.cwd);break;
+  case'ls':{
+    let fl='',ps=[];r.forEach(z=>z[0]=='-'?fl+=z:ps.push(z));if(!ps.length)ps=['.'];
+    const row=(nm,n)=>fl.includes('l')?(n.d?'d':'-')+mstr(n.m||'644')+' 1 '+(n.o||s.u)+' '+(n.o||s.u)+' '+String(n.d?4096:(n.c||'').length).padStart(5)+' Oct 19 08:00 '+nm:nm;
+    for(const p of ps){
+      const P=ab(s,p),n=s.fs[P];
+      if(!n){e("ls: cannot access '"+p+"': No such file or directory");continue}
+      if(n.d&&!fl.includes('d')){
+        let k=kids(s,P);k=fl.includes('a')?['.','..',...k]:k.filter(z=>z[0]!='.');
+        if(ps.length>1)o(p+':');
+        const L=k.map(z=>row(z,z=='.'||z=='..'?n:s.fs[(P=='/'?'':P)+'/'+z]));
+        if(fl.includes('l')){o('total '+k.length*4);L.forEach(z=>o(z))}
+        else if(L.length)o(L.join('  '));
+      }else o(row(p,n));
+    }
+    break;
+  }
+  case'cd':{
+    const p=r[0]||'~',P=ab(s,p),n=s.fs[P];
+    if(!n){e('bash: cd: '+p+': No such file or directory');break}
+    if(!n.d){e('bash: cd: '+p+': Not a directory');break}
+    s.cwd=P;
+    break;
+  }
+  case'cat':{
+    if(!r.length&&inp!=null){o(inp);break}
+    for(const p of r){
+      const t=rd(s,p,sd);
+      if(t.e)e('cat: '+p+': '+t.e);else o(t.c.replace(/\n$/,''));
+    }
+    break;
+  }
+  case'mkdir':{
+    const pf=r.includes('-p');
+    for(const p of r.filter(z=>z[0]!='-')){
+      const P=ab(s,p);
+      if(s.fs[P]){if(!pf)e("mkdir: cannot create directory '"+p+"': File exists");continue}
+      if(!sd&&!canWu(s.u,P)){e("mkdir: cannot create directory '"+p+"': Permission denied");continue}
+      const par=P.replace(/\/[^/]*$/,'')||'/';
+      if(!s.fs[par]&&!pf){e("mkdir: cannot create directory '"+p+"': No such file or directory");continue}
+      if(pf){let c='';P.split('/').filter(Boolean).forEach(z=>{c+='/'+z;if(!s.fs[c])s.fs[c]={d:1,m:'755',o:s.u}})}
+      else s.fs[P]={d:1,m:'755',o:sd?'root':s.u};
+    }
+    break;
+  }
+  case'touch':for(const p of r){
+    const P=ab(s,p);if(s.fs[P])continue;
+    if(!sd&&!canWu(s.u,P)){e("touch: cannot touch '"+p+"': Permission denied");continue}
+    s.fs[P]={c:'',m:'644',o:sd?'root':s.u};
+  }break;
+  case'rm':{
+    const rec=r.some(z=>/^-.*[rR]/.test(z));
+    for(const p of r.filter(z=>z[0]!='-')){
+      const P=ab(s,p),n=s.fs[P];
+      if(!n){e("rm: cannot remove '"+p+"': No such file or directory");continue}
+      if(n.d&&!rec){e("rm: cannot remove '"+p+"': Is a directory");continue}
+      if(!sd&&!canWu(s.u,P)){e("rm: cannot remove '"+p+"': Permission denied");continue}
+      Object.keys(s.fs).filter(k=>k==P||k.startsWith(P+'/')).forEach(k=>delete s.fs[k]);
+    }
+    break;
+  }
+  case'cp':{
+    const rec=r.some(z=>/^-.*[rR]/.test(z)),ar=r.filter(z=>z[0]!='-');
+    if(ar.length<2){e('cp: missing file operand');break}
+    const res=xfer(s,ab(s,ar[0]),s,ab(s,ar[1]),sd?'root':s.u,rec);
+    if(typeof res=='string')e(res=='EISDIR'?"cp: -r not specified; omitting directory '"+ar[0]+"'":'cp: '+EM[res]);
+    break;
+  }
+  case'chmod':{
+    const m=r[0],p=r[1];
+    if(!/^[0-7]{3}$/.test(m||'')||!p){e('Usage: chmod MODE(3 digit) FILE   (contoh: chmod 600 file)');break}
+    const n=s.fs[ab(s,p)];
+    if(!n){e("chmod: cannot access '"+p+"': No such file or directory");break}
+    if(!sd&&n.o=='root'){e("chmod: changing permissions of '"+p+"': Operation not permitted");break}
+    n.m=m;
+    break;
+  }
+  case'echo':{
+    let t=r.slice();const en=t[0]=='-e';if(en)t.shift();
+    let z=t.join(' ');if(en)z=z.replace(/\\n/g,'\n');
+    o(z);
+    break;
+  }
+  case'sed':{
+    const i=r.includes('-i'),rest=r.filter(z=>z!='-i'),sc=rest[0],p=rest[1],m=sc&&sc.match(/^s\/(.*?)\/(.*?)\/(g?)$/);
+    if(!m||!p){e('usage: sed [-i] s/pola/ganti/ file');break}
+    const t=rd(s,p,1);
+    if(t.e){e("sed: can't read "+p+': '+t.e);break}
+    const P=ab(s,p);
+    if(i&&!sd&&!canWu(s.u,P)){e("sed: couldn't open temporary file "+P.replace(/[^/]*$/,'')+'sedXXXXXX: Permission denied');break}
+    const re=new RegExp(m[1].replace(/\\\?/g,'?').replace(/\\\+/g,'+'),m[3]),res=t.c.split('\n').map(l=>l.replace(re,m[2])).join('\n');
+    if(i)wr(s,P,res,sd);else o(res.replace(/\n$/,''));
+    break;
+  }
+  case'tee':{
+    const ap=r.includes('-a'),p=r.find(z=>z[0]!='-');if(!p)break;
+    const P=ab(s,p);if(!sd&&!canWu(s.u,P)){e('tee: '+p+': Permission denied');break}
+    const old=s.fs[P];wr(s,P,(ap&&old?old.c:'')+(inp||'')+'\n',sd);o(inp||'');
+    break;
+  }
+  case'grep':{
+    const fl=r.filter(z=>z[0]=='-'),ar=r.filter(z=>z[0]!='-'),pat=ar[0];
+    if(!pat){e('Usage: grep [OPTION]... PATTERNS [FILE]...');break}
+    let txt;
+    if(ar[1]){const t=rd(s,ar[1],sd);if(t.e){e('grep: '+ar[1]+': '+t.e);break}txt=t.c}
+    else txt=inp||'';
+    let re;try{re=new RegExp(pat,fl.includes('-i')?'i':'')}catch(z){e('grep: Invalid regular expression');break}
+    const Ls=txt.split('\n').filter(l=>re.test(l)!=fl.includes('-v'));
+    if(Ls.length&&/Failed/i.test(pat)&&LG)F.G=1;
+    Ls.forEach(l=>o(l));if(!Ls.length)ec=1;
+    break;
+  }
+  case'tail':{
+    let n=10,f;
+    for(let i=0;i<r.length;i++){if(r[i]=='-n')n=+r[++i];else if(r[i][0]!='-')f=r[i]}
+    let txt=inp;
+    if(f){const t=rd(s,f,sd);if(t.e){e("tail: cannot open '"+f+"' for reading: "+t.e);break}txt=t.c}
+    (txt||'').split('\n').slice(-n).forEach(l=>o(l));
+    break;
+  }
+  case'ip':o(r.includes('-br')?'lo               UNKNOWN        127.0.0.1/8\neth0             UP             '+s.ip+'/24':'1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN\n    inet 127.0.0.1/8 scope host lo\n2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP\n    inet '+s.ip+'/24 brd 10.0.0.255 scope global eth0');break;
+  case'ping':{
+    const n=r.find(z=>z[0]!='-'&&!/^\d+$/.test(z));
+    if(!n){e('ping: usage error: Destination address required');break}
+    if(!NET[n]){e('ping: '+n+': Name or service not known');break}
+    o('PING '+n+' ('+NET[n]+') 56(84) bytes of data.');
+    for(let i=1;i<=3;i++)o('64 bytes from '+n+' ('+NET[n]+'): icmp_seq='+i+' ttl=64 time=0.'+(3+i)+' ms');
+    o('\n--- '+n+' ping statistics ---\n3 packets transmitted, 3 received, 0% packet loss');
+    break;
+  }
+  case'nc':{
+    const pt=+r.filter(z=>z[0]!='-')[1],hn=r.filter(z=>z[0]!='-')[0];
+    if(!s.pk.nc){e('bash: nc: command not found');break}
+    let ok=0;
+    if(hn=='localhost'||hn=='127.0.0.1')ok=TN.some(t=>(t.k=='L'||t.k=='D')&&t.lp==pt);
+    else if(S[hn])ok=(S[hn].inst&&S[hn].act&&+S[hn].live.Port==pt)||(hn=='db'&&pt==3306);
+    o(ok?'Connection to '+hn+' ('+(hn=='localhost'?'127.0.0.1':hn)+') '+pt+' port [tcp/*] succeeded!':'nc: connect to '+hn+' ('+(hn=='localhost'?'127.0.0.1':hn)+') port '+pt+' (tcp) failed: Connection refused');
+    if(!ok)ec=1;
+    break;
+  }
+  case'eval':if(/ssh-agent/.test(r.join(' '))){s.agent=1;o('Agent pid '+(2000+clk))}break;
+  case'ssh-agent':o('SSH_AUTH_SOCK=/tmp/ssh-XXXXXX/agent.'+clk+'; export SSH_AUTH_SOCK;\nSSH_AGENT_PID='+clk+'; export SSH_AGENT_PID;\necho Agent pid '+clk+';\n(Gunakan: eval "$(ssh-agent -s)")');break;
+  case'ssh-add':{
+    if(!s.agent){e('Could not open a connection to your authentication agent.');break}
+    if(r.includes('-l')){o(s.ag.length?s.ag.map(k=>'256 '+FP+' '+s.u+'@'+h+' (ED25519)').join('\n'):'The agent has no identities.');break}
+    const kp=r.find(z=>z[0]!='-')?ab(s,r.find(z=>z[0]!='-')):home(s.u)+'/.ssh/id_ed25519',k=s.fs[kp];
+    if(!k){e(kp+': No such file or directory.');break}
+    if(k.pp){
+      const pw=await ask('Enter passphrase for '+kp+': ',1);
+      if(pw!==k.pp){e('Bad passphrase, try again for '+kp+':');break}
+    }
+    if(!s.ag.includes(kp))s.ag.push(kp);
+    o('Identity added: '+kp+' ('+s.u+'@'+h+')');
+    break;
+  }
+  case'ssh-keygen':{
+    if(r[0]=='-R'){
+      if(s.known[r[1]]){delete s.known[r[1]];o('# Host '+r[1]+' found: line 1\n'+home(s.u)+'/.ssh/known_hosts updated.')}
+      else e('Host '+r[1]+' not found in '+home(s.u)+'/.ssh/known_hosts');
+      break;
+    }
+    let ty='ed25519',bits='256';
+    for(let i=0;i<r.length;i++){if(r[i]=='-t')ty=r[++i];else if(r[i]=='-b')bits=r[++i]}
+    if(ty=='rsa'&&bits=='256')bits='3072';
+    if(!['ed25519','rsa'].includes(ty)){e('unknown key type '+ty);break}
+    o('Generating public/private '+ty+' key pair.');
+    const df=home(s.u)+'/.ssh/id_'+ty;
+    let f=await ask('Enter file in which to save the key ('+df+'): ');
+    f=f?ab(s,f):df;mkssh(s);
+    if(s.fs[f]){const y=await ask(f+' already exists.\nOverwrite (y/n)? ');if(y!='y')break}
+    const p1=await ask('Enter passphrase (empty for no passphrase): ',1),p2=await ask('Enter same passphrase again: ',1);
+    if(p1!==p2){e('Passphrases do not match.  Try again.');break}
+    const id=rid();
+    s.fs[f]={c:'-----BEGIN OPENSSH PRIVATE KEY-----\n'+id+'\n-----END OPENSSH PRIVATE KEY-----',m:'600',o:s.u,pp:p1};
+    s.fs[f+'.pub']={c:'ssh-'+ty+' AAAAC3NzaC1lZDI1NTE5AAAAI'+id+' '+s.u+'@'+h,m:'644',o:s.u};
+    o('Your identification has been saved in '+f+'\nYour public key has been saved in '+f+'.pub\nThe key fingerprint is:\n'+FP+' '+s.u+'@'+h+"\nThe key's randomart image is:\n+--["+ty.toUpperCase()+' '+bits+']--+\n|      .o+=o.     |\n|     . =o*+.     |\n|      o.*B+o     |\n|       o=O+.     |\n|        S+*.     |\n+----[SHA256]-----+');
+    break;
+  }
+  case'ssh-copy-id':{
+    let id=null,port=0,t=null;
+    for(let i=0;i<r.length;i++){if(r[i]=='-i')id=r[++i];else if(r[i]=='-p')port=+r[++i];else if(r[i][0]!='-')t=r[i]}
+    if(!t){e('Usage: /usr/bin/ssh-copy-id [-i [identity_file]] [-p port] [user@]hostname');break}
+    const pf=id?ab(s,id.replace(/\.pub$/,'')):home(s.u)+'/.ssh/id_ed25519',k=s.fs[pf+'.pub']||s.fs[home(s.u)+'/.ssh/id_rsa.pub'];
+    if(!k){e('/usr/bin/ssh-copy-id: ERROR: No identities found');break}
+    o('/usr/bin/ssh-copy-id: INFO: Source of key(s) to be installed: "'+pf+'.pub"\n/usr/bin/ssh-copy-id: INFO: attempting to log in with the new key(s), to filter out any that are already installed');
+    const g=await target(s,t,port,{nokey:1});if(!g.ok){e('');break}
+    const d=S[g.n],hd=home(g.u),dir=hd+'/.ssh',af=dir+'/authorized_keys',pub=k.c.split(' ')[1];
+    if(d.fs[af]&&d.fs[af].c.includes(pub)){o('/usr/bin/ssh-copy-id: WARNING: All keys were skipped because they already exist on the remote system.');break}
+    if(!d.fs[hd])d.fs[hd]={d:1,m:'755',o:g.u};
+    if(!d.fs[dir])d.fs[dir]={d:1,m:'700',o:g.u};
+    d.fs[af]={c:(d.fs[af]?d.fs[af].c:'')+k.c+'\n',m:'600',o:g.u};
+    o('\nNumber of key(s) added: 1\n\nNow try logging into the machine, with:   "ssh \''+t+'\'"\nand check to make sure that only the key(s) you wanted were added.');
+    break;
+  }
+  case'ssh':await ssh(r);break;case'scp':await scp(r);break;case'sftp':await sftp(r);break;case'rsync':
+    if(!s.pk.rsync){e('bash: rsync: command not found');break}await rsync(r);break;
+  case'apt':case'apt-get':{
+    if(!sd){e(r[0]=='update'?'Reading package lists... Done\nE: Could not open lock file /var/lib/apt/lists/lock - open (13: Permission denied)\nE: Unable to lock directory /var/lib/apt/lists/':'E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)\nE: Unable to acquire the dpkg frontend lock (/var/lib/dpkg/lock-frontend), are you root?');break}
+    if(r[0]=='update'){o('Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]\nGet:2 http://security.debian.org/debian-security bookworm-security InRelease [48.0 kB]\nFetched 199 kB in 1s (210 kB/s)\nReading package lists... Done\nBuilding dependency tree... Done\nAll packages are up to date.');break}
+    if(r[0]!='install'){e('Usage: apt [update|install] paket');break}
+    const yes=r.includes('-y'),pk=r.slice(1).filter(z=>z[0]!='-');if(!pk.length){e('E: No packages specified');break}
+    for(const p of pk){
+      const mp={'openssh-server':'sshd','ufw':'ufw','fail2ban':'f2b','rsyslog':'rsyslog','rsync':'rsync','netcat-openbsd':'nc','openssh-client':'x'};
+      if(!mp[p]){e('E: Unable to locate package '+p);continue}
+      const key=mp[p],have=key=='sshd'?s.inst:key=='x'||s.pk[key];
+      if(have){o('Reading package lists... Done\nBuilding dependency tree... Done\n'+p+' is already the newest version.\n0 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.');continue}
+      o('Reading package lists... Done\nBuilding dependency tree... Done\nThe following NEW packages will be installed:\n  '+p+'\n0 upgraded, 1 newly installed, 0 to remove and 0 not upgraded.\nNeed to get 457 kB of archives.');
+      if(!yes){const y=await ask('Do you want to continue? [Y/n] ');if(y&&!/^y/i.test(y)){o('Abort.');ec=1;continue}}
+      o('Get:1 http://deb.debian.org/debian bookworm/main '+p+' [457 kB]\nSetting up '+p+' ...');
+      if(key=='sshd'){instSsh(s);o('Creating SSH2 ED25519 host key...\nCreated symlink /etc/systemd/system/sshd.service → /lib/systemd/system/ssh.service.')}
+      else if(key=='f2b'){s.pk.f2b=1;s.banned=['10.0.0.99']}
+      else s.pk[key]=1;
+    }
+    break;
+  }
+  case'dnf':case'yum':e('bash: '+x+': command not found');break;
+  case'systemctl':{
+    const ac=r.find(z=>/^(start|stop|restart|reload|enable|disable|status)$/.test(z));
+    if(!ac||!r.some(z=>/^(ssh|sshd)(\.service)?$/.test(z))){e('usage: systemctl start|stop|restart|reload|enable|disable|status ssh');break}
+    if(!s.inst){e('Unit ssh.service could not be found.');break}
+    if(ac=='status'){
+      o((s.act?'●':'○')+' ssh.service - OpenBSD Secure Shell server\n     Loaded: loaded (/lib/systemd/system/ssh.service; '+(s.en?'enabled':'disabled')+'; preset: enabled)\n     Active: '+(s.act?'active (running) since Mon 2026-10-19 08:00:00 WIB; 5min ago':'inactive (dead)')+'\n       Docs: man:sshd(8)\n             man:sshd_config(5)\n   Main PID: 612 (sshd)\n\n'+s.log.slice(-3).join('\n'));
+      break;
+    }
+    if(!sd){e('Failed to '+ac+' ssh.service: Interactive authentication required.\nSee system logs and \'systemctl status ssh.service\' for details.');break}
+    if(['start','restart','reload'].includes(ac)||(ac=='enable'&&r.includes('--now'))){
+      const b=cfgErr(s);
+      if(b){
+        lg(s,b.split('\n')[0]);
+        if(ac=='restart')s.act=0;
+        e('Job for ssh.service failed because the control process exited with error code.\nSee "systemctl status ssh.service" and "journalctl -xeu ssh.service" for details.');
+        break;
+      }
+    }
+    if(ac=='stop'){s.act=0;lg(s,'Received signal 15; terminating.')}
+    else if(ac=='reload'){if(!s.act){e('Failed to reload ssh.service: Unit ssh.service is not active.');break}s.live=cfg(s);lg(s,'Received SIGHUP; restarting.')}
+    else if(ac=='start'||ac=='restart'){s.act=1;s.live=cfg(s);lg(s,'Server listening on 0.0.0.0 port '+s.live.Port+'.')}
+    else if(ac=='enable'){s.en=1;o('Synchronizing state of ssh.service with SysV service script with /lib/systemd/systemd-sysv-install.\nExecuting: /lib/systemd/systemd-sysv-install enable ssh');if(r.includes('--now')){s.act=1;s.live=cfg(s)}}
+    else if(ac=='disable'){s.en=0;o('Synchronizing state of ssh.service with SysV service script with /lib/systemd/systemd-sysv-install.\nExecuting: /lib/systemd/systemd-sysv-install disable ssh')}
+    break;
+  }
+  case'sshd':if(!sd){e('bash: sshd: command not found');break}if(!s.inst){e('sudo: sshd: command not found');break}if(r[0]=='-t'){const b=cfgErr(s);if(b)e(b)}else e('usage: sshd -t');break;
+  case'ufw':{
+    if(!sd){e('bash: ufw: command not found');break}if(!s.pk.ufw){e('sudo: ufw: command not found');break}const U=s.ufw;
+    if(r[0]=='allow'||r[0]=='delete'){
+      const arg=r[r.length-1],pt=arg=='ssh'?22:parseInt(arg);
+      if(!pt){e('ERROR: Could not find a profile matching \''+arg+'\'');break}
+      if(r[0]=='allow'){if(!U.allow.includes(pt))U.allow.push(pt);o('Rules updated')}
+      else{U.allow=U.allow.filter(z=>z!=pt);o('Rule deleted')}
+    }
+    else if(r[0]=='enable'){
+      const y=await ask('Command may disrupt existing ssh connections. Proceed with operation (y|n)? ');
+      if(/^y/i.test(y)){U.on=1;o('Firewall is active and enabled on system startup')}else o('Aborted');
+    }
+    else if(r[0]=='disable'){U.on=0;o('Firewall stopped and disabled on system startup')}
+    else if(r[0]=='status')o(U.on?'Status: active\n\nTo                         Action      From\n--                         ------      ----\n'+U.allow.map(p=>(p+'/tcp').padEnd(27)+'ALLOW       Anywhere').join('\n'):'Status: inactive');
+    else e('Usage: ufw allow PORT/tcp | enable | disable | status');
+    break;
+  }
+  case'fail2ban-client':{
+    if(!sd){e('ERROR  Permission denied to socket: /var/run/fail2ban/fail2ban.sock, (you must be root)');break}
+    if(!s.pk.f2b){e('sudo: fail2ban-client: command not found');break}
+    if(r[0]=='status'&&r[1]=='sshd'){
+      const nf=s.fl.length;
+      o('Status for the jail: sshd\n|- Filter\n|  |- Currently failed:\t0\n|  |- Total failed:\t'+nf+'\n|  `- Journal matches:\t_SYSTEMD_UNIT=ssh.service + _COMM=sshd\n`- Actions\n   |- Currently banned:\t'+s.banned.length+'\n   |- Total banned:\t'+s.banned.length+'\n   `- Banned IP list:\t'+s.banned.join(' '));
+    }
+    else if(r[0]=='set'&&r[2]=='unbanip'){
+      const i=s.banned.indexOf(r[3]);if(i>=0){s.banned.splice(i,1);o('1')}else o('0');
+    }
+    else if(r[0]=='status')o('Status\n|- Number of jail:\t1\n`- Jail list:\tsshd');
+    else e('Usage: fail2ban-client status sshd | set sshd unbanip IP');
+    break;
+  }
+  case'journalctl':{
+    if(!sd){o("Hint: You are currently not seeing messages from other users and the system.\n      Users in groups 'adm', 'systemd-journal' can see all messages.\n-- No entries --");break}
+    if(!s.inst){o('-- No entries --');break}
+    let n=1e9;const i=r.indexOf('-n');if(i>=0)n=+r[i+1];LG=1;
+    o('-- Journal begins at Mon 2026-10-19 08:00:00 WIB --');
+    s.log.slice(-n).forEach(l=>o(l));
+    break;
+  }
+  case'w':o(' 08:05:11 up 5 min,  '+(1+s.sess.length)+' user,  load average: 0.00, 0.01, 0.00\nUSER     TTY      FROM             LOGIN@   IDLE WHAT\n'+s.u.padEnd(9)+'tty1     -                08:00    0.00s w'+s.sess.map(z=>'\n'+z.u.padEnd(9)+z.tty.padEnd(9)+z.from.padEnd(17)+z.t.padEnd(9)+'0.00s -bash').join(''));break;
+  case'who':o('siswa    tty1         2026-10-19 08:00'+s.sess.map(z=>'\n'+z.u.padEnd(9)+z.tty.padEnd(13)+'2026-10-19 '+z.t+' ('+z.from+')').join(''));break;
+  case'last':o(s.lh.slice().reverse().map(z=>z.u.padEnd(9)+z.tty.padEnd(13)+z.from.padEnd(17)+'Mon Oct 19 '+z.t+(z.end?' - '+z.end+'  (00:01)':'   still logged in')).concat(['reboot   system boot  6.1.0-21-amd64   Mon Oct 19 08:00   still running','','wtmp begins Mon Oct 19 08:00:00 2026']).join('\n'));break;
+  case'lastb':if(!sd){e('lastb: cannot open /var/log/btmp: Permission denied');break}o(s.fl.slice().reverse().map(z=>z.u.padEnd(9)+'ssh:notty    '+z.from.padEnd(17)+'Mon Oct 19 08:0'+(z.from=='10.0.0.99'?'1':'4')+' - 08:0'+(z.from=='10.0.0.99'?'1':'4')+'  (00:00)').concat(['','btmp begins Mon Oct 19 08:00:00 2026']).join('\n'));break;
+  case'exit':case'logout':{
+    if(stack.length>1){
+      const z=stack.pop();
+      TN=TN.filter(t=>t.sid!=z.sid||!z.sid);
+      if(z.e){z.e.end='08:'+pad(Math.floor(clk/60)%60);const d=S[z.h];d.sess=d.sess.filter(q=>q!=z.e)}
+      o('logout\nConnection to '+z.h+' closed.');
+    }else o('Sesi konsol utama tidak ditutup di simulasi. Gunakan konsol NAMA untuk berpindah.');
+    break;
+  }
+  case'nano':case'vi':case'vim':o('Editor interaktif tidak tersedia di simulator ini. Gunakan sed atau echo ... | sudo tee -a seperti pada panduan langkah modul.');break;
+  default:e('bash: '+x+': command not found');
+  }
+}
+
+I.onkeydown=async e=>{
+  if(e.key=='Enter'){
+    e.preventDefault();const v=I.value;I.value='';
+    if(pend){const p=pend;pend=null;I.type='text';out(p.lp+(p.hid?'':v));setPs();p.res(v);return}
+    if(busy)return;busy=1;outH(pshtml()+esc(v));if(v.trim()){hist.push(v);hi=hist.length}setPs();
+    try{await run(v)}catch(err){out('simulator error: '+err.message,'d')}
+    busy=0;chk();setPs();I.focus();T.scrollTop=T.scrollHeight;
+  }
+  else if(e.key=='ArrowUp'&&!pend){if(hi>0)I.value=hist[--hi];e.preventDefault()}
+  else if(e.key=='ArrowDown'&&!pend){hi=Math.min(hi+1,hist.length);I.value=hist[hi]||'';e.preventDefault()}
+  else if(e.key=='Tab'&&!pend){
+    e.preventDefault();const parts=I.value.split(' '),w=parts.pop();let c;
+    if(!parts.length||(parts.length==1&&parts[0]=='sudo'))c=CMDS.filter(z=>z.startsWith(w));
+    else{
+      const s=S[host()],dir=w.includes('/')?w.replace(/[^/]*$/,''):'',base=w.slice(dir.length),P=ab(s,dir||'.');
+      c=kids(s,P).filter(z=>z.startsWith(base)).map(z=>dir+z+((s.fs[(P=='/'?'':P)+'/'+z]||{}).d?'/':''));
+    }
+    if(c.length==1)I.value=[...parts,c[0]].join(' ')+(c[0].endsWith('/')?'':' ');
+    else if(c.length>1)out(c.join('  '));
+  }
+  else if(e.key=='c'&&e.ctrlKey&&pend){pend.res('');pend=null;I.type='text'}
+};
+
+T.onclick=()=>{if(!getSelection().toString())I.focus()};
+$('#rs').onclick=init;
+
+/* ===== Kuis Interaktif ===== */
+const Q=[
+['Berapa nomor port standar default layanan SSH?',['21','22','23','514'],1,'SSH beroperasi di TCP port 22. Telnet menggunakan port 23, RSH port 514.'],
+['Algoritma yang digunakan client & server untuk menyepakati kunci sesi tanpa mengirimkan rahasia adalah...',['Diffie-Hellman','MD5','Base64','ROT13'],0,'Diffie-Hellman Key Exchange menghasilkan shared secret aman dari pertukaran nilai publik.'],
+['Mode hak akses (permission) yang tepat untuk file kunci privat (~/.ssh/id_ed25519) adalah...',['777','644','600','755'],2,'Mode 600 (-rw-------) memastikan hanya pemilik akun yang dapat membaca kunci rahasia tersebut.'],
+['Perintah praktis untuk menyalin kunci publik lokal ke server tujuan adalah...',['ssh-add','ssh-copy-id','scp -r','ssh-agent'],1,'ssh-copy-id menginstal kunci publik ke berkas authorized_keys di host remote.'],
+['Opsi perintah ssh untuk mengaktifkan Local Port Forwarding adalah...',['-D','-R','-L','-N'],2,'Argumen -L meneruskan port lokal mesin client menuju target layanan melalui server SSH.'],
+['Perintah untuk menguji sintaks berkas sshd_config sebelum memuat ulang service adalah...',['sshd -t','ssh -v','ufw status','last'],0,'sshd -t memverifikasi validitas file konfigurasi tanpa mengganggu service aktif.']
+];
+
+const qz=$('#quiz');
+Q.forEach((q,k)=>{
+  const d=document.createElement('div');
+  d.className='card q';
+  d.innerHTML='<b>'+(k+1)+'. '+q[0]+'</b>';
+  q[1].forEach((o,j)=>{
+    const b=document.createElement('button');
+    b.textContent=o;
+    b.onclick=()=>{
+      [...d.querySelectorAll('button')].forEach((z,y)=>{
+        z.disabled=true;
+        if(y==q[2])z.classList.add('r');
+      });
+      if(j!=q[2])b.classList.add('x');
+      const e=document.createElement('div');
+      e.className='co';
+      e.textContent=(j==q[2]?'Benar! ':'Belum tepat. ')+q[3];
+      d.appendChild(e);
+    };
+    d.appendChild(b);
+  });
+  qz.appendChild(d);
+});
+
+// Jalankan inisialisasi awal
+init();
+show(0);
+</script>
+</body>
+</html>

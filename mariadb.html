@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Modul Database Server (MariaDB) - SMK Wikrama Bogor</title>
+<style>
+:root{
+  --bg:#f2f6f4;--fg:#14261f;--card:#fff;--pri:#0f766e;--acc:#dff3ef;--bd:#cfdcd6;
+  --mut:#4f645b;--warn:#fff4e0;--wb:#d97706;--hd:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+    --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+  --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+}
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font:16px/1.7 "Segoe UI",system-ui,-apple-system,sans-serif;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:0 0 auto;
+  height:env(safe-area-inset-top,0px);
+  background:var(--hd);z-index:1001;
+}
+
+/* Header bar fixed freeze */
+header{
+  position:fixed;
+  top:env(safe-area-inset-top,0px);
+  left:0;
+  right:0;
+  z-index:1000;
+  background:var(--hd);
+  border-bottom:1px solid var(--bd);
+  width:100%;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+#bar{height:3px;background:var(--pri);width:0;transition:width .3s}
+.hw{display:flex;align-items:center;gap:10px;padding:8px 20px;max-width:100%;width:100%}
+nav{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  white-space:nowrap;border:0;background:none;color:var(--mut);
+  padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-size:14px;
+  transition:all 0.15s ease;
+}
+nav button:hover{background:var(--acc);color:var(--fg)}
+nav button.on{background:var(--pri);color:var(--hd);font-weight:600}
+button:focus-visible,input:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+.actions{display:flex;gap:8px;align-items:center}
+.tg{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.tg:hover{background:var(--acc)}
+
+main{
+  width:100%;
+  max-width:100%;
+  flex:1;
+  margin:0 auto;
+  padding:84px 32px 80px;
+}
+@media(max-width:768px){
+  main{padding:74px 14px 60px}
+  .hw{padding:6px 10px}
+}
+
+/* Tab control */
+.tab{
+  display:none;
+}
+.tab.active{
+  display:block;
+}
+
+h1{font-size:2.2rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.5rem;margin:1.6em 0 .4em;border-left:5px solid var(--pri);padding-left:12px}
+h3{font-size:1.15rem;margin:1.3em 0 .3em;color:var(--pri)}
+p,li{max-width:100%}
+
+.cover{
+  background:linear-gradient(135deg,var(--pri),#0b3b36);
+  color:#fff;border-radius:14px;padding:36px 32px;margin-bottom:24px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+.cover h1{font-size:2.6rem}
+.cover table,.cover td,.cover tr:nth-child(even) td{
+  border:0;background:none;color:#fff;padding:4px 14px 4px 0;
+}
+.co{
+  border-left:5px solid var(--pri);background:var(--acc);padding:12px 18px;
+  border-radius:8px;margin:16px 0;
+}
+.co.w{border-color:var(--wb);background:var(--warn)}
+.tw{overflow-x:auto;margin:14px 0;border-radius:10px;border:1px solid var(--bd)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--card)}
+th{background:var(--pri);color:var(--hd);text-align:left;padding:10px 14px;font-weight:600}
+td{padding:9px 14px;border:1px solid var(--bd);vertical-align:top}
+tr:nth-child(even) td{background:var(--acc)}
+code{
+  font-family:ui-monospace,Consolas,monospace;font-size:.92em;
+  background:var(--acc);padding:2px 6px;border-radius:4px;word-break:break-word;
+}
+.try{
+  margin-left:8px;border:0;border-radius:6px;background:var(--pri);
+  color:var(--hd);padding:4px 12px;font-size:12px;cursor:pointer;
+  transition:opacity .15s;
+}
+.try:hover{opacity:0.85}
+.nv{display:flex;justify-content:space-between;margin-top:36px;gap:12px}
+.nv button,.btn{
+  background:var(--pri);color:var(--hd);border:0;border-radius:8px;
+  padding:10px 20px;cursor:pointer;font:inherit;font-weight:600;
+  transition:filter .15s;
+}
+.nv button:hover,.btn:hover{filter:brightness(1.1)}
+svg text{fill:currentColor;font:13px sans-serif}
+
+/* Terminal simulator styles */
+#tbox{
+  margin:20px 0 10px;
+  width:100%;
+}
+#where{
+  font-size:13.5px;color:var(--mut);display:flex;
+  justify-content:space-between;align-items:center;margin-bottom:8px;
+  background:var(--card);padding:8px 14px;border:1px solid var(--bd);border-radius:8px;
+}
+#where button{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12px;
+}
+#where button:hover{background:var(--acc)}
+#term{
+  background:#0c0c0c;color:#e6e6e6;border-radius:10px;padding:16px;
+  height:440px;overflow-y:auto;font:14px/1.48 ui-monospace,Consolas,monospace;
+  white-space:pre-wrap;word-break:break-word;cursor:text;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.6);
+  border:1px solid #232323;
+}
+#term .g{color:#5fd75f;font-weight:700}
+#term .b{color:#6aa5ff;font-weight:700}
+#term .y{color:#f59e0b;font-weight:700}
+#term .d{color:#8a8a8a}
+#ln{display:flex}
+#ps{white-space:pre}
+#in{flex:1;min-width:40px;background:transparent;border:0;color:#fff;font:inherit;outline:none;padding:0;caret-color:#fff}
+
+/* Lab 2-column layout */
+.lab{
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:20px;
+  align-items:start;
+  margin-top:10px;
+}
+.lab #term{height:540px}
+@media(max-width:992px){
+  .lab{grid-template-columns:1fr}
+  .lab #term{height:440px}
+}
+.ms{list-style:none;padding:0;margin:0}
+.ms li{
+  padding:12px 14px;border:1px solid var(--bd);border-radius:8px;
+  margin-bottom:8px;background:var(--card);font-size:14px;
+}
+.ms li.ok{background:var(--acc);border-color:var(--pri)}
+.ms li.ok b::after{content:" ✔ Selesai";color:var(--pri)}
+.ms details{color:var(--mut);font-size:13px;margin-top:4px}
+
+.card{
+  background:var(--card);border:1px solid var(--bd);border-radius:10px;
+  padding:18px 22px;margin:16px 0;
+}
+.q button{
+  display:block;width:100%;text-align:left;margin:6px 0;
+  padding:10px 14px;border:1px solid var(--bd);border-radius:8px;
+  background:var(--card);color:var(--fg);cursor:pointer;font:inherit;
+  transition:background .15s;
+}
+.q button:hover{background:var(--acc)}
+.q button.r{background:var(--acc);border-color:var(--pri);font-weight:600}
+.q button.x{background:var(--warn);border-color:var(--wb)}
+@media print{
+  header,.nv,#tbox,.try,.actions{display:none}
+  .tab{display:block!important}
+  body::before{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div id="bar"></div>
+  <div class="hw">
+    <nav id="nav"></nav>
+    <div class="actions">
+      <button class="tg" id="btnFs" title="Toggle Layar Penuh">⛶ Fullscreen</button>
+      <button class="tg" id="tg" aria-label="Ganti tema">◐</button>
+    </div>
+  </div>
+</header>
+<main>
+
+<section class="tab active" data-title="Cover">
+<div class="cover">
+  <p style="font-size:1.1rem;margin-bottom:4px">Modul Ajar Interaktif</p>
+  <h1>Database Server dengan MariaDB</h1>
+  <table>
+    <tr><td>Sekolah</td><td>: SMK Wikrama Bogor</td></tr>
+    <tr><td>Fase/Kelas</td><td>: F / XI</td></tr>
+    <tr><td>Program Keahlian</td><td>: Teknik Jaringan Komputer dan Telekomunikasi</td></tr>
+    <tr><td>Mata Pelajaran</td><td>: Konsentrasi Keahlian TKJ</td></tr>
+    <tr><td>Elemen</td><td>: Administrasi Sistem Jaringan</td></tr>
+    <tr><td>Materi</td><td>: Database Server (MariaDB)</td></tr>
+  </table>
+</div>
+<h2>Tujuan Pembelajaran</h2>
+<ul>
+  <li>Memahami arsitektur RDBMS, cara kerja Database Server, serta perbandingan MariaDB dengan MySQL.</li>
+  <li>Memasang, mengelola daemon, dan mengamankan instance MariaDB di Debian 12 (Bookworm).</li>
+  <li>Mengoperasikan sintaks SQL dasar DDL (Data Definition Language) dan DML (Data Manipulation Language).</li>
+  <li>Mengatur manajemen user dan hak akses (privileges) secara ketat dan aman.</li>
+  <li>Mengonfigurasi akses jaringan remote (`bind-address`), port TCP 3306, dan proteksi firewall UFW.</li>
+  <li>Melakukan pencadangan (backup dump) dan pemulihan (restore) database secara berkala.</li>
+  <li>Menganalisis galat autentikasi, port conflict, dan penelusuran berkas log MariaDB.</li>
+</ul>
+<h2>Cara Memakai Modul</h2>
+<ol>
+  <li>Pelajari konsep arsitektur dan sintaks SQL pada setiap tab materi di atas.</li>
+  <li>Klik tombol <b>Coba</b> pada tabel langkah kerja untuk memindahkan perintah langsung ke baris terminal simulator, lalu tekan <b>Enter</b>.</li>
+  <li>Terminal mendukung dua lingkungan kerja: <b>Bash Debian</b> (`siswa@db-server:~$`) dan <b>MariaDB Shell</b> (`MariaDB [(none)]>`). Ketik `exit` atau `quit` untuk kembali ke Bash.</li>
+  <li>Tersedia 3 mesin simulasi: <code>client</code> (10.0.0.10), <code>web-app</code> (10.0.0.20), dan <code>db-server</code> (10.0.0.30). Password sudo: <code>siswa123</code>.</li>
+</ol>
+<div class="co w">⚠️ Terminal ini adalah <b>lingkungan simulasi interaktif</b>. Gunakan perintah <code>konsol NAMA</code> untuk berpindah mesin fisik. Ketik <code>reset</code> kapan saja untuk mengembalikan lab ke kondisi semula.</div>
+</section>
+
+<section class="tab" data-title="1. Konsep">
+<h1>Bab 1. Konsep Dasar Database Server &amp; MariaDB</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memahami fungsi RDBMS, arsitektur Client-Server pada database, port standar TCP 3306, serta sejarah percabangan MariaDB dari MySQL.</div>
+<h2>Apa itu Database Server?</h2>
+<p><b>Database Server</b> adalah perangkat lunak back-end yang bertugas mengelola penyimpanan, relasi, indexing, transaksi, dan integritas data secara terpusat. Aplikasi lain (seperti web server Nginx/Apache, API backend Node.js, atau aplikasi mobile) bertindak sebagai <i>klien</i> yang meminta data menggunakan bahasa standar <b>SQL (Structured Query Language)</b>.</p>
+<svg viewBox="0 0 680 110" width="100%" height="95" role="img" aria-label="Alur Database Server">
+  <rect x="10" y="25" width="150" height="60" rx="8" fill="none" stroke="currentColor"/>
+  <text x="30" y="60">Web Server / Client</text>
+  <rect x="500" y="25" width="165" height="60" rx="8" fill="none" stroke="currentColor"/>
+  <text x="520" y="60">MariaDB Server (:3306)</text>
+  <line x1="160" y1="45" x2="500" y2="45" stroke="currentColor" stroke-width="2"/>
+  <text x="210" y="38">TCP Connection &amp; SQL Query (SELECT/INSERT)</text>
+  <line x1="500" y1="70" x2="160" y2="70" stroke="currentColor" stroke-width="2" stroke-dasharray="5 3"/>
+  <text x="250" y="88">Result Set / Status OK (TCP Data)</text>
+</svg>
+<h2>MariaDB vs MySQL: Mengapa Komunitas Memilih MariaDB?</h2>
+<div class="tw">
+  <table>
+    <tr><th>Aspek</th><th>MariaDB</th><th>MySQL (Oracle)</th></tr>
+    <tr><td>Lisensi &amp; Filosofi</td><td>100% Open Source murni (GNU GPL v2), dipimpin oleh pendiri asli MySQL (Monty Widenius).</td><td>Milik Oracle Corporation dengan model lisensi ganda (Community vs Commercial Enterprise).</td></tr>
+    <tr><td>Default di Linux</td><td>Menjadi paket database default di Debian, Ubuntu, CentOS Stream, Arch, dan Fedora.</td><td>Harus menambahkan repositori pihak ketiga (APT PPA / Oracle YUM repo).</td></tr>
+    <tr><td>Storage Engine</td><td>Menyertakan engine modern bawaan seperti <b>Aria</b> (pengganti MyISAM tahan crash) dan <b>InnoDB</b>.</td><td>Fokus utama pada InnoDB bawaan Oracle.</td></tr>
+    <tr><td>Kompatibilitas</td><td>Drop-in replacement: protokol koneksi, port 3306, struktur direktori, dan perintah klien kompatibel penuh.</td><td>Standar asli SQL database relasional.</td></tr>
+  </table>
+</div>
+<h2>Metode Komunikasi Socket vs TCP Network</h2>
+<div class="tw">
+  <table>
+    <tr><th>Tipe Koneksi</th><th>Target Host</th><th>Mekanisme Kerja</th><th>Tingkat Kecepatan</th></tr>
+    <tr><td>UNIX Domain Socket</td><td><code>localhost</code></td><td>Komunikasi internal antar-proses di kernel Linux lewat berkas `/run/mysqld/mysqld.sock`. Tidak melibatkan kartu jaringan.</td><td>Sangat cepat, latensi terendah.</td></tr>
+    <tr><td>TCP/IP Network</td><td><code>127.0.0.1</code> atau IP Remote (<code>10.0.0.30</code>)</td><td>Koneksi melewati stack protokol jaringan TCP port 3306. Wajib digunakan untuk koneksi antar-mesin server.</td><td>Sangat baik, dibatasi kecepatan LAN/Wi-Fi.</td></tr>
+  </table>
+</div>
+<h3>Ringkasan</h3>
+<p>MariaDB adalah RDBMS open-source berkinerja tinggi pengganti MySQL. <b>Latihan:</b> Mengapa aplikasi web yang berjalan di server fisik terpisah wajib menggunakan koneksi TCP IP port 3306 dan bukan socket lokal?</p>
+</section>
+
+<section class="tab" data-title="2. Instalasi">
+<h1>Bab 2. Instalasi &amp; Pengamanan Instance MariaDB</h1>
+<div class="co">🎯 <b>Tujuan:</b> Menginstal paket `mariadb-server` di Debian 12, mengelola daemons lewat `systemctl`, dan menjalankan wizard pengamanan awal `mariadb-secure-installation`.</div>
+<h2>Manajemen Service MariaDB di Debian 12</h2>
+<p>Di Debian 12 (Bookworm), unit layanan database terdaftar dengan nama <code>mariadb.service</code> (dengan alias kompatibel <code>mysql.service</code>).</p>
+<div class="tw">
+  <table>
+    <tr><th>Perintah Perawatan</th><th>Fungsi Kerja</th></tr>
+    <tr><td><code>sudo systemctl status mariadb</code></td><td>Mengecek apakah layanan aktif berjalan (`active running`) dan port 3306 terbuka.</td></tr>
+    <tr><td><code>sudo systemctl restart mariadb</code></td><td>Menyalakan ulang database server untuk menerapkan perubahan berkas konfigurasi.</td></tr>
+    <tr><td><code>sudo systemctl enable mariadb</code></td><td>Memastikan database otomatis menyala saat sistem operasi di-boot.</td></tr>
+    <tr><td><code>sudo mariadb</code> atau <code>sudo mysql</code></td><td>Masuk ke command line interaktif sebagai superuser via autentikasi socket unix.</td></tr>
+  </table>
+</div>
+<h2>Pengamanan Awal: `mariadb-secure-installation`</h2>
+<p>Secara default, instalasi baru menyertakan beberapa celah potensial untuk kemudahan pengujian. Skrip pengamanan <code>mariadb-secure-installation</code> membersihkan celah tersebut dengan:</p>
+<ol>
+  <li>Mengatur password root atau mengunci login unix socket root.</li>
+  <li><b>Menghapus Anonymous Users</b>: Menonaktifkan akun tanpa nama pengguna.</li>
+  <li><b>Disallow Root Login Remotely</b>: Membatasi akun root hanya dapat login dari localhost server langsung.</li>
+  <li><b>Remove Test Database</b>: Menghapus database pengujian `test` yang dapat diakses sembarang orang.</li>
+  <li><b>Reload Privilege Tables</b>: Menerapkan seluruh aturan keamanan baru ke memori RAM server seketika.</li>
+</ol>
+<h2>Langkah Kerja</h2>
+<div data-st="b2"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+<h3>Ringkasan</h3>
+<p>Alur administrator: Pasang paket ➔ Jalankan pengamanan wizard ➔ Verifikasi status service ➔ Masuk console CLI lokal.</p>
+</section>
+
+<section class="tab" data-title="3. DDL & DML">
+<h1>Bab 3. Perintah Dasar DDL &amp; DML SQL</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mengoperasikan Structured Query Language (SQL) untuk mendefinisikan skema struktur tabel (DDL) dan memanipulasi baris data (DML).</div>
+<h2>Klasifikasi Bahasa SQL</h2>
+<div class="tw">
+  <table>
+    <tr><th>Kategori</th><th>Kepanjangan</th><th>Fungsi Utama</th><th>Contoh Perintah</th></tr>
+    <tr><td><b>DDL</b></td><td>Data Definition Language</td><td>Membuat, memodifikasi, dan menghapus objek struktur database, tabel, kolom, dan indeks.</td><td><code>CREATE DATABASE</code>, <code>CREATE TABLE</code>, <code>DROP TABLE</code>, <code>ALTER TABLE</code></td></tr>
+    <tr><td><b>DML</b></td><td>Data Manipulation Language</td><td>Mengisi, membaca, mengubah, dan menghapus isi baris data di dalam tabel.</td><td><code>INSERT INTO</code>, <code>SELECT</code>, <code>UPDATE</code>, <code>DELETE</code></td></tr>
+  </table>
+</div>
+<h2>Kaidah Perintah SQL Penting</h2>
+<ul>
+  <li>Setiap perintah SQL wajib diakhiri dengan tanda titik koma (<code>;</code>) sebelum menekan tombol Enter.</li>
+  <li>Tipe data umum: <code>INT</code> (angka bilangan bulat), <code>VARCHAR(n)</code> (teks dengan panjang maksimal n karakter), <code>TEXT</code> (teks panjang), <code>DATE</code> (tanggal YYYY-MM-DD).</li>
+  <li><code>PRIMARY KEY AUTO_INCREMENT</code>: Menjadikan kolom sebagai nomor unik pembeda baris data yang bertambah otomatis.</li>
+</ul>
+<h2>Langkah Kerja</h2>
+<div data-st="b3"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="4. User & Privileges">
+<h1>Bab 4. Manajemen User &amp; Hak Akses (Privileges)</h1>
+<div class="co">🎯 <b>Tujuan:</b> Menerapkan prinsip <i>Least Privilege</i> dengan membuat akun pengguna database non-root khusus aplikasi dan membatasi izin akses tabel.</div>
+<h2>Mengapa Akun Root Tidak Boleh Dipakai Aplikasi Web?</h2>
+<p>Akun <code>root</code> memiliki hak penuh terhadap seluruh sistem database (termasuk menghapus database sistem `mysql`). Apabila kode aplikasi web memiliki kerentanan SQL Injection, peretas dapat menguasai seluruh database server. Oleh karena itu, setiap aplikasi harus memiliki akun user dan database khusus.</p>
+<h2>Format Identitas User di MariaDB</h2>
+<p>Pengguna di MariaDB diidentifikasi dengan pasangan <code>'nama_user'@'host_asal'</code>:</p>
+<div class="tw">
+  <table>
+    <tr><th>Pola Host Asal</th><th>Arti dan Cakupan Akses</th></tr>
+    <tr><td><code>'webuser'@'localhost'</code></td><td>Hanya diizinkan login jika berasal dari mesin yang sama secara lokal.</td></tr>
+    <tr><td><code>'webuser'@'10.0.0.20'</code></td><td>Hanya diizinkan login jika request jaringan berasal tepat dari IP 10.0.0.20.</td></tr>
+    <tr><td><code>'webuser'@'%'</code></td><td>Diizinkan login dari alamat IP mana saja melalui jaringan LAN maupun internet (*wildcard*).</td></tr>
+  </table>
+</div>
+<h2>Tingkatan Hak Akses (Privileges)</h2>
+<div class="tw">
+  <table>
+    <tr><th>Hak Akses (Privilege)</th><th>Tindakan yang Diperbolehkan</th></tr>
+    <tr><td><code>ALL PRIVILEGES</code></td><td>Memberikan seluruh hak akses pada level database/tabel yang ditentukan.</td></tr>
+    <tr><td><code>SELECT, INSERT, UPDATE</code></td><td>Hanya boleh membaca dan mengubah baris data tanpa hak menghapus tabel (`DROP`).</td></tr>
+    <tr><td><code>FLUSH PRIVILEGES;</code></td><td>Memerintahkan MariaDB memuat ulang tabel otorisasi memori seketika.</td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b4"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="5. Remote Access">
+<h1>Bab 5. Konfigurasi Remote Access &amp; Firewall</h1>
+<div class="co">🎯 <b>Tujuan:</b> Membuka listen address database agar dapat diakses dari server aplikasi eksternal dan mengamankan port 3306 melalui firewall UFW.</div>
+<h2>Mengapa MariaDB Menolak Koneksi Luar secara Default?</h2>
+<p>Secara default, instalasi MariaDB di Debian mengikat soket jaringan ke parameter <code>bind-address = 127.0.0.1</code>. Artinya, port 3306 hanya mendengarkan sinyal internal mesin (loopback interface), sehingga request jaringan dari komputer lain langsung ditolak (*Connection Refused*).</p>
+<h2>Pengaturan Berkas Konfigurasi 50-server.cnf</h2>
+<p>Untuk mengizinkan koneksi jaringan luar, ubah direktif di <code>/etc/mysql/mariadb.conf.d/50-server.cnf</code>:</p>
+<div class="tw">
+  <table>
+    <tr><th>Nilai Bind Address</th><th>Dampak Jaringan</th></tr>
+    <tr><td><code>bind-address = 127.0.0.1</code></td><td>Hanya menerima koneksi internal localhost server langsung.</td></tr>
+    <tr><td><code>bind-address = 0.0.0.0</code></td><td>Mendengarkan seluruh antarmuka jaringan (NIC fisik, Wi-Fi, dan LAN).</td></tr>
+  </table>
+</div>
+<h2>Pengamanan Port 3306 dengan Firewall (UFW)</h2>
+<div class="co">⚠️ Jangan membuka port database 3306 sembarangan ke internet publik. Di lingkungan produksi, selalu batasi subnet IP pengakses, misalnya: <code>sudo ufw allow from 10.0.0.20 to any port 3306 proto tcp</code>.</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b5"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="6. Backup & Restore">
+<h1>Bab 6. Backup &amp; Restore Database (Dump)</h1>
+<div class="co">🎯 <b>Tujuan:</b> Menggunakan utilitas `mariadb-dump` / `mysqldump` untuk menghasilkan cadangan SQL logika dan memulihkannya saat terjadi insiden kehilangan data.</div>
+<h2>Metode Cadangan: Logical Dump vs Physical Backup</h2>
+<div class="tw">
+  <table>
+    <tr><th>Kriteria</th><th>Logical Dump (`mariadb-dump`)</th><th>Physical Backup (Mariabackup / File Copy)</th></tr>
+    <tr><td>Bentuk Berkas</td><td>File teks biasa berisi rentetan instruksi SQL (`CREATE TABLE`, `INSERT INTO`).</td><td>Penyalinan blok data biner dan file tablespace mentah dari `/var/lib/mysql`.</td></tr>
+    <tr><td>Kelebihan</td><td>Sangat portabel: bisa dibaca manusia, diedit, dan dipulihkan ke versi MariaDB/MySQL yang berbeda.</td><td>Sangat cepat untuk database berukuran raksasa (terabyte).</td></tr>
+    <tr><td>Penggunaan Ideal</td><td>Database skala kecil hingga menengah, migrasi antar-server, dan backup berkala harian.</td><td>Enterprise sistem dengan kapasitas data masif dan kebutuhan snapshot instan.</td></tr>
+  </table>
+</div>
+<h2>Sintaks Ekspor dan Impor Data</h2>
+<ul>
+  <li><b>Backup:</b> <code>mariadb-dump -u [user] -p [nama_db] > file_backup.sql</code></li>
+  <li><b>Restore:</b> <code>mariadb -u [user] -p [nama_db] < file_backup.sql</code></li>
+</ul>
+<h2>Langkah Kerja</h2>
+<div data-st="b6"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="7. Troubleshooting">
+<h1>Bab 7. Troubleshooting &amp; Analisis Galat</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mendiagnosis penyebab umum koneksi database gagal, menangani error permission, dan memeriksa riwayat log MariaDB.</div>
+<h2>Diagnosis Masalah Umum Database</h2>
+<div class="tw">
+  <table>
+    <tr><th>Pesan Galat / Error</th><th>Kemungkinan Akar Masalah</th><th>Tindakan Solusi</th></tr>
+    <tr><td><code>ERROR 1045 (28000): Access denied for user</code></td><td>Password salah atau user tidak memiliki hak login dari host asal (misal terdaftar sebagai `user@localhost` tetapi login dari IP remote).</td><td>Periksa tabel `mysql.user` dan jalankan `GRANT ... TO 'user'@'%' IDENTIFIED BY '...'`.</td></tr>
+    <tr><td><code>ERROR 2003 (HY000): Can't connect to server (111 Connection Refused)</code></td><td>Daemon MariaDB belum menyala atau parameter `bind-address` masih mengunci di 127.0.0.1.</td><td>Cek `systemctl status mariadb` dan pastikan `bind-address = 0.0.0.0`.</td></tr>
+    <tr><td><code>ERROR 2003 (HY000): Connection timed out</code></td><td>Firewall (UFW/iptables) memblokir port 3306 atau rute jaringan terputus.</td><td>Jalankan <code>sudo ufw status</code> dan buka aturan port 3306 TCP.</td></tr>
+    <tr><td><code>ERROR 1049 (42000): Unknown database</code></td><td>Nama database belum dibuat di server atau salah ejaan (huruf besar/kecil berpengaruh di Linux).</td><td>Gunakan perintah <code>SHOW DATABASES;</code> untuk memastikan nama database yang ada.</td></tr>
+  </table>
+</div>
+<div class="co">ℹ️ Lokasi berkas log galat MariaDB di Debian berada di <code>/var/log/mysql/error.log</code>. Pantau pesan log runtime menggunakan perintah <code>sudo tail -n 20 /var/log/mysql/error.log</code>.</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b7"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="Lab Terminal">
+<h1>Lab Terminal MariaDB Interaktif</h1>
+<p>Selesaikan 6 misi praktikum administrasi database server di bawah ini. Uji setiap konfigurasi dan jalankan query SQL langsung di simulator. Password akun: <code>siswa123</code>.</p>
+<div class="lab">
+  <div class="tslot"></div>
+  <div>
+    <h3 style="margin-top:0">Daftar Misi Mandiri</h3>
+    <ul class="ms" id="ms"></ul>
+  </div>
+</div>
+</section>
+
+<section class="tab" data-title="Latihan">
+<h1>Latihan Soal &amp; Rangkuman</h1>
+<div id="quiz"></div>
+<h2>Rangkuman Inti</h2>
+<ul>
+  <li>MariaDB adalah RDBMS open-source yang sepenuhnya kompatibel dengan protokol MySQL dan port default TCP 3306.</li>
+  <li>Skrip <code>mariadb-secure-installation</code> wajib dijalankan setelah instalasi untuk menyingkirkan akun anonim, database pengujian, dan akses remote root.</li>
+  <li>SQL terbagi menjadi DDL untuk menyusun skema struktur data (seperti <code>CREATE</code>, <code>DROP</code>) dan DML untuk mengelola baris data (<code>SELECT</code>, <code>INSERT</code>, <code>UPDATE</code>, <code>DELETE</code>).</li>
+  <li>Keamanan database diatur via prinsip *least privilege* menggunakan format <code>'user'@'host'</code> dan perintah <code>GRANT</code>.</li>
+  <li>Untuk melayani server web eksternal, konfigurasi <code>bind-address</code> diubah ke <code>0.0.0.0</code> serta port 3306 dibuka pada firewall UFW.</li>
+  <li>Pencadangan rutin berbasis teks SQL dilakukan dengan <code>mariadb-dump</code> dan pemulihan memanfaatkan operator pengarah input <code>&lt;</code>.</li>
+</ul>
+</section>
+
+<!-- Terminal Simulator Widget -->
+<div id="tbox">
+  <div id="where">
+    <span></span>
+    <button id="rs" title="Kembalikan terminal ke kondisi semula">⟲ Reset Lab</button>
+  </div>
+  <div id="term">
+    <div id="log"></div>
+    <div id="ln">
+      <span id="ps"></span>
+      <input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Terminal Input">
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+const ST = {
+  b2: [
+    ['Masuk ke db-server', [['konsol db-server', 'Berpindah ke konsol mesin db-server. Server ini belum terpasang MariaDB.']]],
+    ['Perbarui paket & pasang MariaDB Server', [['sudo apt update', 'Memperbarui daftar paket repositori Debian 12.'], ['sudo apt install -y mariadb-server', 'Memasang database server MariaDB dan perkakas CLI klien.']], 'Di Debian 12, service MariaDB otomatis aktif dan berjalan segera setelah pemasangan.'],
+    ['Periksa status daemon database', [['systemctl status mariadb', 'Mengecek status service. Harus tertera active (running).'], ['sudo mariadb -e "SELECT VERSION();"', 'Menguji kueri cepat langsung dari terminal bash menggunakan opsi -e.']]],
+    ['Jalankan wizard pengamanan', [['sudo mariadb-secure-installation', 'Menjalankan skrip pengamanan: hapus anonymous user, matikan remote root, dan hapus test db. Ikuti instruksi di terminal.']]]
+  ],
+  b3: [
+    ['Pindah ke db-server', [['konsol db-server', 'Masuk ke konsol server database.']]],
+    ['Masuk ke shell interaktif MariaDB', [['sudo mariadb', 'Membuka console interaktif database sebagai superuser root. Prompt berubah menjadi MariaDB [(none)]>.']]],
+    ['Buat Database dan Tabel Baru', [['CREATE DATABASE sekolah;', 'Membuat database baru dengan nama sekolah.'], ['SHOW DATABASES;', 'Melihat daftar database yang ada di server.'], ['USE sekolah;', 'Memilih database sekolah sebagai konteks kerja aktif.'], ['CREATE TABLE siswa (id INT AUTO_INCREMENT PRIMARY KEY, nis VARCHAR(10), nama VARCHAR(50), jurusan VARCHAR(30));', 'Membuat tabel siswa dengan kolom ID, NIS, Nama, dan Jurusan.']]],
+    ['Manipulasi Data Siswa (DML)', [['INSERT INTO siswa (nis, nama, jurusan) VALUES ("12001", "Ahmad Fauzi", "TKJ");', 'Menambahkan baris data siswa pertama.'], ['INSERT INTO siswa (nis, nama, jurusan) VALUES ("12002", "Siti Aisyah", "RPL");', 'Menambahkan baris data siswa kedua.'], ['SELECT * FROM siswa;', 'Menampilkan seluruh baris data siswa dalam format tabel ASCII rapi.'], ['exit', 'Keluar dari shell MariaDB dan kembali ke terminal Bash Debian.']]]
+  ],
+  b4: [
+    ['Pindah ke db-server', [['konsol db-server', 'Manajemen akun user dilakukan langsung di database server.']]],
+    ['Masuk ke console MariaDB', [['sudo mariadb', 'Membuka shell SQL MariaDB.']]],
+    ['Buat user aplikasi khusus', [['CREATE USER "webuser"@"%" IDENTIFIED BY "dbpass123";', 'Membuat akun webuser yang boleh mengakses dari host jaringan mana saja (%) dengan password dbpass123.']]],
+    ['Berikan hak akses database sekolah', [['GRANT ALL PRIVILEGES ON sekolah.* TO "webuser"@"%";', 'Memberikan hak penuh atas database sekolah kepada user webuser.'], ['FLUSH PRIVILEGES;', 'Menyegarkan tabel privilege di memori server.']]],
+    ['Uji hak akses user baru secara lokal', [['exit', 'Keluar dari shell root.'], ['mariadb -u webuser -p sekolah', 'Mencoba login sebagai user webuser ke database sekolah. Masukkan password: dbpass123.'], ['SELECT * FROM siswa;', 'Membuktikan bahwa webuser dapat membaca data tabel.'], ['exit', 'Kembali ke terminal Bash.']]]
+  ],
+  b5: [
+    ['Pindah ke db-server', [['konsol db-server', 'Konfigurasi remote access dilakukan di db-server.']]],
+    ['Ubah bind-address agar mendengarkan semua IP', [['sudo sed -i "s/^bind-address.*/bind-address = 0.0.0.0/" /etc/mysql/mariadb.conf.d/50-server.cnf', 'Mengubah bind-address dari 127.0.0.1 menjadi 0.0.0.0 agar port 3306 menerima koneksi jaringan luar.'], ['sudo systemctl restart mariadb', 'Menyalakan ulang MariaDB agar bind-address baru diterapkan.']]],
+    ['Atur Firewall UFW', [['sudo apt install -y ufw', 'Memasang firewall UFW jika belum ada.'], ['sudo ufw allow 3306/tcp', 'Membuka port 3306 untuk koneksi database eksternal.'], ['sudo ufw enable', 'Mengaktifkan firewall. Jawab y saat konfirmasi.']]],
+    ['Uji akses remote dari mesin Client', [['konsol client', 'Pindah ke komputer client (10.0.0.10).'], ['mariadb -h 10.0.0.30 -u webuser -p sekolah', 'Menghubungi database di db-server (10.0.0.30) dari komputer lain melalui jaringan. Ketik password dbpass123.'], ['SELECT * FROM siswa;', 'Data berhasil diakses dari jarak jauh!'], ['exit', 'Kembali ke shell client.']]]
+  ],
+  b6: [
+    ['Pindah ke db-server', [['konsol db-server', 'Pencadangan dilakukan di db-server.']]],
+    ['Lakukan backup database ke file SQL', [['mariadb-dump -u root sekolah > ~/sekolah_backup.sql', 'Mengekspor seluruh struktur dan data database sekolah ke berkas teks SQL cadangan.'], ['cat ~/sekolah_backup.sql', 'Memeriksa isi berkas backup yang memuat query DDL dan DML lengkap.']]],
+    ['Simulasi bencana: Hapus tabel', [['sudo mariadb -e "DROP TABLE sekolah.siswa;"', 'Mensimulasikan insiden terhapusnya tabel siswa akibat kesalahan atau crash.'], ['sudo mariadb -e "SHOW TABLES FROM sekolah;"', 'Tabel siswa terbukti sudah hilang dari database!']]],
+    ['Restore data kembali dari backup', [['sudo mariadb sekolah < ~/sekolah_backup.sql', 'Mengimpor kembali berkas backup SQL untuk memulihkan tabel siswa.'], ['sudo mariadb -e "SELECT * FROM sekolah.siswa;"', 'Data berhasil dipulihkan utuh seperti sedia kala!']]]
+  ],
+  b7: [
+    ['Pindah ke db-server', [['konsol db-server', 'Audit galat dilakukan di server.']]],
+    ['Periksa port yang sedang mendengarkan (listen)', [['sudo ss -tulpn | grep 3306', 'Melihat apakah socket port 3306 sedang aktif didengarkan oleh proses mariadbd.']]],
+    ['Pantau error log server', [['sudo tail -n 15 /var/log/mysql/error.log', 'Menampilkan rekaman aktivitas terkini dan pesan kesalahan dari database daemon.']]],
+    ['Simulasi galat Access Denied dari client', [['konsol client', 'Pindah ke client.'], ['mariadb -h 10.0.0.30 -u webuser -p', 'Mencoba login dengan mengetikkan password yang sengaja disalahkan.'], ['konsol db-server', 'Kembali ke db-server.'], ['sudo grep "Access denied" /var/log/mysql/error.log', 'Melihat rekaman kegagalan autentikasi di file log.']]]
+  ]
+};
+
+const tabs = Array.from(document.querySelectorAll('.tab'));
+const nav = document.getElementById('nav');
+const TB = document.getElementById('tbox');
+
+function show(i) {
+  tabs.forEach((t, k) => {
+    if (k === i) {
+      t.classList.add('active');
+    } else {
+      t.classList.remove('active');
+    }
+  });
+
+  const navBtns = nav.querySelectorAll('button');
+  navBtns.forEach((b, k) => {
+    b.classList.toggle('on', k === i);
+  });
+
+  const bar = document.getElementById('bar');
+  if (bar) bar.style.width = (i / (tabs.length - 1) * 100) + '%';
+
+  const currentTab = tabs[i];
+  const sl = currentTab.querySelector('.tslot');
+  if (sl) {
+    sl.appendChild(TB);
+    TB.style.display = 'block';
+  } else if (currentTab.dataset.title === 'Cover' || currentTab.dataset.title === '1. Konsep' || currentTab.dataset.title === 'Latihan') {
+    TB.style.display = 'none';
+  } else {
+    currentTab.appendChild(TB);
+    TB.style.display = 'block';
+  }
+  window.scrollTo(0, 0);
+}
+
+// Inisialisasi tombol navbar
+nav.innerHTML = '';
+tabs.forEach((t, k) => {
+  const b = document.createElement('button');
+  b.textContent = t.dataset.title;
+  b.onclick = () => show(k);
+  nav.appendChild(b);
+
+  const oldNv = t.querySelector('.nv');
+  if (oldNv) oldNv.remove();
+
+  const d = document.createElement('div');
+  d.className = 'nv';
+
+  const prevBtn = k > 0 ? '<button class="btn-prev">← Sebelumnya</button>' : '<div></div>';
+  const nextBtn = k < tabs.length - 1 ? '<button class="btn-next">Berikutnya →</button>' : '<div></div>';
+
+  d.innerHTML = prevBtn + nextBtn;
+  if (k > 0) d.querySelector('.btn-prev').onclick = () => show(k - 1);
+  if (k < tabs.length - 1) d.querySelector('.btn-next').onclick = () => show(k + 1);
+  t.appendChild(d);
+});
+
+// Toggle Dark/Light Theme
+document.getElementById('tg').onclick = () => {
+  const r = document.documentElement;
+  const isDark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+  r.dataset.theme = isDark ? 'light' : 'dark';
+};
+
+// Fullscreen API toggle
+const btnFs = document.getElementById('btnFs');
+btnFs.onclick = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    btnFs.textContent = '✕ Exit Full';
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+    btnFs.textContent = '⛶ Fullscreen';
+  }
+};
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) btnFs.textContent = '⛶ Fullscreen';
+});
+
+const $ = s => document.querySelector(s);
+const T = $('#term');
+const LOG = $('#log');
+const LN = $('#ln');
+const I = $('#in');
+const PS = $('#ps');
+
+// Render tabel langkah kerja
+document.querySelectorAll('[data-st]').forEach(el => {
+  let k = 0;
+  const list = ST[el.dataset.st];
+  if (!list) return;
+  list.forEach(([t, rows, n]) => {
+    k++;
+    const h = document.createElement('h3');
+    h.textContent = 'Langkah ' + k + '. ' + t;
+    const w = document.createElement('div');
+    w.className = 'tw';
+    const tb = document.createElement('table');
+    tb.innerHTML = '<tr><th style="width:40%">Perintah</th><th>Fungsi</th></tr>';
+    rows.forEach(([c, f]) => {
+      const tr = tb.insertRow();
+      const a = tr.insertCell();
+      const b = tr.insertCell();
+      const cd = document.createElement('code');
+      cd.textContent = c;
+      a.appendChild(cd);
+      const bt = document.createElement('button');
+      bt.className = 'try';
+      bt.textContent = 'Coba';
+      bt.onclick = () => {
+        I.value = c;
+        I.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        I.focus();
+      };
+      a.appendChild(bt);
+      b.textContent = f;
+    });
+    w.appendChild(tb);
+    el.append(h, w);
+    if (n) {
+      const p = document.createElement('p');
+      p.className = 'co';
+      p.textContent = n;
+      el.appendChild(p);
+    }
+  });
+});
+
+const NET = { client: '10.0.0.10', 'web-app': '10.0.0.20', 'db-server': '10.0.0.30' };
+const PW = { siswa: 'siswa123', root: 'root123' };
+const CMDS = 'help clear reset konsol ls cd pwd cat mkdir touch rm cp chmod chown echo sed grep tail whoami hostname id date uname ip ping nc sudo apt systemctl mariadb mysql mariadbd mariadb-dump mysqldump mariadb-secure-installation ufw ss exit quit'.split(' ');
+
+let S, stack, D, clk, ec, hist = [], hi = 0, pend = null, busy = 0;
+let inMariaDBShell = false;
+let currentDb = null;
+let currentDbUser = 'root';
+
+const home = u => u === 'root' ? '/root' : '/home/' + u;
+const canWu = (u, p) => u === 'root' || p === '/tmp' || p.startsWith('/tmp/') || p.startsWith('/home/' + u + '/');
+const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const ts = () => { clk++; return '2026-10-19 ' + pad(Math.floor(clk / 60) % 60) + ':' + pad(clk % 60); };
+
+function ab(s, p) {
+  if (p === '~' || p.startsWith('~/')) p = home(s.u) + p.slice(1);
+  if (p[0] !== '/') p = s.cwd + '/' + p;
+  const o = [];
+  p.split('/').forEach(x => {
+    if (x === '' || x === '.') return;
+    if (x === '..') o.pop();
+    else o.push(x);
+  });
+  return '/' + o.join('/');
+}
+
+const kids = (s, P) => {
+  const b = P === '/' ? '/' : P + '/';
+  return Object.keys(s.fs).filter(k => k !== P && k.startsWith(b) && !k.slice(b.length).includes('/')).map(k => k.split('/').pop()).sort();
+};
+const mstr = m => [...m].map(c => 'rwx'.split('').map((x, i) => (c >> (2 - i) & 1) ? x : '-').join('')).join('');
+
+function mkhost(h) {
+  const fs = {};
+  ['/', '/home', '/home/siswa', '/etc', '/var', '/var/log', '/tmp', '/usr', '/root'].forEach(p => {
+    fs[p] = { d: 1, m: p === '/tmp' ? '777' : '755', o: p === '/home/siswa' ? 'siswa' : 'root', g: p === '/home/siswa' ? 'siswa' : 'root' };
+  });
+  fs['/etc/hostname'] = { c: h, m: '644', o: 'root', g: 'root' };
+  return {
+    name: h, ip: NET[h], u: 'siswa', cwd: '/home/siswa', fs,
+    inst: 0, act: 0, en: 0,
+    bind: '127.0.0.1',
+    ufw: { on: 0, allow: [] },
+    pk: {},
+    errorLog: [],
+    dbs: {
+      information_schema: { tables: {} },
+      mysql: { tables: {} },
+      performance_schema: { tables: {} },
+      sys: { tables: {} }
+    },
+    users: [
+      { user: 'root', host: 'localhost', pass: '' },
+      { user: 'mariadb.sys', host: 'localhost', pass: '' }
+    ],
+    secured: false
+  };
+}
+
+function instMariaDB(s) {
+  s.inst = 1; s.act = 1; s.en = 1;
+  ['/etc/mysql', '/etc/mysql/mariadb.conf.d', '/var/lib/mysql', '/var/log/mysql', '/run/mysqld'].forEach(p => {
+    s.fs[p] = { d: 1, m: '755', o: 'mysql', g: 'mysql' };
+  });
+  s.fs['/etc/mysql/mariadb.conf.d/50-server.cnf'] = {
+    c: `[server]
+[mysqld]
+user                    = mysql
+pid-file                = /run/mysqld/mysqld.pid
+basedir                 = /usr
+datadir                 = /var/lib/mysql
+tmpdir                  = /tmp
+lc-messages-dir         = /usr/share/mysql
+bind-address            = 127.0.0.1
+port                    = 3306
+log_error               = /var/log/mysql/error.log
+`,
+    m: '644', o: 'root', g: 'root'
+  };
+  s.errorLog.push(ts() + ' 0 [Note] Starting MariaDB 10.11.6-MariaDB-0+deb12u1 source distribution');
+  s.errorLog.push(ts() + ' 0 [Note] InnoDB: Initializing buffer pool, total size = 128.0M');
+  s.errorLog.push(ts() + ' 0 [Note] Server socket created on IP: \'' + s.bind + '\'.');
+  s.errorLog.push(ts() + ' 0 [Note] /usr/sbin/mariadbd: ready for connections. Version: \'10.11.6-MariaDB\'  socket: \'/run/mysqld/mysqld.sock\'  port: 3306');
+}
+
+function init() {
+  S = {
+    client: mkhost('client'),
+    'web-app': mkhost('web-app'),
+    'db-server': mkhost('db-server')
+  };
+  S.client.pk = { mariadb: 1, mysql: 1, nc: 1 };
+  S['web-app'].pk = { mariadb: 1, mysql: 1 };
+
+  clk = 100;
+  stack = [{ h: 'client' }];
+  D = {};
+  inMariaDBShell = false;
+  currentDb = null;
+  currentDbUser = 'root';
+  LOG.innerHTML = '';
+  pend = null;
+  busy = 0;
+
+  out('Debian GNU/Linux 12 (bookworm) - Simulasi MariaDB Full Page');
+  out('Ketik help untuk daftar perintah. Password sudo semua akun: siswa123', 'd');
+  rm();
+  setPs();
+}
+
+const host = () => stack[stack.length - 1].h;
+
+function out(t, c) {
+  const d = document.createElement('div');
+  if (c) d.className = c;
+  d.textContent = t;
+  LOG.appendChild(d);
+  T.scrollTop = T.scrollHeight;
+}
+function outH(h) {
+  const d = document.createElement('div');
+  d.innerHTML = h;
+  LOG.appendChild(d);
+  T.scrollTop = T.scrollHeight;
+}
+
+function pshtml() {
+  if (inMariaDBShell) {
+    const dbName = currentDb ? currentDb : '(none)';
+    return '<span class="y">MariaDB [' + dbName + ']&gt;</span> ';
+  }
+  const s = S[host()], hm = home(s.u), c = s.cwd, p = c === hm ? '~' : c.startsWith(hm + '/') ? '~' + c.slice(hm.length) : c;
+  return '<span class="g">' + s.u + '@' + host() + '</span>:<span class="b">' + p + '</span>' + (s.u === 'root' ? '#' : '$') + ' ';
+}
+
+function setPs() {
+  PS.innerHTML = pshtml();
+  const modeTxt = inMariaDBShell ? ' [MariaDB Shell: ' + (currentDb || 'none') + ']' : '';
+  $('#where span').textContent = 'Mesin Aktif: ' + host() + ' (' + S[host()].ip + ')' + modeTxt;
+  LN.style.display = (busy && !pend) ? 'none' : 'flex';
+}
+
+function ask(p, hid) {
+  return new Promise(res => {
+    const L = p.split('\n'), lp = L.pop();
+    L.forEach(l => out(l));
+    PS.textContent = lp;
+    I.type = hid ? 'password' : 'text';
+    pend = { res, lp, hid };
+    LN.style.display = 'flex';
+    I.focus();
+  });
+}
+
+const M = [
+  ['Pasang dan aktifkan MariaDB di db-server',
+   'konsol db-server → sudo apt update && sudo apt install -y mariadb-server',
+   'Menyiapkan service database server di host tujuan.',
+   () => S['db-server'].inst && S['db-server'].act],
+
+  ['Jalankan pengamanan mariadb-secure-installation',
+   'sudo mariadb-secure-installation di db-server',
+   'Mengunci akun root, membuang user anonim, dan menghapus database test.',
+   () => S['db-server'].secured],
+
+  ['Buat database sekolah dan tabel siswa',
+   'sudo mariadb → CREATE DATABASE sekolah; USE sekolah; CREATE TABLE siswa ...;',
+   'Menyusun struktur skema relational database (DDL) dan mengisi data.',
+   () => {
+     const db = S['db-server'].dbs['sekolah'];
+     return db && db.tables['siswa'] && db.tables['siswa'].rows && db.tables['siswa'].rows.length > 0;
+   }],
+
+  ['Buat user khusus webuser@%',
+   'CREATE USER "webuser"@"%" IDENTIFIED BY "dbpass123"; GRANT ALL ON sekolah.* TO "webuser"@"%";',
+   'Menerapkan hak akses least-privilege untuk backend aplikasi web.',
+   () => {
+     const u = S['db-server'].users.find(x => x.user === 'webuser' && (x.host === '%' || x.host === '10.0.0.%'));
+     return !!u;
+   }],
+
+  ['Buka remote bind-address 0.0.0.0 & firewall 3306',
+   'Ubah bind-address = 0.0.0.0 di 50-server.cnf, restart mariadb, buka ufw port 3306, lalu uji dari client',
+   'Mengizinkan koneksi database antar-mesin server lewat jaringan TCP.',
+   () => {
+     const s = S['db-server'];
+     const conf = (s.fs['/etc/mysql/mariadb.conf.d/50-server.cnf'] || {}).c || '';
+     const bindOk = conf.includes('bind-address            = 0.0.0.0') || conf.includes('bind-address = 0.0.0.0');
+     return s.act && bindOk && s.ufw.allow.includes(3306);
+   }],
+
+  ['Lakukan backup database sekolah ke file SQL',
+   'mariadb-dump -u root sekolah > ~/sekolah_backup.sql',
+   'Menyimpan cadangan logikal (SQL Dump) untuk mitigasi bencana data.',
+   () => {
+     const s = S['db-server'];
+     const f = s.fs['/home/siswa/sekolah_backup.sql'] || s.fs['/root/sekolah_backup.sql'];
+     return !!f && f.c.includes('CREATE TABLE') && f.c.includes('siswa');
+   }]
+];
+
+function rm() {
+  const u = $('#ms');
+  u.innerHTML = '';
+  M.forEach((m, k) => {
+    const l = document.createElement('li');
+    l.id = 'm' + k;
+    l.innerHTML = '<b>Misi ' + (k + 1) + ': ' + m[0] + '</b><details><summary>Petunjuk</summary>' + m[1] + '<br><i>Mengapa: ' + m[2] + '</i></details>';
+    u.appendChild(l);
+  });
+}
+const chk = () => M.forEach((m, k) => {
+  if (!D[k] && m[3]()) D[k] = 1;
+  $('#m' + k).classList.toggle('ok', !!D[k]);
+});
+
+function rd(s, p, sd) {
+  let P = ab(s, p);
+  const n = s.fs[P];
+  if (!n) return { e: 'No such file or directory' };
+  if (n.l) { P = n.l; return rd(s, P, sd); }
+  if (n.d) return { e: 'Is a directory' };
+  if (n.m === '000' && !sd) return { e: 'Permission denied' };
+  return { c: n.c };
+}
+function wr(s, P, c, sd) {
+  const owner = sd ? 'root' : s.u;
+  const grp = sd ? 'root' : s.u;
+  if (s.fs[P] && !s.fs[P].d) s.fs[P].c = c;
+  else s.fs[P] = { c, m: '644', o: owner, g: grp };
+}
+
+function printAsciiTable(headers, rows) {
+  const widths = headers.map((h, i) => {
+    let max = h.length;
+    rows.forEach(r => {
+      const val = String(r[i] !== undefined ? r[i] : 'NULL');
+      if (val.length > max) max = val.length;
+    });
+    return max + 2;
+  });
+
+  const sep = '+' + widths.map(w => '-'.repeat(w)).join('+') + '+';
+  const headRow = '|' + headers.map((h, i) => ' ' + h.padEnd(widths[i] - 1)).join('|') + '|';
+
+  const lines = [sep, headRow, sep];
+  rows.forEach(r => {
+    const rowStr = '|' + r.map((cell, i) => {
+      const val = String(cell !== undefined ? cell : 'NULL');
+      return ' ' + val.padEnd(widths[i] - 1);
+    }).join('|') + '|';
+    lines.push(rowStr);
+  });
+  lines.push(sep);
+  lines.push(rows.length + ' row' + (rows.length === 1 ? '' : 's') + ' in set (0.001 sec)');
+  return lines.join('\n');
+}
+
+function executeSQLQuery(serverObj, query, userContext) {
+  const q = query.trim().replace(/;$/, '');
+  const lower = q.toLowerCase();
+
+  if (lower === 'show databases') {
+    const dbs = Object.keys(serverObj.dbs).map(d => [d]);
+    return { ok: true, out: printAsciiTable(['Database'], dbs) };
+  }
+
+  if (lower.startsWith('use ')) {
+    const dbName = q.slice(4).trim().replace(/[`"']/g, '');
+    if (!serverObj.dbs[dbName]) {
+      return { ok: false, out: "ERROR 1049 (42000): Unknown database '" + dbName + "'" };
+    }
+    currentDb = dbName;
+    return { ok: true, out: 'Database changed' };
+  }
+
+  if (lower === 'show tables') {
+    if (!currentDb || !serverObj.dbs[currentDb]) {
+      return { ok: false, out: 'ERROR 1046 (3D000): No database selected' };
+    }
+    const tbls = Object.keys(serverObj.dbs[currentDb].tables).map(t => [t]);
+    return { ok: true, out: printAsciiTable(['Tables_in_' + currentDb], tbls) };
+  }
+
+  if (lower.startsWith('create database ')) {
+    const dbName = q.slice(16).trim().replace(/[`"']/g, '');
+    if (serverObj.dbs[dbName]) {
+      return { ok: false, out: "ERROR 1007 (HY000): Can't create database '" + dbName + "'; database exists" };
+    }
+    serverObj.dbs[dbName] = { tables: {} };
+    return { ok: true, out: 'Query OK, 1 row affected (0.002 sec)' };
+  }
+
+  if (lower.startsWith('create table ')) {
+    if (!currentDb || !serverObj.dbs[currentDb]) {
+      return { ok: false, out: 'ERROR 1046 (3D000): No database selected' };
+    }
+    const match = q.match(/create\s+table\s+([a-zA-Z0-9_]+)\s*\((.+)\)/i);
+    if (!match) {
+      return { ok: false, out: 'ERROR 1064 (42000): You have an error in your SQL syntax' };
+    }
+    const tableName = match[1];
+    const defs = match[2].split(',').map(c => c.trim().split(/\s+/)[0]);
+    serverObj.dbs[currentDb].tables[tableName] = {
+      cols: defs,
+      rows: []
+    };
+    return { ok: true, out: 'Query OK, 0 rows affected (0.012 sec)' };
+  }
+
+  if (lower.startsWith('insert into ')) {
+    if (!currentDb || !serverObj.dbs[currentDb]) {
+      return { ok: false, out: 'ERROR 1046 (3D000): No database selected' };
+    }
+    const match = q.match(/insert\s+into\s+([a-zA-Z0-9_]+)(?:\s*\(([^)]+)\))?\s+values\s*\((.+)\)/i);
+    if (!match) {
+      return { ok: false, out: 'ERROR 1064 (42000): You have an error in your SQL syntax' };
+    }
+    const tableName = match[1];
+    const tbl = serverObj.dbs[currentDb].tables[tableName];
+    if (!tbl) {
+      return { ok: false, out: "ERROR 1146 (42S02): Table '" + currentDb + "." + tableName + "' doesn't exist" };
+    }
+    const rawVals = match[3].split(',').map(v => v.trim().replace(/^['"]|['"]$/g, ''));
+    if (tbl.cols.includes('id') && rawVals.length === tbl.cols.length - 1) {
+      const newId = String(tbl.rows.length + 1);
+      tbl.rows.push([newId, ...rawVals]);
+    } else {
+      tbl.rows.push(rawVals);
+    }
+    return { ok: true, out: 'Query OK, 1 row affected (0.003 sec)' };
+  }
+
+  if (lower.startsWith('select * from ')) {
+    if (!currentDb || !serverObj.dbs[currentDb]) {
+      return { ok: false, out: 'ERROR 1046 (3D000): No database selected' };
+    }
+    const tableName = q.slice(14).trim().replace(/[`"']/g, '');
+    const tbl = serverObj.dbs[currentDb].tables[tableName];
+    if (!tbl) {
+      return { ok: false, out: "ERROR 1146 (42S02): Table '" + currentDb + "." + tableName + "' doesn't exist" };
+    }
+    return { ok: true, out: printAsciiTable(tbl.cols, tbl.rows) };
+  }
+
+  if (lower.startsWith('create user ')) {
+    const match = q.match(/create\s+user\s+["']?([^"'@]+)["']?@["']?([^"' ]+)["']?\s+identified\s+by\s+["']([^"']+)["']/i);
+    if (!match) {
+      return { ok: false, out: 'ERROR 1064 (42000): You have an error in your SQL syntax near CREATE USER' };
+    }
+    const uName = match[1], uHost = match[2], uPass = match[3];
+    serverObj.users = serverObj.users.filter(x => !(x.user === uName && x.host === uHost));
+    serverObj.users.push({ user: uName, host: uHost, pass: uPass });
+    return { ok: true, out: 'Query OK, 0 rows affected (0.004 sec)' };
+  }
+
+  if (lower.startsWith('grant ')) {
+    return { ok: true, out: 'Query OK, 0 rows affected (0.002 sec)' };
+  }
+
+  if (lower === 'flush privileges') {
+    return { ok: true, out: 'Query OK, 0 rows affected (0.001 sec)' };
+  }
+
+  if (lower.startsWith('drop table ')) {
+    const raw = q.slice(11).trim().replace(/[`"']/g, '');
+    let db = currentDb;
+    let tblName = raw;
+    if (raw.includes('.')) {
+      [db, tblName] = raw.split('.');
+    }
+    if (!db || !serverObj.dbs[db] || !serverObj.dbs[db].tables[tblName]) {
+      return { ok: false, out: "ERROR 1051 (42S02): Unknown table '" + raw + "'" };
+    }
+    delete serverObj.dbs[db].tables[tblName];
+    return { ok: true, out: 'Query OK, 0 rows affected (0.008 sec)' };
+  }
+
+  if (lower.startsWith('select version()')) {
+    return { ok: true, out: printAsciiTable(['VERSION()'], [['10.11.6-MariaDB-0+deb12u1']]) };
+  }
+
+  return { ok: true, out: 'Query OK (simulated statement executed)' };
+}
+
+async function runSecureInstallation(srv) {
+  out('NOTE: RUNNING ALL PARTS OF THIS SCRIPT IS RECOMMENDED FOR ALL MariaDB\n      SERVERS IN PRODUCTION USE!  PLEASE READ EACH STEP CAREFULLY!\n');
+  await ask('Enter current password for root (enter for none): ', 1);
+  out('OK, successfully used password, moving on...\n');
+
+  const swUnix = await ask('Switch to unix_socket authentication [Y/n] ');
+  out('Enabled unix_socket authentication.');
+
+  const chPass = await ask('Change the root password? [Y/n] ');
+  if (/^y/i.test(chPass) || chPass === '') {
+    await ask('New password: ', 1);
+    await ask('Re-enter new password: ', 1);
+    out('Password updated successfully!');
+  }
+
+  const rmAnon = await ask('Remove anonymous users? [Y/n] ');
+  out(' ... Success!');
+
+  const disRoot = await ask('Disallow root login remotely? [Y/n] ');
+  out(' ... Success!');
+
+  const rmTest = await ask('Remove test database and access to it? [Y/n] ');
+  if (srv.dbs['test']) delete srv.dbs['test'];
+  out(' - Dropping test database...\n ... Success!');
+
+  const relPriv = await ask('Reload privilege tables now? [Y/n] ');
+  out(' ... Success!\n\nAll done!  If you\'ve completed all of the above steps, your MariaDB\ninstallation should now be secure.\n\nThanks for using MariaDB!');
+  srv.secured = true;
+}
+
+function tok(l) {
+  const r = [], re = /"([^"]*)"|'([^']*)'|(>>|>|<|\||&&|[^\s|<>&"']+)/g;
+  let m;
+  while ((m = re.exec(l))) {
+    if (m[1] !== undefined) r.push({ v: m[1], q: 1 });
+    else if (m[2] !== undefined) r.push({ v: m[2], q: 1 });
+    else r.push({ v: m[3], q: 0 });
+  }
+  return r;
+}
+
+async function run(line) {
+  if (inMariaDBShell) {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    if (trimmed.toLowerCase() === 'exit' || trimmed.toLowerCase() === 'quit') {
+      inMariaDBShell = false;
+      out('Bye');
+      return;
+    }
+    const targetHost = S[host()];
+    const res = executeSQLQuery(targetHost, trimmed, currentDbUser);
+    out(res.out);
+    return;
+  }
+
+  const tk = tok(line);
+  if (!tk.length) return;
+  const segs = [[]];
+  tk.forEach(t => (!t.q && t.v === '&&') ? segs.push([]) : segs[segs.length - 1].push(t));
+
+  for (let q = 0; q < segs.length; q++) {
+    if (q && ec) break;
+    ec = 0;
+    const st = [[]];
+    segs[q].forEach(t => (!t.q && t.v === '|') ? st.push([]) : st[st.length - 1].push(t));
+    let inp = null;
+
+    for (let i = 0; i < st.length; i++) {
+      const a = [];
+      let rdIn = null, rdOut = null;
+      const tsArr = st[i];
+
+      for (let j = 0; j < tsArr.length; j++) {
+        const t = tsArr[j];
+        if (!t.q && (t.v === '>' || t.v === '>>')) {
+          rdOut = { ap: t.v === '>>', f: (tsArr[++j] || {}).v };
+        } else if (!t.q && t.v === '<') {
+          rdIn = { f: (tsArr[++j] || {}).v };
+        } else {
+          a.push(t.v);
+        }
+      }
+      if (!a.length) continue;
+
+      if (rdIn && rdIn.f) {
+        const s = S[host()];
+        const pIn = rd(s, rdIn.f, 0);
+        if (pIn.e) {
+          out('bash: ' + rdIn.f + ': ' + pIn.e);
+          ec = 1;
+          continue;
+        }
+        inp = pIn.c;
+      }
+
+      const last = i === st.length - 1;
+      const buf = [];
+      const o = m => { (last && !rdOut) ? out(m) : buf.push(m); };
+
+      await exec(a, inp, o, 0);
+
+      if (rdOut && rdOut.f) {
+        const s = S[host()], P = ab(s, rdOut.f), par = P.replace(/\/[^/]*$/, '') || '/';
+        if (!s.fs[par]) {
+          out('bash: ' + rdOut.f + ': No such file or directory');
+          ec = 1;
+        } else if (!canWu(s.u, P)) {
+          out('bash: ' + rdOut.f + ': Permission denied');
+          ec = 1;
+        } else {
+          const old = s.fs[P];
+          wr(s, P, (rdOut.ap && old ? old.c : '') + buf.join('\n') + '\n', 0);
+        }
+      }
+      inp = buf.join('\n');
+    }
+  }
+}
+
+async function exec(a, inp, o, sd) {
+  const h = host(), s = S[h], x = a[0], r = a.slice(1), e = m => { o(m); ec = 1; };
+
+  switch (x) {
+  case 'sudo':
+    if (r.length < 1) { e('usage: sudo command'); break; }
+    return exec(r, inp, o, 1);
+
+  case 'help':
+    o('Perintah MariaDB Lab: ' + CMDS.join(' ') + '\nPindah mesin: konsol client | konsol db-server | konsol web-app | reset');
+    break;
+
+  case 'clear':
+    LOG.innerHTML = '';
+    break;
+
+  case 'reset':
+    init();
+    return;
+
+  case 'konsol':
+    if (!NET[r[0]]) { e('usage: konsol client|db-server|web-app'); break; }
+    stack = [{ h: r[0] }];
+    o('Berpindah ke konsol ' + r[0] + ' (' + NET[r[0]] + ').');
+    break;
+
+  case 'whoami': o(sd ? 'root' : s.u); break;
+  case 'hostname': o(h); break;
+  case 'id': o(sd ? 'uid=0(root) gid=0(root) groups=0(root)' : 'uid=1000(siswa) gid=1000(siswa) groups=1000(siswa),27(sudo)'); break;
+  case 'date': o('Mon Oct 19 09:30:00 WIB 2026'); break;
+  case 'uname': o(r.includes('-a') ? 'Linux ' + h + ' 6.1.0-21-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.90-1 (2024-05-03) x86_64 GNU/Linux' : 'Linux'); break;
+  case 'pwd': o(s.cwd); break;
+
+  case 'ls': {
+    let fl = '', ps = []; r.forEach(z => z[0] === '-' ? fl += z : ps.push(z)); if (!ps.length) ps = ['.'];
+    const row = (nm, n) => fl.includes('l') ? (n.d ? 'd' : n.l ? 'l' : '-') + mstr(n.m || '644') + ' 1 ' + (n.o || s.u) + ' ' + (n.g || s.u) + ' ' + String(n.d ? 4096 : (n.c || '').length).padStart(5) + ' Oct 19 09:00 ' + nm : nm;
+    for (const p of ps) {
+      const P = ab(s, p), n = s.fs[P];
+      if (!n) { e("ls: cannot access '" + p + "': No such file or directory"); continue; }
+      if (n.d && !fl.includes('d')) {
+        let k = kids(s, P); k = fl.includes('a') ? ['.', '..', ...k] : k.filter(z => z[0] !== '.');
+        if (ps.length > 1) o(p + ':');
+        const L = k.map(z => row(z, z === '.' || z === '..' ? n : s.fs[(P === '/' ? '' : P) + '/' + z]));
+        if (fl.includes('l')) { o('total ' + k.length * 4); L.forEach(z => o(z)); }
+        else if (L.length) o(L.join('  '));
+      } else o(row(p, n));
+    }
+    break;
+  }
+
+  case 'cd': {
+    const p = r[0] || '~', P = ab(s, p), n = s.fs[P];
+    if (!n) { e('bash: cd: ' + p + ': No such file or directory'); break; }
+    if (!n.d) { e('bash: cd: ' + p + ': Not a directory'); break; }
+    s.cwd = P;
+    break;
+  }
+
+  case 'cat': {
+    if (!r.length && inp != null) { o(inp); break; }
+    for (const p of r) {
+      const t = rd(s, p, sd);
+      if (t.e) e('cat: ' + p + ': ' + t.e); else o(t.c.replace(/\n$/, ''));
+    }
+    break;
+  }
+
+  case 'echo': {
+    let t = r.slice(); const en = t[0] === '-e'; if (en) t.shift();
+    let z = t.join(' '); if (en) z = z.replace(/\\n/g, '\n').replace(/\\t/g, '\t');
+    o(z);
+    break;
+  }
+
+  case 'sed': {
+    const i = r.includes('-i'), rest = r.filter(z => z !== '-i'), sc = rest[0], p = rest[1], m = sc && sc.match(/^s\/(.*?)\/(.*?)\/(g?)$/);
+    if (!m || !p) { e('usage: sed [-i] s/pola/ganti/ file'); break; }
+    const t = rd(s, p, 1);
+    if (t.e) { e("sed: can't read " + p + ': ' + t.e); break; }
+    const P = ab(s, p);
+    if (i && !sd && !canWu(s.u, P)) { e("sed: couldn't open temporary file " + P.replace(/[^/]*$/, '') + 'sedXXXXXX: Permission denied'); break; }
+    const re = new RegExp(m[1].replace(/\\\?/g, '?').replace(/\\\+/g, '+'), m[3]);
+    const res = t.c.split('\n').map(l => l.replace(re, m[2])).join('\n');
+    if (i) wr(s, P, res, sd); else o(res.replace(/\n$/, ''));
+    break;
+  }
+
+  case 'grep': {
+    const fl = r.filter(z => z[0] === '-'), ar = r.filter(z => z[0] !== '-'), pat = ar[0];
+    if (!pat) { e('Usage: grep [OPTION]... PATTERNS [FILE]...'); break; }
+    let txt;
+    if (ar[1]) { const t = rd(s, ar[1], sd); if (t.e) { e('grep: ' + ar[1] + ': ' + t.e); break; } txt = t.c; }
+    else txt = inp || '';
+    let re; try { re = new RegExp(pat, fl.includes('-i') ? 'i' : ''); } catch (z) { e('grep: Invalid regular expression'); break; }
+    const Ls = txt.split('\n').filter(l => re.test(l) !== fl.includes('-v'));
+    Ls.forEach(l => o(l)); if (!Ls.length) ec = 1;
+    break;
+  }
+
+  case 'tail': {
+    let n = 10, f;
+    for (let i = 0; i < r.length; i++) { if (r[i] === '-n') n = +r[++i]; else if (r[i][0] !== '-') f = r[i]; }
+    if (f === '/var/log/mysql/error.log' && s.name === 'db-server') {
+      if (!sd) { e("tail: cannot open '" + f + "' for reading: Permission denied"); break; }
+      s.errorLog.slice(-n).forEach(l => o(l));
+      break;
+    }
+    let txt = inp;
+    if (f) { const t = rd(s, f, sd); if (t.e) { e("tail: cannot open '" + f + "' for reading: " + t.e); break; } txt = t.c; }
+    (txt || '').split('\n').slice(-n).forEach(l => o(l));
+    break;
+  }
+
+  case 'ss': {
+    if (r.includes('-tulpn') || r.includes('-tuln') || r.includes('-tulp')) {
+      if (s.inst && s.act) {
+        const conf = (s.fs['/etc/mysql/mariadb.conf.d/50-server.cnf'] || {}).c || '';
+        const isAll = conf.includes('bind-address            = 0.0.0.0') || conf.includes('bind-address = 0.0.0.0');
+        const bindIp = isAll ? '0.0.0.0:3306' : '127.0.0.1:3306';
+        o('Netid State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess\ntcp   LISTEN 0      80     ' + bindIp.padEnd(20) + '0.0.0.0:*    users:(("mariadbd",pid=842,fd=19))');
+      } else {
+        o('Netid State  Recv-Q Send-Q Local Address:Port  Peer Address:PortProcess');
+      }
+    } else {
+      o('State Recv-Q Send-Q Local Address:Port Peer Address:Port');
+    }
+    break;
+  }
+
+  case 'apt': case 'apt-get': {
+    if (!sd) { e('E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)\nE: Unable to acquire the dpkg frontend lock, are you root?'); break; }
+    if (r[0] === 'update') {
+      o('Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]\nFetched 151 kB in 1s (180 kB/s)\nReading package lists... Done\nBuilding dependency tree... Done\nAll packages are up to date.');
+      break;
+    }
+    if (r[0] !== 'install') { e('Usage: apt [update|install] paket'); break; }
+    const pk = r.slice(1).filter(z => z[0] !== '-'); if (!pk.length) { e('E: No packages specified'); break; }
+    for (const p of pk) {
+      if (p === 'mariadb-server' || p === 'mariadb-client') {
+        if (s.inst) { o('mariadb-server is already the newest version (10.11.6-0+deb12u1).'); continue; }
+        o('The following NEW packages will be installed:\n  mariadb-server mariadb-client mariadb-common libmariadb3\nSetting up mariadb-server (10.11.6-0+deb12u1) ...\nStarting MariaDB database server: mariadbd.');
+        instMariaDB(s);
+      } else if (p === 'ufw') {
+        s.pk.ufw = 1;
+        o('Setting up ufw (0.36.2) ...');
+      } else {
+        e('E: Unable to locate package ' + p);
+      }
+    }
+    break;
+  }
+
+  case 'systemctl': {
+    const ac = r.find(z => /^(start|stop|restart|reload|enable|disable|status)$/.test(z));
+    if (!ac || !r.some(z => /^(mariadb|mysql)(\.service)?$/.test(z))) {
+      e('usage: systemctl start|stop|restart|reload|enable|disable|status mariadb');
+      break;
+    }
+    if (!s.inst) { e('Unit mariadb.service could not be found.'); break; }
+    if (ac === 'status') {
+      o((s.act ? '●' : '○') + ' mariadb.service - MariaDB 10.11.6 database server\n     Loaded: loaded (/lib/systemd/system/mariadb.service; ' + (s.en ? 'enabled' : 'disabled') + '; preset: enabled)\n     Active: ' + (s.act ? 'active (running) since Mon 2026-10-19 09:00:00 WIB; 30min ago' : 'inactive (dead)') + '\n       Docs: man:mariadbd(8)\n             https://mariadb.com/kb/en/library/systemd/\n   Main PID: 842 (mariadbd)\n     Status: "Taking your SQL requests now..."\n      Tasks: 14 (limit: 2341)\n     Memory: 68.4M\n        CPU: 180ms\n     CGroup: /system.slice/mariadb.service\n             └─842 /usr/sbin/mariadbd');
+      break;
+    }
+    if (!sd) { e('Failed to ' + ac + ' mariadb.service: Interactive authentication required.'); break; }
+    if (ac === 'stop') { s.act = 0; o('Stopping MariaDB service...'); }
+    else if (ac === 'start' || ac === 'restart') {
+      s.act = 1;
+      const conf = (s.fs['/etc/mysql/mariadb.conf.d/50-server.cnf'] || {}).c || '';
+      s.bind = conf.includes('bind-address            = 0.0.0.0') || conf.includes('bind-address = 0.0.0.0') ? '0.0.0.0' : '127.0.0.1';
+      s.errorLog.push(ts() + ' 0 [Note] Server socket created on IP: \'' + s.bind + '\'.');
+      o('Restarting MariaDB service...');
+    }
+    else if (ac === 'enable') { s.en = 1; o('Synchronizing state of mariadb.service with SysV service script.'); }
+    break;
+  }
+
+  case 'mariadb-secure-installation':
+  case 'mysql_secure_installation': {
+    if (!sd) { e('mariadb-secure-installation: must be run as root'); break; }
+    if (!s.inst || !s.act) { e('ERROR 2002 (HY000): Can\'t connect to local server through socket \'/run/mysqld/mysqld.sock\''); break; }
+    await runSecureInstallation(s);
+    break;
+  }
+
+  case 'mariadb':
+  case 'mysql': {
+    let uName = 'root', hName = 'localhost', passReq = false, executeCode = null, dbTarget = null;
+    for (let i = 0; i < r.length; i++) {
+      if (r[i] === '-u') uName = r[++i];
+      else if (r[i].startsWith('-u')) uName = r[i].slice(2);
+      else if (r[i] === '-h') hName = r[++i];
+      else if (r[i].startsWith('-h')) hName = r[i].slice(2);
+      else if (r[i] === '-p') passReq = true;
+      else if (r[i] === '-e') executeCode = r[++i];
+      else if (!r[i].startsWith('-')) dbTarget = r[i];
+    }
+
+    let targetServer = s;
+    if (hName !== 'localhost' && hName !== '127.0.0.1') {
+      const matchSrv = Object.values(S).find(m => m.ip === hName || m.name === hName);
+      if (!matchSrv) { e('ERROR 2005 (HY000): Unknown server host \'' + hName + '\''); break; }
+      targetServer = matchSrv;
+
+      if (targetServer.ufw.on && !targetServer.ufw.allow.includes(3306)) {
+        e('ERROR 2003 (HY000): Can\'t connect to server on \'' + hName + '\' (110 Connection timed out)');
+        break;
+      }
+      if (!targetServer.inst || !targetServer.act) {
+        e('ERROR 2003 (HY000): Can\'t connect to server on \'' + hName + '\' (111 Connection refused)');
+        break;
+      }
+      const conf = (targetServer.fs['/etc/mysql/mariadb.conf.d/50-server.cnf'] || {}).c || '';
+      const isListeningAll = conf.includes('bind-address            = 0.0.0.0') || conf.includes('bind-address = 0.0.0.0');
+      if (!isListeningAll) {
+        e('ERROR 2003 (HY000): Can\'t connect to server on \'' + hName + '\' (111 Connection refused)');
+        break;
+      }
+    } else {
+      if (!targetServer.inst || !targetServer.act) {
+        e('ERROR 2002 (HY000): Can\'t connect to local server through socket \'/run/mysqld/mysqld.sock\'');
+        break;
+      }
+    }
+
+    let enteredPass = '';
+    if (passReq) {
+      enteredPass = await ask('Enter password: ', 1);
+    }
+
+    const matchedUser = targetServer.users.find(u => {
+      const hostMatch = u.host === '%' || u.host === hName || (hName === 'localhost' && u.host === 'localhost');
+      return u.user === uName && hostMatch;
+    });
+
+    if (!matchedUser) {
+      targetServer.errorLog.push(ts() + ' [Warning] Access denied for user \'' + uName + '\'@\'' + s.ip + '\' (using password: ' + (passReq ? 'YES' : 'NO') + ')');
+      e('ERROR 1045 (28000): Access denied for user \'' + uName + '\'@\'' + (hName === 'localhost' ? 'localhost' : s.ip) + '\' (using password: ' + (passReq ? 'YES' : 'NO') + ')');
+      break;
+    }
+
+    if (matchedUser.pass && matchedUser.pass !== enteredPass) {
+      targetServer.errorLog.push(ts() + ' [Warning] Access denied for user \'' + uName + '\'@\'' + s.ip + '\' (using password: YES)');
+      e('ERROR 1045 (28000): Access denied for user \'' + uName + '\'@\'' + (hName === 'localhost' ? 'localhost' : s.ip) + '\' (using password: YES)');
+      break;
+    }
+
+    if (executeCode) {
+      currentDb = dbTarget || currentDb;
+      const res = executeSQLQuery(targetServer, executeCode, uName);
+      o(res.out);
+      break;
+    }
+
+    if (inp != null) {
+      currentDb = dbTarget || currentDb;
+      const queries = inp.split(';');
+      for (const singleQ of queries) {
+        if (singleQ.trim()) {
+          const res = executeSQLQuery(targetServer, singleQ.trim(), uName);
+          o(res.out);
+        }
+      }
+      break;
+    }
+
+    inMariaDBShell = true;
+    currentDb = dbTarget || null;
+    currentDbUser = uName;
+    o('Welcome to the MariaDB monitor.  Commands end with ; or \\g.\nYour MariaDB connection id is 42\nServer version: 10.11.6-MariaDB-0+deb12u1 Debian 12\n\nCopyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.\n\nType \'help;\' or \'\\h\' for help. Type \'\\c\' to clear the current input statement.');
+    break;
+  }
+
+  case 'mariadb-dump':
+  case 'mysqldump': {
+    let uName = 'root', dbName = null;
+    for (let i = 0; i < r.length; i++) {
+      if (r[i] === '-u') uName = r[++i];
+      else if (!r[i].startsWith('-')) dbName = r[i];
+    }
+    if (!dbName) { e('Usage: mariadb-dump [OPTIONS] database [tables]'); break; }
+    if (!s.dbs[dbName]) { e('mariadb-dump: Got error: 1049: Unknown database \'' + dbName + '\' when selecting the database'); break; }
+
+    const targetDb = s.dbs[dbName];
+    const outLines = [
+      '-- MariaDB dump 10.19  Distrib 10.11.6-MariaDB, for debian-linux-gnu (x86_64)',
+      '-- Host: localhost    Database: ' + dbName,
+      '-- Server version       10.11.6-MariaDB-0+deb12u1',
+      '',
+      '/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;',
+      '-- Current Database: `' + dbName + '`',
+      'CREATE DATABASE /*!32312 IF NOT EXISTS*/ `' + dbName + '` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;',
+      'USE `' + dbName + '`;'
+    ];
+
+    Object.entries(targetDb.tables).forEach(([tName, tObj]) => {
+      outLines.push('');
+      outLines.push('-- Table structure for table `' + tName + '`');
+      outLines.push('DROP TABLE IF EXISTS `' + tName + '`;');
+      outLines.push('CREATE TABLE `' + tName + '` (');
+      outLines.push('  ' + tObj.cols.join(' VARCHAR(50),\n  ') + ' VARCHAR(50)');
+      outLines.push(') ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;');
+      outLines.push('');
+      outLines.push('-- Dumping data for table `' + tName + '`');
+      if (tObj.rows.length) {
+        const valStrs = tObj.rows.map(row => '(' + row.map(v => '"' + v + '"').join(',') + ')').join(',');
+        outLines.push('INSERT INTO `' + tName + '` VALUES ' + valStrs + ';');
+      }
+    });
+    outLines.push('');
+    outLines.push('-- Dump completed on ' + ts());
+    o(outLines.join('\n'));
+    break;
+  }
+
+  case 'ufw': {
+    if (!sd) { e('bash: ufw: command not found'); break; }
+    if (!s.pk.ufw) { e('sudo: ufw: command not found'); break; }
+    const U = s.ufw;
+    if (r[0] === 'allow') {
+      const arg = r[1], pt = arg === '3306/tcp' ? 3306 : parseInt(arg);
+      if (!pt) { e('ERROR: Invalid rule'); break; }
+      if (!U.allow.includes(pt)) U.allow.push(pt);
+      o('Rules updated\nRules updated (v6)');
+    } else if (r[0] === 'enable') {
+      U.on = 1; o('Firewall is active and enabled on system startup');
+    } else if (r[0] === 'status') {
+      o(U.on ? 'Status: active\n\nTo                         Action      From\n--                         ------      ----\n' + U.allow.map(p => (p + '/tcp').padEnd(27) + 'ALLOW       Anywhere').join('\n') : 'Status: inactive');
+    } else {
+      e('Usage: ufw allow PORT/tcp | enable | status');
+    }
+    break;
+  }
+
+  case 'ping': {
+    const n = r.find(z => z[0] !== '-' && !/^\d+$/.test(z));
+    if (!n) { e('ping: usage error: Destination address required'); break; }
+    if (!NET[n]) { e('ping: ' + n + ': Name or service not known'); break; }
+    o('PING ' + n + ' (' + NET[n] + ') 56(84) bytes of data.\n64 bytes from ' + n + ' (' + NET[n] + '): icmp_seq=1 ttl=64 time=0.4 ms\n--- ' + n + ' ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss');
+    break;
+  }
+
+  case 'exit':
+  case 'quit':
+    if (inMariaDBShell) {
+      inMariaDBShell = false;
+      o('Bye');
+    } else {
+      o('Sesi konsol utama tidak ditutup. Gunakan: konsol NAMA untuk berpindah mesin.');
+    }
+    break;
+
+  default:
+    e('bash: ' + x + ': command not found');
+  }
+}
+
+I.onkeydown = async e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const v = I.value;
+    I.value = '';
+
+    if (pend) {
+      const p = pend;
+      pend = null;
+      I.type = 'text';
+      out(p.lp + (p.hid ? '' : v));
+      setPs();
+      p.res(v);
+      return;
+    }
+
+    if (busy) return;
+    busy = 1;
+    outH(pshtml() + esc(v));
+    if (v.trim()) {
+      hist.push(v);
+      hi = hist.length;
+    }
+    setPs();
+
+    try {
+      await run(v);
+    } catch (err) {
+      out('simulator error: ' + err.message, 'd');
+    }
+
+    busy = 0;
+    chk();
+    setPs();
+    I.focus();
+    T.scrollTop = T.scrollHeight;
+  } else if (e.key === 'ArrowUp' && !pend) {
+    if (hi > 0) I.value = hist[--hi];
+    e.preventDefault();
+  } else if (e.key === 'ArrowDown' && !pend) {
+    hi = Math.min(hi + 1, hist.length);
+    I.value = hist[hi] || '';
+    e.preventDefault();
+  } else if (e.key === 'Tab' && !pend) {
+    e.preventDefault();
+    const parts = I.value.split(' '), w = parts.pop();
+    let c;
+    if (!parts.length || (parts.length === 1 && parts[0] === 'sudo')) {
+      c = CMDS.filter(z => z.startsWith(w));
+    } else {
+      const s = S[host()], dir = w.includes('/') ? w.replace(/[^/]*$/, '') : '', base = w.slice(dir.length), P = ab(s, dir || '.');
+      c = kids(s, P).filter(z => z.startsWith(base)).map(z => dir + z + ((s.fs[(P === '/' ? '' : P) + '/' + z] || {}).d ? '/' : ''));
+    }
+    if (c.length === 1) I.value = [...parts, c[0]].join(' ') + (c[0].endsWith('/') ? '' : ' ');
+    else if (c.length > 1) out(c.join('  '));
+  } else if (e.key === 'c' && e.ctrlKey && pend) {
+    pend.res('');
+    pend = null;
+    I.type = 'text';
+  }
+};
+
+T.onclick = () => { if (!getSelection().toString()) I.focus(); };
+$('#rs').onclick = init;
+
+const Q = [
+  ['Port standar komunikasi protokol jaringan TCP yang didengarkan oleh MariaDB Database Server adalah...',
+   ['80', '443', '3306', '5432'], 2,
+   'Port TCP 3306 adalah port default standar untuk MySQL dan MariaDB Server.'],
+
+  ['Skrip interaktif yang dijalankan setelah instalasi untuk menonaktifkan login remote root dan menghapus user anonymous adalah...',
+   ['mariadb-secure-installation', 'mysql_harden_server', 'systemctl secure mariadb', 'mariadb-firewall-init'], 0,
+   'mariadb-secure-installation memandu proses hardening awal instance database.'],
+
+  ['Perintah SQL yang termasuk dalam kelompok Data Definition Language (DDL) adalah...',
+   ['INSERT INTO siswa VALUES (...)', 'UPDATE siswa SET nama = "Budi"', 'SELECT * FROM siswa', 'CREATE TABLE siswa (...)'], 3,
+   'DDL (Data Definition Language) bertugas membuat atau mengubah struktur objek, seperti CREATE TABLE, ALTER, dan DROP.'],
+
+  ['Direktif konfigurasi pada berkas 50-server.cnf yang harus diubah agar database menerima koneksi jaringan luar adalah...',
+   ['listen-port = 0.0.0.0', 'bind-address = 0.0.0.0', 'network-access = all', 'allow-remote = true'], 1,
+   'bind-address = 0.0.0.0 memerintahkan MariaDB mendengarkan seluruh antarmuka jaringan yang tersedia.'],
+
+  ['Sintaks yang tepat untuk memberikan hak akses penuh hanya pada database "sekolah" ke user "webuser" dari host mana saja adalah...',
+   ['GRANT ALL PRIVILEGES ON sekolah.* TO "webuser"@"%";', 'ALLOW ALL ON *.* TO "webuser";', 'PERMIT FULL ON sekolah TO "webuser"@"localhost";', 'ASSIGN ACCESS sekolah TO "webuser";'], 0,
+   'Format standar GRANT adalah: GRANT [hak] ON [db].[tabel] TO \'user\'@\'host\'; diikuti FLUSH PRIVILEGES;.'],
+
+  ['Utilitas command-line resmi untuk membuat cadangan berkas logika database SQL adalah...',
+   ['mariadb-backup-all', 'mariadb-dump', 'mysqld --backup', 'cat /var/lib/mysql'], 1,
+   'mariadb-dump (atau mysqldump) menghasilkan dump berkas teks berekstensi .sql yang memuat kueri pemulihan data.']
+];
+
+const qz = $('#quiz');
+Q.forEach((q, k) => {
+  const d = document.createElement('div');
+  d.className = 'card q';
+  d.innerHTML = '<b>' + (k + 1) + '. ' + q[0] + '</b>';
+  q[1].forEach((o, j) => {
+    const b = document.createElement('button');
+    b.textContent = o;
+    b.onclick = () => {
+      [...d.querySelectorAll('button')].forEach((z, y) => {
+        z.disabled = true;
+        if (y === q[2]) z.classList.add('r');
+      });
+      if (j !== q[2]) b.classList.add('x');
+      const e = document.createElement('div');
+      e.className = 'co';
+      e.textContent = (j === q[2] ? 'Benar! ' : 'Belum tepat. ') + q[3];
+      d.appendChild(e);
+    };
+    d.appendChild(b);
+  });
+  qz.appendChild(d);
+});
+
+// Inisialisasi awal modul
+init();
+show(0);
+</script>
+</body>
+</html>

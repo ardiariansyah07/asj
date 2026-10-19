@@ -1,0 +1,1413 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Modul Web Server (Nginx) - SMK Wikrama Bogor (Full Page)</title>
+<style>
+:root{
+  --bg:#f2f6f4;--fg:#14261f;--card:#fff;--pri:#0f766e;--acc:#dff3ef;--bd:#cfdcd6;
+  --mut:#4f645b;--warn:#fff4e0;--wb:#d97706;--hd:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+    --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+  --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+}
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 60px)}
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font:16px/1.7 "Segoe UI",system-ui,-apple-system,sans-serif;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:0 0 auto;
+  height:env(safe-area-inset-top,0px);
+  background:var(--hd);z-index:1001;
+}
+
+header{
+  position:fixed;
+  top:env(safe-area-inset-top,0px);
+  left:0;
+  right:0;
+  z-index:1000;
+  background:var(--hd);
+  border-bottom:1px solid var(--bd);
+  width:100%;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+#bar{height:3px;background:var(--pri);width:0;transition:width .3s}
+.hw{display:flex;align-items:center;gap:10px;padding:8px 20px;max-width:100%;width:100%}
+nav{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  white-space:nowrap;border:0;background:none;color:var(--mut);
+  padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-size:14px;
+  transition:all 0.15s ease;
+}
+nav button:hover{background:var(--acc);color:var(--fg)}
+nav button.on{background:var(--pri);color:var(--hd);font-weight:600}
+button:focus-visible,input:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+.actions{display:flex;gap:8px;align-items:center}
+.tg{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.tg:hover{background:var(--acc)}
+
+main{
+  width:100%;
+  max-width:100%;
+  flex:1;
+  margin:0 auto;
+  padding:84px 32px 80px;
+}
+@media(max-width:768px){
+  main{padding:74px 14px 60px}
+  .hw{padding:6px 10px}
+}
+
+/* Tab control: tab disembunyikan default kecuali tab aktif */
+.tab{
+  display:none;
+}
+.tab.active{
+  display:block;
+}
+
+h1{font-size:2.2rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.5rem;margin:1.6em 0 .4em;border-left:5px solid var(--pri);padding-left:12px}
+h3{font-size:1.15rem;margin:1.3em 0 .3em;color:var(--pri)}
+p,li{max-width:100%}
+
+.cover{
+  background:linear-gradient(135deg,var(--pri),#0b3b36);
+  color:#fff;border-radius:14px;padding:36px 32px;margin-bottom:24px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+.cover h1{font-size:2.6rem}
+.cover table,.cover td,.cover tr:nth-child(even) td{
+  border:0;background:none;color:#fff;padding:4px 14px 4px 0;
+}
+.co{
+  border-left:5px solid var(--pri);background:var(--acc);padding:12px 18px;
+  border-radius:8px;margin:16px 0;
+}
+.co.w{border-color:var(--wb);background:var(--warn)}
+.tw{overflow-x:auto;margin:14px 0;border-radius:10px;border:1px solid var(--bd)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--card)}
+th{background:var(--pri);color:var(--hd);text-align:left;padding:10px 14px;font-weight:600}
+td{padding:9px 14px;border:1px solid var(--bd);vertical-align:top}
+tr:nth-child(even) td{background:var(--acc)}
+code{
+  font-family:ui-monospace,Consolas,monospace;font-size:.92em;
+  background:var(--acc);padding:2px 6px;border-radius:4px;word-break:break-word;
+}
+.try{
+  margin-left:8px;border:0;border-radius:6px;background:var(--pri);
+  color:var(--hd);padding:4px 12px;font-size:12px;cursor:pointer;
+  transition:opacity .15s;
+}
+.try:hover{opacity:0.85}
+.nv{display:flex;justify-content:space-between;margin-top:36px;gap:12px}
+.nv button,.btn{
+  background:var(--pri);color:var(--hd);border:0;border-radius:8px;
+  padding:10px 20px;cursor:pointer;font:inherit;font-weight:600;
+  transition:filter .15s;
+}
+.nv button:hover,.btn:hover{filter:brightness(1.1)}
+svg text{fill:currentColor;font:13px sans-serif}
+
+#tbox{
+  margin:20px 0 10px;
+  width:100%;
+}
+#where{
+  font-size:13.5px;color:var(--mut);display:flex;
+  justify-content:space-between;align-items:center;margin-bottom:8px;
+  background:var(--card);padding:8px 14px;border:1px solid var(--bd);border-radius:8px;
+}
+#where button{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12px;
+}
+#where button:hover{background:var(--acc)}
+#term{
+  background:#0c0c0c;color:#e6e6e6;border-radius:10px;padding:16px;
+  height:440px;overflow-y:auto;font:14px/1.48 ui-monospace,Consolas,monospace;
+  white-space:pre-wrap;word-break:break-word;cursor:text;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.6);
+  border:1px solid #232323;
+}
+#term .g{color:#5fd75f;font-weight:700}
+#term .b{color:#6aa5ff;font-weight:700}
+#term .d{color:#8a8a8a}
+#ln{display:flex}
+#ps{white-space:pre}
+#in{flex:1;min-width:40px;background:transparent;border:0;color:#fff;font:inherit;outline:none;padding:0;caret-color:#fff}
+
+.lab{
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:20px;
+  align-items:start;
+  margin-top:10px;
+}
+.lab #term{height:540px}
+@media(max-width:992px){
+  .lab{grid-template-columns:1fr}
+  .lab #term{height:440px}
+}
+.ms{list-style:none;padding:0;margin:0}
+.ms li{
+  padding:12px 14px;border:1px solid var(--bd);border-radius:8px;
+  margin-bottom:8px;background:var(--card);font-size:14px;
+}
+.ms li.ok{background:var(--acc);border-color:var(--pri)}
+.ms li.ok b::after{content:" ✔ Selesai";color:var(--pri)}
+.ms details{color:var(--mut);font-size:13px;margin-top:4px}
+
+.card{
+  background:var(--card);border:1px solid var(--bd);border-radius:10px;
+  padding:18px 22px;margin:16px 0;
+}
+.q button{
+  display:block;width:100%;text-align:left;margin:6px 0;
+  padding:10px 14px;border:1px solid var(--bd);border-radius:8px;
+  background:var(--card);color:var(--fg);cursor:pointer;font:inherit;
+  transition:background .15s;
+}
+.q button:hover{background:var(--acc)}
+.q button.r{background:var(--acc);border-color:var(--pri);font-weight:600}
+.q button.x{background:var(--warn);border-color:var(--wb)}
+@media print{
+  header,.nv,#tbox,.try,.actions{display:none}
+  .tab{display:block!important}
+  body::before{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div id="bar"></div>
+  <div class="hw">
+    <nav id="nav"></nav>
+    <div class="actions">
+      <button class="tg" id="btnFs" title="Toggle Layar Penuh">⛶ Fullscreen</button>
+      <button class="tg" id="tg" aria-label="Ganti tema">◐</button>
+    </div>
+  </div>
+</header>
+<main>
+
+<section class="tab active" data-title="Cover">
+<div class="cover">
+  <p style="font-size:1.1rem;margin-bottom:4px">Modul Ajar Interaktif</p>
+  <h1>Web Server dengan Nginx</h1>
+  <table>
+    <tr><td>Sekolah</td><td>: SMK Wikrama Bogor</td></tr>
+    <tr><td>Fase/Kelas</td><td>: F / XI</td></tr>
+    <tr><td>Program Keahlian</td><td>: Teknik Jaringan Komputer dan Telekomunikasi</td></tr>
+    <tr><td>Mata Pelajaran</td><td>: Konsentrasi Keahlian TKJ</td></tr>
+    <tr><td>Elemen</td><td>: Administrasi Sistem Jaringan</td></tr>
+    <tr><td>Materi</td><td>: Web Server &amp; Reverse Proxy (Nginx)</td></tr>
+  </table>
+</div>
+<h2>Tujuan Pembelajaran</h2>
+<ul>
+  <li>Memahami arsitektur event-driven Nginx serta perbedaannya dengan web server tradisional seperti Apache.</li>
+  <li>Memasang dan mengelola layanan Nginx di sistem operasi Debian 12 (Bookworm).</li>
+  <li>Mengonfigurasi Server Blocks (Virtual Host) untuk menghosting lebih dari satu domain website dalam satu server fisik.</li>
+  <li>Menerapkan keamanan web server: pengaturan permission `www-data`, firewall UFW, dan penyembunyian banner identitas (hardening).</li>
+  <li>Mengonfigurasi Reverse Proxy untuk meneruskan trafik web ke backend microservice atau database app.</li>
+  <li>Mengamankan transmisi dengan enkripsi SSL/TLS (HTTPS) serta menganalisis kode status HTTP dan log akses.</li>
+</ul>
+<h2>Cara Memakai Modul</h2>
+<ol>
+  <li>Pelajari konsep arsitektur dan sintaks konfigurasi Nginx pada setiap tab bab di atas.</li>
+  <li>Klik tombol <b>Coba</b> pada tabel langkah kerja untuk memindahkan perintah langsung ke baris terminal, lalu tekan <b>Enter</b>.</li>
+  <li>Terminal simulator di bawah mendukung inspeksi HTTP via <code>curl</code> dan <code>curl -I</code> untuk melihat response header langsung.</li>
+  <li>Tersedia 3 mesin simulasi: <code>client</code> (PC klien), <code>server1</code> (Web Server Nginx), dan <code>app-backend</code> (Aplikasi Node/Python di port 8080). Kata sandi akun sudo: <code>siswa123</code>.</li>
+</ol>
+<div class="co w">⚠️ Terminal ini adalah <b>lingkungan simulasi</b> interaktif. Gunakan perintah <code>konsol NAMA</code> untuk berpindah mesin fisik langsung. Ketik <code>reset</code> kapan saja untuk mengembalikan konfigurasi lab ke status semula.</div>
+</section>
+
+<section class="tab" data-title="1. Konsep">
+<h1>Bab 1. Konsep Dasar Web Server &amp; Nginx</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memahami protokol HTTP/HTTPS, cara kerja Web Server melayani klien, serta keunggulan arsitektur Asynchronous Event-Driven Nginx dibanding Apache.</div>
+<h2>Apa itu Web Server?</h2>
+<p><b>Web Server</b> adalah perangkat lunak yang bertugas melayani permintaan dokumen web (HTML, CSS, gambar, API) dari browser klien melalui protokol HTTP (TCP port 80) atau HTTPS (TCP port 443). Komunikasi berjalan dengan konsep Request-Response.</p>
+<svg viewBox="0 0 680 100" width="100%" height="90" role="img" aria-label="Alur request response HTTP">
+  <rect x="10" y="20" width="160" height="60" rx="8" fill="none" stroke="currentColor"/>
+  <text x="35" y="55">Browser / Client</text>
+  <rect x="500" y="20" width="160" height="60" rx="8" fill="none" stroke="currentColor"/>
+  <text x="520" y="55">Nginx (Port 80/443)</text>
+  <line x1="170" y1="40" x2="500" y2="40" stroke="currentColor" stroke-width="2"/>
+  <text x="240" y="34">HTTP GET /index.html</text>
+  <line x1="500" y1="65" x2="170" y2="65" stroke="currentColor" stroke-width="2" stroke-dasharray="5 3"/>
+  <text x="260" y="80">HTTP 200 OK (HTML Content)</text>
+</svg>
+<h2>Perbandingan: Nginx vs Apache HTTP Server</h2>
+<div class="tw">
+  <table>
+    <tr><th>Aspek</th><th>Nginx (Engine-X)</th><th>Apache HTTP Server</th></tr>
+    <tr><td>Arsitektur Dasar</td><td><b>Asynchronous, Event-Driven, Non-blocking</b> (1 worker process dapat menangani ribuan koneksi bersamaan).</td><td><b>Process/Thread-based</b> (Model MPM prefork/worker; tiap request dialokasikan thread/proses tersendiri).</td></tr>
+    <tr><td>Konsumsi Memori (RAM)</td><td>Sangat rendah dan stabil, tidak membengkak saat lonjakan koneksi (C10K Problem Solver).</td><td>Cenderung meningkat drastis seiring bertambahnya jumlah koneksi aktif.</td></tr>
+    <tr><td>Konten Statis</td><td>Sangat cepat dan efisien melayani file HTML, CSS, JS, dan berkas media langsung.</td><td>Baik, namun memiliki overhead konfigurasi per-direktori (<code>.htaccess</code>).</td></tr>
+    <tr><td>Peran Tambahan</td><td>Sangat umum difungsikan sebagai <b>Reverse Proxy, Load Balancer,</b> dan API Gateway.</td><td>Umumnya dipakai sebagai monolithic web server terintegrasi runtime modul bawaan (mod_php).</td></tr>
+  </table>
+</div>
+<div class="co">💡 <b>Analogi Restoran:</b> Apache seperti restoran yang merekrut 1 pelayan khusus untuk duduk menunggui 1 meja sampai tamu selesai makan. Jika ada 100 tamu, dibutuhkan 100 pelayan (menghabiskan RAM). Nginx seperti 1 pelayan cekatan yang mencatat pesanan semua meja sekaligus sambil lalu; saat masakan siap dari dapur (event), pelayan langsung mengantarkannya ke meja yang tepat.</div>
+<h2>Kode Status HTTP Penting</h2>
+<div class="tw">
+  <table>
+    <tr><th>Status Code</th><th>Kategori</th><th>Arti &amp; Penyebab Umum</th></tr>
+    <tr><td><code>200 OK</code></td><td>Sukses</td><td>Permintaan berhasil diproses dan konten web dikirimkan ke klien.</td></tr>
+    <tr><td><code>301 / 302</code></td><td>Redirection</td><td>Halaman dialihkan permanen (misal HTTP dipaksa pindah ke HTTPS).</td></tr>
+    <tr><td><code>403 Forbidden</code></td><td>Client Error</td><td>Akses ditolak: izin baca berkas (permission) salah atau direktori tidak punya <code>index.html</code>.</td></tr>
+    <tr><td><code>404 Not Found</code></td><td>Client Error</td><td>Berkas yang diminta di URL tidak ditemukan pada direktori `root` server.</td></tr>
+    <tr><td><code>500 Internal Error</code></td><td>Server Error</td><td>Terjadi galat pada backend program atau kesalahan fatal konfigurasi.</td></tr>
+    <tr><td><code>502 Bad Gateway</code></td><td>Server Error</td><td>Nginx bertindak sebagai proxy, namun backend aplikasi (Node/PHP) sedang mati / tidak merespons.</td></tr>
+  </table>
+</div>
+<h3>Ringkasan</h3>
+<p>Nginx adalah web server modern berperforma tinggi yang melayani aset statis dengan cepat dan sering menjadi garda depan (*reverse proxy*). <b>Latihan:</b> Mengapa arsitektur non-blocking Nginx lebih tahan terhadap lonjakan pengunjung dibanding model proses thread?</p>
+</section>
+
+<section class="tab" data-title="2. Instalasi">
+<h1>Bab 2. Instalasi &amp; Manajemen Layanan Nginx</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memasang paket Nginx di Debian 12, mengelola daemons lewat `systemctl`, dan memahami direktori default `/var/www/html`.</div>
+<h2>Manajemen Service di Debian 12</h2>
+<p>Di Debian 12 (Bookworm), Nginx dikelola melalui daemon systemd dengan unit bernama <code>nginx.service</code>. Setelah paket terpasang, daemon langsung aktif dan mendengarkan port 80 secara otomatis.</p>
+<div class="tw">
+  <table>
+    <tr><th>Perintah Perawatan</th><th>Fungsi Kerja</th></tr>
+    <tr><td><code>sudo systemctl status nginx</code></td><td>Mengecek apakah layanan sedang `active (running)` atau terjadi kegagalan.</td></tr>
+    <tr><td><code>sudo systemctl restart nginx</code></td><td>Menghentikan lalu menyalakan ulang daemon (menimbulkan jeda koneksi sesaat).</td></tr>
+    <tr><td><code>sudo systemctl reload nginx</code></td><td>Membaca ulang konfigurasi baru tanpa memutus koneksi klien yang sedang aktif (*graceful*).</td></tr>
+    <tr><td><code>sudo nginx -t</code></td><td>Memvalidasi sintaks berkas konfigurasi sebelum diterapkan agar server tidak mogok.</td></tr>
+  </table>
+</div>
+<h2>Struktur Direktori Nginx</h2>
+<ul>
+  <li><code>/etc/nginx/nginx.conf</code> : Berkas konfigurasi global utama server.</li>
+  <li><code>/etc/nginx/sites-available/</code> : Wadah seluruh berkas konfigurasi virtual host/server block.</li>
+  <li><code>/etc/nginx/sites-enabled/</code> : Wadah symlink aktif yang dibaca langsung oleh Nginx saat berjalan.</li>
+  <li><code>/var/www/html/</code> : Lokasi berkas website default (dokumen root).</li>
+  <li><code>/var/log/nginx/</code> : Tempat penyimpanan berkas `access.log` dan `error.log`.</li>
+</ul>
+<h2>Langkah Kerja</h2>
+<div data-st="b2"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+<h3>Ringkasan</h3>
+<p>Alur kerja administrator: Pasang paket ➔ Periksa status dengan <code>systemctl</code> ➔ Uji respons via <code>curl localhost</code> ➔ Validasi sintaks dengan <code>nginx -t</code> sebelum reload.</p>
+</section>
+
+<section class="tab" data-title="3. Virtual Host">
+<h1>Bab 3. Virtual Host (Server Blocks)</h1>
+<div class="co">🎯 <b>Tujuan:</b> Menghosting banyak nama domain website yang berbeda dalam satu mesin server tunggal menggunakan Server Blocks.</div>
+<h2>Konsep Name-based Virtual Hosting</h2>
+<p>Satu server fisik dengan 1 IP dapat melayani website berbeda (misal <code>sekolah.sch.id</code> dan <code>portalku.lan</code>). Saat browser menghubungi server, browser menyertakan header <code>Host: nama_domain</code>. Nginx memeriksa direktif <code>server_name</code> yang cocok lalu menyajikan dokumen dari folder <code>root</code> masing-masing.</p>
+<div class="tw">
+  <table>
+    <tr><th>Direktif Konfigurasi</th><th>Fungsi Konfigurasi</th><th>Contoh Nilai</th></tr>
+    <tr><td><code>listen</code></td><td>Port TCP dan alamat IP yang didengarkan</td><td><code>listen 80;</code></td></tr>
+    <tr><td><code>server_name</code></td><td>Nama domain yang dicocokkan dengan header Host klien</td><td><code>server_name portalku.lan;</code></td></tr>
+    <tr><td><code>root</code></td><td>Folder fisik tempat dokumen HTML website disimpan</td><td><code>root /var/www/portalku;</code></td></tr>
+    <tr><td><code>index</code></td><td>Urutan nama berkas utama yang dicari pertama kali</td><td><code>index index.html index.htm;</code></td></tr>
+  </table>
+</div>
+<div class="co">💡 <b>Mengapa menggunakan symlink (ln -s)?</b> Direktori <code>sites-available</code> berfungsi sebagai gudang rancangan. Dengan membuat link ke <code>sites-enabled</code>, kamu dapat mengaktifkan atau menonaktifkan website dalam sekejap tanpa menghapus berkas aslinya.</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b3"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="4. Keamanan">
+<h1>Bab 4. Keamanan Web Server &amp; Hardening</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mengamankan hak akses dokumen web (`www-data`), menyembunyikan identitas versi server, dan mengatur proteksi firewall (UFW).</div>
+<div class="tw">
+  <table>
+    <tr><th>Tindakan Keamanan</th><th>Alasan &amp; Manfaat Proteksi</th></tr>
+    <tr><td>Kepemilikan Akun `www-data`</td><td>Nginx berjalan di bawah akun non-root (`www-data`). Berkas web tidak boleh dimiliki root agar jika terjadi eksploitasi, peretas tidak langsung menguasai sistem operasi.</td></tr>
+    <tr><td><code>server_tokens off;</code></td><td>Menyembunyikan informasi nomor versi Nginx dari response header HTTP (mempersulit pencarian kerentanan spesifik).</td></tr>
+    <tr><td>Firewall `ufw allow 80/tcp` &amp; `443/tcp`</td><td>Hanya membuka port 80 (HTTP) dan 443 (HTTPS), menutup port lain yang tidak berizin.</td></tr>
+    <tr><td>Izin Berkas 644 dan Folder 755</td><td>Mencegah pengguna luar atau script nakal mengubah isi kode website tanpa izin.</td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b4"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+<h3>Checklist Keamanan Web Server</h3>
+<div class="tw">
+  <table>
+    <tr><th>Status</th><th>Langkah Hardening</th></tr>
+    <tr><td><input type="checkbox"></td><td>Kepemilikan berkas web diarahkan ke user <code>www-data:www-data</code>.</td></tr>
+    <tr><td><input type="checkbox"></td><td>Versi server disembunyikan dengan direktif <code>server_tokens off;</code>.</td></tr>
+    <tr><td><input type="checkbox"></td><td>Firewall UFW aktif dan hanya mengizinkan port web.</td></tr>
+    <tr><td><input type="checkbox"></td><td>Uji sintaks <code>nginx -t</code> berhasil tanpa peringatan error.</td></tr>
+  </table>
+</div>
+</section>
+
+<section class="tab" data-title="5. Reverse Proxy">
+<h1>Bab 5. Konfigurasi Reverse Proxy</h1>
+<div class="co">🎯 <b>Tujuan:</b> Menjadikan Nginx sebagai pintu gerbang (*front-facing server*) yang meneruskan request klien ke aplikasi backend di server internal.</div>
+<h2>Apa itu Reverse Proxy?</h2>
+<p>Bila <i>Forward Proxy</i> bertindak mewakili klien untuk mengakses internet, maka <b>Reverse Proxy</b> bertindak mewakili server internal agar dapat diakses klien luar. Aplikasi modern (seperti Node.js, Python Flask/Django, Go) umumnya berjalan di port lokal (misal `127.0.0.1:8080`). Nginx menerima request di port 80/443 lalu meneruskannya via direktif <code>proxy_pass</code>.</p>
+<svg viewBox="0 0 680 100" width="100%" height="90" role="img" aria-label="Alur reverse proxy">
+  <rect x="5" y="25" width="130" height="50" rx="8" fill="none" stroke="currentColor"/>
+  <text x="25" y="55">Klien Browser</text>
+  <rect x="250" y="25" width="150" height="50" rx="8" fill="none" stroke="currentColor"/>
+  <text x="270" y="55">Nginx (:80)</text>
+  <rect x="510" y="25" width="150" height="50" rx="8" fill="none" stroke="currentColor"/>
+  <text x="525" y="55">Backend App (:8080)</text>
+  <line x1="135" y1="50" x2="250" y2="50" stroke="currentColor" stroke-width="2"/>
+  <line x1="400" y1="50" x2="510" y2="50" stroke="currentColor" stroke-width="3" stroke-dasharray="5 3"/>
+  <text x="420" y="42">proxy_pass</text>
+</svg>
+<div class="tw">
+  <table>
+    <tr><th>Direktif Proxy</th><th>Fungsi dan Parameter</th></tr>
+    <tr><td><code>proxy_pass http://10.0.0.30:8080;</code></td><td>Meneruskan lalu lintas HTTP ke server tujuan di internal localhost/jaringan privat.</td></tr>
+    <tr><td><code>proxy_set_header Host $host;</code></td><td>Menyampaikan nama host asli yang diminta browser klien ke aplikasi backend.</td></tr>
+    <tr><td><code>proxy_set_header X-Real-IP $remote_addr;</code></td><td>Meneruskan alamat IP asli pengunjung ke backend (agar pencatatan IP tidak tertulis IP Nginx).</td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b5"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="6. HTTPS & SSL">
+<h1>Bab 6. Enkripsi HTTPS &amp; Sertifikat SSL</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mengamankan transmisi data website dari penyadapan (sniffing) dengan sertifikat SSL/TLS pada port 443.</div>
+<h2>Perbedaan HTTP dan HTTPS</h2>
+<p>HTTP mentransmisikan data dalam bentuk teks biasa (plaintext), sehingga kredensial login atau formulir mudah disadap di jaringan publik. <b>HTTPS</b> membungkus komunikasi HTTP di dalam terowongan terenkripsi TLS menggunakan kriptografi asimetris dan simetris.</p>
+<div class="tw">
+  <table>
+    <tr><th>Komponen Sertifikat</th><th>Fungsi Teknis</th></tr>
+    <tr><td>Private Key (<code>nginx-selfsigned.key</code>)</td><td>Kunci rahasia milik server, tidak boleh diberikan ke pihak mana pun. Disimpan dengan permission ketat (600).</td></tr>
+    <tr><td>Public Certificate (<code>nginx-selfsigned.crt</code>)</td><td>Sertifikat publik berisi identitas domain dan public key server yang dibagikan ke browser pengunjung.</td></tr>
+    <tr><td>Port Standar</td><td>HTTPS beroperasi pada protokol TCP port <b>443</b>.</td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b6"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="7. Troubleshooting">
+<h1>Bab 7. Troubleshooting &amp; Analisis Log</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mendiagnosis penyebab website gagal tampil melalui berkas log Nginx dan pengujian kode status HTTP.</div>
+<div class="tw">
+  <table>
+    <tr><th>Gejala / Pesan Galat</th><th>Kemungkinan Akar Masalah</th><th>Tindakan Perbaikan</th></tr>
+    <tr><td><code>403 Forbidden</code></td><td>Izin akses folder web salah atau berkas <code>index.html</code> belum dibuat di direktori <code>root</code>.</td><td>Jalankan <code>chmod 755 /var/www/...</code> dan pastikan ada file index.</td></tr>
+    <tr><td><code>502 Bad Gateway</code></td><td>Nginx gagal terhubung ke backend upstream (aplikasi Node/PHP mati atau port salah).</td><td>Periksa apakah service backend aktif mendengarkan port yang dituju (misal port 8080).</td></tr>
+    <tr><td><code>Job for nginx.service failed</code></td><td>Kesalahan penulisan sintaks di berkas konfigurasi (titik koma kurang atau kurung kurawal hilang).</td><td>Jalankan <code>sudo nginx -t</code> untuk melihat baris yang salah secara presisi.</td></tr>
+    <tr><td><code>Connection Refused</code></td><td>Layanan Nginx tidak sedang berjalan atau port belum dibuka.</td><td>Jalankan <code>systemctl start nginx</code> dan periksa <code>ufw status</code>.</td></tr>
+  </table>
+</div>
+<div class="co">ℹ️ Nginx menyimpan catatan riwayat akses di <code>/var/log/nginx/access.log</code> dan catatan galat di <code>/var/log/nginx/error.log</code>. Pantau secara live menggunakan <code>tail -f</code>.</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b7"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="Lab Terminal">
+<h1>Lab Terminal Nginx Interaktif</h1>
+<p>Selesaikan 6 misi praktikum sistem administrasi server di bawah ini. Uji setiap konfigurasi langsung menggunakan browser/perintah <code>curl</code> di simulator. Password sudo: <code>siswa123</code>.</p>
+<div class="lab">
+  <div class="tslot"></div>
+  <div>
+    <h3 style="margin-top:0">Daftar Misi Mandiri</h3>
+    <ul class="ms" id="ms"></ul>
+  </div>
+</div>
+</section>
+
+<section class="tab" data-title="Latihan">
+<h1>Latihan Soal &amp; Rangkuman</h1>
+<div id="quiz"></div>
+<h2>Rangkuman Inti</h2>
+<ul>
+  <li>Nginx memakai arsitektur event-driven non-blocking yang sangat efisien dalam menangani ribuan koneksi bersamaan dengan RAM rendah.</li>
+  <li>Konfigurasi virtual host (Server Blocks) memungkinkan satu IP server menghosting banyak domain via direktif <code>server_name</code>.</li>
+  <li>Praktik hardening utama mencakup kepemilikan <code>www-data</code>, firewall UFW, serta <code>server_tokens off;</code>.</li>
+  <li>Fungsi <code>proxy_pass</code> menjadikan Nginx sebagai pintu masuk terpadu untuk meneruskan request ke aplikasi backend microservice.</li>
+  <li>Diagnosis galat selalu diawali dengan <code>nginx -t</code> dan membaca log di <code>/var/log/nginx/error.log</code>.</li>
+</ul>
+</section>
+
+<div id="tbox">
+  <div id="where">
+    <span></span>
+    <button id="rs" title="Kembalikan terminal ke kondisi semula">⟲ Reset Lab</button>
+  </div>
+  <div id="term">
+    <div id="log"></div>
+    <div id="ln">
+      <span id="ps"></span>
+      <input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Terminal Input">
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+const ST = {
+  b2: [
+    ['Masuk ke server1', [['konsol server1', 'Berpindah ke konsol server1. Server ini belum memiliki web server Nginx.']]],
+    ['Perbarui daftar paket & pasang Nginx', [['sudo apt update', 'Memperbarui katalog repositori paket Debian 12.'], ['sudo apt install -y nginx', 'Mengunduh dan memasang paket web server Nginx.']], 'Di Debian, daemon Nginx otomatis aktif langsung setelah pemasangan.'],
+    ['Periksa status layanan', [['systemctl status nginx', 'Melihat status service Nginx. Harus tertera active (running).'], ['sudo nginx -t', 'Menguji kebenaran sintaks berkas konfigurasi.'], ['sudo systemctl reload nginx', 'Memuat ulang konfigurasi tanpa mematikan sesi web yang sedang berlangsung.']]],
+    ['Uji Web Server dari lokal dan client', [['curl http://localhost', 'Menampilkan kode HTML halaman awal default Nginx dari server1.'], ['konsol client', 'Pindah ke komputer client.'], ['curl http://10.0.0.20', 'Mengakses web server1 dari client via IP jaringan. Hasilnya identik.']]]
+  ],
+  b3: [
+    ['Pindah ke server1', [['konsol server1', 'Konfigurasi virtual host dibuat di server.']]],
+    ['Buat folder & berkas web baru', [['sudo mkdir -p /var/www/portalku', 'Membuat direktori root untuk website baru portalku.lan.'], ['echo "<h1>Selamat Datang di Portal SMK Wikrama</h1>" | sudo tee /var/www/portalku/index.html', 'Membuat berkas HTML beranda baru.']]],
+    ['Buat konfigurasi Server Block', [['echo -e "server {\\n  listen 80;\\n  server_name portalku.lan;\\n  root /var/www/portalku;\\n  index index.html;\\n}" | sudo tee /etc/nginx/sites-available/portalku', 'Menulis blok konfigurasi virtual host di sites-available.']]],
+    ['Aktifkan konfigurasi via Symlink', [['sudo ln -s /etc/nginx/sites-available/portalku /etc/nginx/sites-enabled/', 'Membuat symlink ke folder sites-enabled untuk mengaktifkan website.'], ['sudo nginx -t', 'Menguji konfigurasi. Jika sintaks lolos, siap dimuat ulang.'], ['sudo systemctl reload nginx', 'Menerapkan website baru ke memori Nginx.']]],
+    ['Uji virtual host dari client', [['konsol client', 'Pindah ke client.'], ['curl -H "Host: portalku.lan" http://10.0.0.20', 'Mengakses web dengan mengirimkan header Host. Nginx akan menampilkan halaman Portal Wikrama!']]]
+  ],
+  b4: [
+    ['Pindah ke server1', [['konsol server1', 'Pengaturan keamanan dilakukan di server.']]],
+    ['Atur izin akses direktori www-data', [['sudo chown -R www-data:www-data /var/www', 'Menjadikan akun sistem www-data sebagai pemilik seluruh dokumen web.'], ['sudo chmod -R 755 /var/www', 'Mengunci izin folder menjadi 755 (hanya www-data yang dapat menulis).']]],
+    ['Sembunyikan versi server', [['sudo sed -i "s/# server_tokens off;/server_tokens off;/" /etc/nginx/nginx.conf', 'Mengaktifkan direktif server_tokens off pada konfigurasi utama.'], ['sudo nginx -t', 'Memastikan sintaks tetap valid.'], ['sudo systemctl reload nginx', 'Menerapkan aturan penyembunyian banner identitas.']]],
+    ['Atur Firewall UFW', [['sudo apt install -y ufw', 'Memasang paket firewall UFW.'], ['sudo ufw allow 80/tcp', 'Membuka akses port web HTTP.'], ['sudo ufw allow 443/tcp', 'Membuka akses port aman HTTPS.'], ['sudo ufw enable', 'Mengaktifkan proteksi firewall. Ketik y saat diminta konfirmasi.']]],
+    ['Uji header keamanan dari client', [['konsol client', 'Kembali ke client untuk membuktikan efek penyembunyian banner.'], ['curl -I http://10.0.0.20', 'Periksa baris Server: hanya tertulis nginx tanpa nomor rilis versi.']]]
+  ],
+  b5: [
+    ['Pindah ke server1', [['konsol server1', 'Konfigurasi proxy dipasang di server1.']]],
+    ['Buat konfigurasi Reverse Proxy', [['echo -e "server {\\n  listen 80;\\n  server_name app.lan;\\n  location / {\\n    proxy_pass http://10.0.0.30:8080;\\n    proxy_set_header Host \\$host;\\n  }\\n}" | sudo tee /etc/nginx/sites-available/app', 'Membuat server block yang mem-forward request domain app.lan ke backend app di port 8080.']]],
+    ['Aktifkan dan reload', [['sudo ln -s /etc/nginx/sites-available/app /etc/nginx/sites-enabled/', 'Mengaktifkan konfigurasi proxy ke sites-enabled.'], ['sudo nginx -t', 'Validasi sintaks konfigurasi.'], ['sudo systemctl reload nginx', 'Memuat konfigurasi proxy ke server aktif.']]],
+    ['Uji Reverse Proxy dari client', [['konsol client', 'Pindah ke client.'], ['curl -H "Host: app.lan" http://10.0.0.20', 'Nginx akan meneruskan request ke 10.0.0.30:8080 dan menampilkan respon dari backend app!']]]
+  ],
+  b6: [
+    ['Pindah ke server1', [['konsol server1', 'Pembuatan sertifikat SSL dilakukan di web server.']]],
+    ['Generate Self-Signed SSL Certificate', [['sudo openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/ssl/private/nginx-selfsigned.key -out /etc/ssl/certs/nginx-selfsigned.crt -subj "/CN=server1"', 'Membuat pasangan kunci privat dan sertifikat SSL x509 yang valid selama 1 tahun.']]],
+    ['Konfigurasi port 443 SSL', [['echo -e "server {\\n  listen 443 ssl;\\n  server_name 10.0.0.20;\\n  ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;\\n  ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;\\n  root /var/www/html;\\n}" | sudo tee /etc/nginx/sites-available/ssl-web', 'Membuat konfigurasi server block HTTPS port 443 dengan sertifikat SSL.']]],
+    ['Aktifkan HTTPS dan reload', [['sudo ln -s /etc/nginx/sites-available/ssl-web /etc/nginx/sites-enabled/', 'Mengaktifkan virtual host HTTPS.'], ['sudo nginx -t', 'Memeriksa validitas direktif SSL.'], ['sudo systemctl reload nginx', 'Menerapkan SSL.']]],
+    ['Uji koneksi HTTPS dari client', [['konsol client', 'Pindah ke client.'], ['curl -k https://10.0.0.20', 'Mengakses HTTPS web server (-k mengabaikan peringatan sertifikat self-signed).']]]
+  ],
+  b7: [
+    ['Pindah ke server1', [['konsol server1', 'Audit dan diagnosis dilakukan di server.']]],
+    ['Pantau riwayat akses web', [['sudo tail -n 10 /var/log/nginx/access.log', 'Menampilkan 10 baris terakhir log pengunjung web lengkap dengan kode HTTP respons.']]],
+    ['Analisis log galat (error log)', [['sudo tail -n 10 /var/log/nginx/error.log', 'Melihat rincian pesan kesalahan saat ada halaman gagal dimuat.']]],
+    ['Simulasi galat 403 Forbidden', [['sudo chmod 000 /var/www/html/index.nginx-debian.html', 'Mengunci total akses berkas index untuk mensimulasikan error permission.'], ['curl -I http://localhost', 'Output menunjukkan HTTP 403 Forbidden!'], ['sudo grep "permission denied" /var/log/nginx/error.log', 'Melihat bukti rekaman kesalahan di berkas error.log.']]],
+    ['Perbaiki izin kembali', [['sudo chmod 644 /var/www/html/index.nginx-debian.html', 'Mengembalikan mode izin berkas ke standar aman 644.'], ['curl -I http://localhost', 'Status kembali normal: HTTP/1.1 200 OK.']]]
+  ]
+};
+
+const tabs = Array.from(document.querySelectorAll('.tab'));
+const nav = document.getElementById('nav');
+const TB = document.getElementById('tbox');
+
+function show(i) {
+  tabs.forEach((t, k) => {
+    if (k === i) {
+      t.classList.add('active');
+    } else {
+      t.classList.remove('active');
+    }
+  });
+
+  const navBtns = nav.querySelectorAll('button');
+  navBtns.forEach((b, k) => {
+    b.classList.toggle('on', k === i);
+  });
+
+  const bar = document.getElementById('bar');
+  if (bar) bar.style.width = (i / (tabs.length - 1) * 100) + '%';
+
+  const currentTab = tabs[i];
+  const sl = currentTab.querySelector('.tslot');
+  if (sl) {
+    sl.appendChild(TB);
+    TB.style.display = 'block';
+  } else if (currentTab.dataset.title === 'Cover' || currentTab.dataset.title === '1. Konsep' || currentTab.dataset.title === 'Latihan') {
+    TB.style.display = 'none';
+  } else {
+    currentTab.appendChild(TB);
+    TB.style.display = 'block';
+  }
+  window.scrollTo(0, 0);
+}
+
+// Inisialisasi tombol pada navbar
+nav.innerHTML = '';
+tabs.forEach((t, k) => {
+  const b = document.createElement('button');
+  b.textContent = t.dataset.title;
+  b.onclick = () => show(k);
+  nav.appendChild(b);
+
+  const oldNv = t.querySelector('.nv');
+  if (oldNv) oldNv.remove();
+
+  const d = document.createElement('div');
+  d.className = 'nv';
+
+  const prevBtn = k > 0 ? '<button class="btn-prev">← Sebelumnya</button>' : '<div></div>';
+  const nextBtn = k < tabs.length - 1 ? '<button class="btn-next">Berikutnya →</button>' : '<div></div>';
+
+  d.innerHTML = prevBtn + nextBtn;
+  if (k > 0) d.querySelector('.btn-prev').onclick = () => show(k - 1);
+  if (k < tabs.length - 1) d.querySelector('.btn-next').onclick = () => show(k + 1);
+  t.appendChild(d);
+});
+
+// Toggle Ganti Tema
+document.getElementById('tg').onclick = () => {
+  const r = document.documentElement;
+  const isDark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+  r.dataset.theme = isDark ? 'light' : 'dark';
+};
+
+// Toggle Fullscreen Layar Penuh
+const btnFs = document.getElementById('btnFs');
+btnFs.onclick = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    btnFs.textContent = '✕ Exit Full';
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+    btnFs.textContent = '⛶ Fullscreen';
+  }
+};
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) btnFs.textContent = '⛶ Fullscreen';
+});
+
+const $ = s => document.querySelector(s);
+const T = $('#term');
+const LOG = $('#log');
+const LN = $('#ln');
+const I = $('#in');
+const PS = $('#ps');
+
+document.querySelectorAll('[data-st]').forEach(el => {
+  let k = 0;
+  const list = ST[el.dataset.st];
+  if (!list) return;
+  list.forEach(([t, rows, n]) => {
+    k++;
+    const h = document.createElement('h3');
+    h.textContent = 'Langkah ' + k + '. ' + t;
+    const w = document.createElement('div');
+    w.className = 'tw';
+    const tb = document.createElement('table');
+    tb.innerHTML = '<tr><th style="width:40%">Perintah</th><th>Fungsi</th></tr>';
+    rows.forEach(([c, f]) => {
+      const tr = tb.insertRow();
+      const a = tr.insertCell();
+      const b = tr.insertCell();
+      const cd = document.createElement('code');
+      cd.textContent = c;
+      a.appendChild(cd);
+      const bt = document.createElement('button');
+      bt.className = 'try';
+      bt.textContent = 'Coba';
+      bt.onclick = () => {
+        I.value = c;
+        I.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        I.focus();
+      };
+      a.appendChild(bt);
+      b.textContent = f;
+    });
+    w.appendChild(tb);
+    el.append(h, w);
+    if (n) {
+      const p = document.createElement('p');
+      p.className = 'co';
+      p.textContent = n;
+      el.appendChild(p);
+    }
+  });
+});
+
+const NET = { client: '10.0.0.10', server1: '10.0.0.20', 'app-backend': '10.0.0.30' };
+const PW = { siswa: 'siswa123', root: 'root123' };
+const CMDS = 'help clear reset konsol ls cd pwd cat mkdir touch rm cp chmod chown echo sed grep tail whoami hostname id date uname ip ping nc sudo apt systemctl nginx ufw curl openssl ln exit'.split(' ');
+let S, stack, D, clk, ec, hist = [], hi = 0, pend = null, busy = 0;
+
+const home = u => u === 'root' ? '/root' : '/home/' + u;
+const canWu = (u, p) => u === 'root' || p === '/tmp' || p.startsWith('/tmp/') || p.startsWith('/home/' + u + '/');
+const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const ts = () => { clk++; return 'Oct 19 08:' + pad(Math.floor(clk / 60) % 60) + ':' + pad(clk % 60); };
+
+function ab(s, p) {
+  if (p === '~' || p.startsWith('~/')) p = home(s.u) + p.slice(1);
+  if (p[0] !== '/') p = s.cwd + '/' + p;
+  const o = [];
+  p.split('/').forEach(x => {
+    if (x === '' || x === '.') return;
+    if (x === '..') o.pop();
+    else o.push(x);
+  });
+  return '/' + o.join('/');
+}
+
+const kids = (s, P) => {
+  const b = P === '/' ? '/' : P + '/';
+  return Object.keys(s.fs).filter(k => k !== P && k.startsWith(b) && !k.slice(b.length).includes('/')).map(k => k.split('/').pop()).sort();
+};
+const mstr = m => [...m].map(c => 'rwx'.split('').map((x, i) => (c >> (2 - i) & 1) ? x : '-').join('')).join('');
+
+function mkhost(h) {
+  const fs = {};
+  ['/', '/home', '/home/siswa', '/etc', '/var', '/var/log', '/tmp', '/usr', '/root'].forEach(p => {
+    fs[p] = { d: 1, m: p === '/tmp' ? '777' : '755', o: p === '/home/siswa' ? 'siswa' : 'root', g: p === '/home/siswa' ? 'siswa' : 'root' };
+  });
+  fs['/etc/hostname'] = { c: h, m: '644', o: 'root', g: 'root' };
+  return { name: h, ip: NET[h], u: 'siswa', cwd: '/home/siswa', fs, inst: 0, act: 0, en: 0, tokens: 1, ufw: { on: 0, allow: [] }, pk: {}, accessLog: [], errorLog: [], vhosts: [] };
+}
+
+function instNginx(s) {
+  s.inst = 1; s.act = 1; s.en = 1;
+  ['/etc/nginx', '/etc/nginx/sites-available', '/etc/nginx/sites-enabled', '/var/www', '/var/www/html', '/var/log/nginx', '/etc/ssl', '/etc/ssl/certs', '/etc/ssl/private'].forEach(p => {
+    s.fs[p] = { d: 1, m: '755', o: 'root', g: 'root' };
+  });
+  s.fs['/etc/nginx/nginx.conf'] = {
+    c: `user www-data;
+worker_processes auto;
+pid /run/nginx.pid;
+events { worker_connections 768; }
+http {
+    sendfile on;
+    # server_tokens off;
+    include /etc/nginx/sites-enabled/*;
+}`,
+    m: '644', o: 'root', g: 'root'
+  };
+  s.fs['/var/www/html/index.nginx-debian.html'] = {
+    c: `<!DOCTYPE html>
+<html>
+<head><title>Welcome to nginx!</title></head>
+<body>
+<h1>Welcome to nginx on Debian 12!</h1>
+<p>If you see this page, the nginx web server is successfully installed and working.</p>
+</body>
+</html>\n`,
+    m: '644', o: 'www-data', g: 'www-data'
+  };
+  s.fs['/etc/nginx/sites-available/default'] = {
+    c: `server {
+    listen 80 default_server;
+    listen [::]:80 default_server;
+    root /var/www/html;
+    index index.html index.htm index.nginx-debian.html;
+    server_name _;
+    location / {
+        try_files $uri $uri/ =404;
+    }
+}`,
+    m: '644', o: 'root', g: 'root'
+  };
+  s.fs['/etc/nginx/sites-enabled/default'] = { l: '/etc/nginx/sites-available/default', m: '777', o: 'root', g: 'root' };
+  s.accessLog.push(ts() + ' [notice] 1024#1024: start worker processes');
+  s.errorLog.push(ts() + ' [notice] 1024#1024: using the "epoll" event method');
+}
+
+function init() {
+  S = { client: mkhost('client'), server1: mkhost('server1'), 'app-backend': mkhost('app-backend') };
+  S.client.pk = { curl: 1 };
+  const b = S['app-backend'];
+  b.fs['/home/siswa/app.js'] = { c: `// Backend microservice berjalan di port 8080\n`, m: '644', o: 'siswa', g: 'siswa' };
+
+  clk = 120; stack = [{ h: 'client' }]; D = {}; LOG.innerHTML = ''; pend = null; busy = 0;
+  out('Debian GNU/Linux 12 (bookworm)  -  simulasi terminal Nginx full page');
+  out('Ketik help untuk daftar perintah. Password sudo semua akun: siswa123', 'd');
+  rm(); setPs();
+}
+
+const host = () => stack[stack.length - 1].h;
+function out(t, c) {
+  const d = document.createElement('div');
+  if (c) d.className = c;
+  d.textContent = t;
+  LOG.appendChild(d);
+  T.scrollTop = T.scrollHeight;
+}
+function outH(h) {
+  const d = document.createElement('div');
+  d.innerHTML = h;
+  LOG.appendChild(d);
+  T.scrollTop = T.scrollHeight;
+}
+function pshtml() {
+  const s = S[host()], hm = home(s.u), c = s.cwd, p = c === hm ? '~' : c.startsWith(hm + '/') ? '~' + c.slice(hm.length) : c;
+  return '<span class="g">' + s.u + '@' + host() + '</span>:<span class="b">' + p + '</span>' + (s.u === 'root' ? '#' : '$') + ' ';
+}
+function setPs() {
+  PS.innerHTML = pshtml();
+  $('#where span').textContent = 'Mesin Aktif: ' + host() + ' (' + S[host()].ip + ')';
+  LN.style.display = (busy && !pend) ? 'none' : 'flex';
+}
+function ask(p, hid) {
+  return new Promise(res => {
+    const L = p.split('\n'), lp = L.pop();
+    L.forEach(l => out(l));
+    PS.textContent = lp;
+    I.type = hid ? 'password' : 'text';
+    pend = { res, lp, hid };
+    LN.style.display = 'flex';
+    I.focus();
+  });
+}
+
+const M = [
+  ['Pasang dan aktifkan Nginx di server1',
+   'konsol server1 → sudo apt install -y nginx',
+   'Nginx harus terpasang dan berstatus active (running).',
+   () => S.server1.inst && S.server1.act],
+  ['Buat halaman & Virtual Host portalku.lan',
+   'Buat folder /var/www/portalku, index.html, konfigurasi di sites-available, symlink, lalu reload',
+   'Hosting banyak website dalam satu IP server.',
+   () => {
+     const s = S.server1;
+     return s.act && s.fs['/var/www/portalku/index.html'] && s.fs['/etc/nginx/sites-enabled/portalku'];
+   }],
+  ['Sembunyikan nomor versi Nginx (Hardening)',
+   'sudo sed -i "s/# server_tokens off;/server_tokens off;/" /etc/nginx/nginx.conf && sudo systemctl reload nginx',
+   'Mempersulit peretas mengenali rilis versi server.',
+   () => {
+     const s = S.server1;
+     const conf = (s.fs['/etc/nginx/nginx.conf'] || {}).c || '';
+     return s.act && conf.includes('server_tokens off;') && !conf.includes('# server_tokens off;');
+   }],
+  ['Konfigurasi Reverse Proxy untuk app.lan',
+   'Buat server block app.lan dengan proxy_pass http://10.0.0.30:8080, aktifkan, lalu reload',
+   'Meneruskan trafik pengunjung luar ke service backend internal.',
+   () => {
+     const s = S.server1;
+     const link = s.fs['/etc/nginx/sites-enabled/app'];
+     const conf = link ? (s.fs['/etc/nginx/sites-available/app'] || {}).c || '' : '';
+     return s.act && conf.includes('proxy_pass');
+   }],
+  ['Buat SSL Self-Signed & Aktifkan Port 443',
+   'sudo openssl req ... lalu konfigurasi server block listen 443 ssl',
+   'Mengamankan lalu lintas dengan enkripsi SSL/HTTPS.',
+   () => {
+     const s = S.server1;
+     return s.fs['/etc/ssl/certs/nginx-selfsigned.crt'] && s.fs['/etc/ssl/private/nginx-selfsigned.key'];
+   }],
+  ['Audit error log Nginx',
+   'sudo tail -n 10 /var/log/nginx/error.log atau grep error',
+   'Menelusuri jejak pesan galat untuk troubleshooting cepat.',
+   () => {
+     return S.server1.errorLogRead === true;
+   }]
+];
+
+function rm() {
+  const u = $('#ms');
+  u.innerHTML = '';
+  M.forEach((m, k) => {
+    const l = document.createElement('li');
+    l.id = 'm' + k;
+    l.innerHTML = '<b>Misi ' + (k + 1) + ': ' + m[0] + '</b><details><summary>Petunjuk</summary>' + m[1] + '<br><i>Mengapa: ' + m[2] + '</i></details>';
+    u.appendChild(l);
+  });
+}
+const chk = () => M.forEach((m, k) => {
+  if (!D[k] && m[3]()) D[k] = 1;
+  $('#m' + k).classList.toggle('ok', !!D[k]);
+});
+
+function rd(s, p, sd) {
+  let P = ab(s, p);
+  const n = s.fs[P];
+  if (!n) return { e: 'No such file or directory' };
+  if (n.l) { P = n.l; return rd(s, P, sd); }
+  if (n.d) return { e: 'Is a directory' };
+  if (n.m === '000' && !sd) return { e: 'Permission denied' };
+  return { c: n.c };
+}
+function wr(s, P, c, sd) {
+  const owner = sd ? 'root' : s.u;
+  const grp = sd ? 'root' : s.u;
+  if (s.fs[P] && !s.fs[P].d) s.fs[P].c = c;
+  else s.fs[P] = { c, m: '644', o: owner, g: grp };
+}
+
+function parseVhosts(s) {
+  const vhosts = [];
+  const enabled = Object.keys(s.fs).filter(k => k.startsWith('/etc/nginx/sites-enabled/'));
+  enabled.forEach(linkPath => {
+    const item = s.fs[linkPath];
+    let content = '';
+    if (item.l && s.fs[item.l]) content = s.fs[item.l].c;
+    else if (item.c) content = item.c;
+
+    const srvRe = /server\s*\{([^}]+)\}/gs;
+    let m;
+    while ((m = srvRe.exec(content)) !== null) {
+      const block = m[1];
+      const portM = block.match(/listen\s+(\d+)(?:\s+ssl)?/);
+      const isSsl = /listen\s+\d+\s+ssl/.test(block);
+      const nameM = block.match(/server_name\s+([^;]+);/);
+      const rootM = block.match(/root\s+([^;]+);/);
+      const proxyM = block.match(/proxy_pass\s+([^;]+);/);
+
+      vhosts.push({
+        port: portM ? parseInt(portM[1]) : 80,
+        ssl: isSsl,
+        serverName: nameM ? nameM[1].trim() : '_',
+        root: rootM ? rootM[1].trim() : '/var/www/html',
+        proxyPass: proxyM ? proxyM[1].trim() : null
+      });
+    }
+  });
+  return vhosts;
+}
+
+function curlRequest(targetUrl, headers = {}, headOnly = false, insecure = false) {
+  let clean = targetUrl.replace(/^https?:\/\//, '');
+  const isHttps = targetUrl.startsWith('https://');
+  let [hostPart, pathPart] = clean.split(/\/(.+)/);
+  pathPart = '/' + (pathPart || '');
+  let [dstHost, dstPort] = hostPart.split(':');
+
+  let targetIp = dstHost;
+  if (dstHost === 'localhost' || dstHost === '127.0.0.1') targetIp = S[host()].ip;
+  if (NET[dstHost]) targetIp = NET[dstHost];
+
+  let destMachine = Object.values(S).find(m => m.ip === targetIp);
+  if (!destMachine) return { status: 0, err: "curl: (6) Could not resolve host: " + dstHost };
+
+  const portNum = dstPort ? parseInt(dstPort) : (isHttps ? 443 : 80);
+
+  if (destMachine.ufw.on && !destMachine.ufw.allow.includes(portNum)) {
+    return { status: 0, err: "curl: (28) Failed to connect to " + dstHost + " port " + portNum + ": Connection timed out" };
+  }
+
+  if (targetIp === NET['app-backend'] && portNum === 8080) {
+    return {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', 'Server': 'NodeJS/Microservice' },
+      body: '{"status":"success","message":"Hello from Microservice Backend API (Node.js port 8080)"}\n'
+    };
+  }
+
+  if (!destMachine.inst || !destMachine.act) {
+    return { status: 0, err: "curl: (7) Failed to connect to " + dstHost + " port " + portNum + ": Connection refused" };
+  }
+
+  const vhosts = parseVhosts(destMachine);
+  const reqHost = headers['Host'] || headers['host'] || dstHost;
+
+  let match = vhosts.find(v => v.port === portNum && v.serverName === reqHost);
+  if (!match) match = vhosts.find(v => v.port === portNum && (v.serverName === '_' || v.serverName === 'localhost'));
+  if (!match && vhosts.length) match = vhosts.find(v => v.port === portNum);
+
+  if (!match) {
+    return { status: 0, err: "curl: (7) Failed to connect to " + dstHost + " port " + portNum + ": Connection refused" };
+  }
+
+  const confText = (destMachine.fs['/etc/nginx/nginx.conf'] || {}).c || '';
+  const showTokens = !confText.includes('server_tokens off;');
+  const srvHeader = showTokens ? 'nginx/1.22.1 (Debian)' : 'nginx';
+
+  destMachine.accessLog.push(S[host()].ip + ' - - [' + ts() + '] "GET ' + pathPart + ' HTTP/1.1" 200 - "-" "curl/7.88.1"');
+
+  if (match.proxyPass) {
+    return {
+      status: 200,
+      headers: { 'Server': srvHeader, 'Content-Type': 'text/plain; charset=utf-8', 'X-Proxy-By': 'Nginx' },
+      body: '[Proxy -> ' + match.proxyPass + '] Response: {"status":"200 OK","backend":"Connected via Nginx Reverse Proxy"}\n'
+    };
+  }
+
+  let filePath = ab({ u: 'root', cwd: match.root }, pathPart === '/' ? 'index.html' : pathPart);
+  let fileNode = destMachine.fs[filePath];
+  if (!fileNode && pathPart === '/') {
+    filePath = ab({ u: 'root', cwd: match.root }, 'index.nginx-debian.html');
+    fileNode = destMachine.fs[filePath];
+  }
+
+  if (!fileNode) {
+    destMachine.errorLog.push(ts() + ' [error] 1024#1024: *1 open() "' + filePath + '" failed (2: No such file or directory)');
+    return {
+      status: 404,
+      headers: { 'Server': srvHeader, 'Content-Type': 'text/html' },
+      body: '<html>\r\n<head><title>404 Not Found</title></head>\r\n<body>\r\n<center><h1>404 Not Found</h1></center>\r\n<hr><center>' + srvHeader + '</center>\r\n</body>\r\n</html>\n'
+    };
+  }
+
+  if (fileNode.m === '000') {
+    destMachine.errorLog.push(ts() + ' [error] 1024#1024: *1 open() "' + filePath + '" failed (13: Permission denied)');
+    return {
+      status: 403,
+      headers: { 'Server': srvHeader, 'Content-Type': 'text/html' },
+      body: '<html>\r\n<head><title>403 Forbidden</title></head>\r\n<body>\r\n<center><h1>403 Forbidden</h1></center>\r\n<hr><center>' + srvHeader + '</center>\r\n</body>\r\n</html>\n'
+    };
+  }
+
+  return {
+    status: 200,
+    headers: { 'Server': srvHeader, 'Content-Type': 'text/html', 'Content-Length': String((fileNode.c || '').length) },
+    body: fileNode.c || ''
+  };
+}
+
+function tok(l) {
+  const r = [], re = /"([^"]*)"|'([^']*)'|(>>|>|\||&&|[^\s|>&"']+)/g;
+  let m;
+  while ((m = re.exec(l))) {
+    if (m[1] !== undefined) r.push({ v: m[1], q: 1 });
+    else if (m[2] !== undefined) r.push({ v: m[2], q: 1 });
+    else r.push({ v: m[3], q: 0 });
+  }
+  return r;
+}
+
+async function run(line) {
+  const tk = tok(line);
+  if (!tk.length) return;
+  const segs = [[]];
+  tk.forEach(t => (!t.q && t.v === '&&') ? segs.push([]) : segs[segs.length - 1].push(t));
+  for (let q = 0; q < segs.length; q++) {
+    if (q && ec) break;
+    ec = 0;
+    const st = [[]];
+    segs[q].forEach(t => (!t.q && t.v === '|') ? st.push([]) : st[st.length - 1].push(t));
+    let inp = null;
+    for (let i = 0; i < st.length; i++) {
+      const a = []; let rd = null; const ts = st[i];
+      for (let j = 0; j < ts.length; j++) {
+        const t = ts[j];
+        if (!t.q && (t.v === '>' || t.v === '>>')) rd = { ap: t.v === '>>', f: (ts[++j] || {}).v };
+        else a.push(t.v);
+      }
+      if (!a.length) continue;
+      const last = i === st.length - 1, buf = [], o = m => { (last && !rd) ? out(m) : buf.push(m); };
+      await exec(a, inp, o, 0);
+      if (rd && rd.f) {
+        const s = S[host()], P = ab(s, rd.f), par = P.replace(/\/[^/]*$/, '') || '/';
+        if (!s.fs[par]) { out('bash: ' + rd.f + ': No such file or directory'); ec = 1; }
+        else if (!canWu(s.u, P)) { out('bash: ' + rd.f + ': Permission denied'); ec = 1; }
+        else { const old = s.fs[P]; wr(s, P, (rd.ap && old ? old.c : '') + buf.join('\n') + '\n', 0); }
+      }
+      inp = buf.join('\n');
+    }
+  }
+}
+
+async function exec(a, inp, o, sd) {
+  const h = host(), s = S[h], x = a[0], r = a.slice(1), e = m => { o(m); ec = 1; };
+  switch (x) {
+  case 'sudo': if (r.length < 1) { e('usage: sudo command'); break; } return exec(r, inp, o, 1);
+  case 'help': o('Perintah Nginx Lab: ' + CMDS.join(' ') + '\nPindah mesin: konsol client | konsol server1 | konsol app-backend | reset'); break;
+  case 'clear': LOG.innerHTML = ''; break;
+  case 'reset': init(); return;
+  case 'konsol': if (!NET[r[0]]) { e('usage: konsol client|server1|app-backend'); break; } stack = [{ h: r[0] }]; o('Berpindah ke konsol ' + r[0] + ' (' + NET[r[0]] + ').'); break;
+  case 'whoami': o(sd ? 'root' : s.u); break;
+  case 'hostname': o(h); break;
+  case 'id': o(sd ? 'uid=0(root) gid=0(root) groups=0(root)' : 'uid=1000(siswa) gid=1000(siswa) groups=1000(siswa),27(sudo)'); break;
+  case 'date': o('Mon Oct 19 08:15:00 WIB 2026'); break;
+  case 'uname': o(r.includes('-a') ? 'Linux ' + h + ' 6.1.0-21-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.90-1 (2024-05-03) x86_64 GNU/Linux' : 'Linux'); break;
+  case 'pwd': o(s.cwd); break;
+
+  case 'ls': {
+    let fl = '', ps = []; r.forEach(z => z[0] === '-' ? fl += z : ps.push(z)); if (!ps.length) ps = ['.'];
+    const row = (nm, n) => fl.includes('l') ? (n.d ? 'd' : n.l ? 'l' : '-') + mstr(n.m || '644') + ' 1 ' + (n.o || s.u) + ' ' + (n.g || s.u) + ' ' + String(n.d ? 4096 : (n.c || '').length).padStart(5) + ' Oct 19 08:00 ' + nm + (n.l ? ' -> ' + n.l : '') : nm;
+    for (const p of ps) {
+      const P = ab(s, p), n = s.fs[P];
+      if (!n) { e("ls: cannot access '" + p + "': No such file or directory"); continue; }
+      if (n.d && !fl.includes('d')) {
+        let k = kids(s, P); k = fl.includes('a') ? ['.', '..', ...k] : k.filter(z => z[0] !== '.');
+        if (ps.length > 1) o(p + ':');
+        const L = k.map(z => row(z, z === '.' || z === '..' ? n : s.fs[(P === '/' ? '' : P) + '/' + z]));
+        if (fl.includes('l')) { o('total ' + k.length * 4); L.forEach(z => o(z)); }
+        else if (L.length) o(L.join('  '));
+      } else o(row(p, n));
+    }
+    break;
+  }
+
+  case 'cd': {
+    const p = r[0] || '~', P = ab(s, p), n = s.fs[P];
+    if (!n) { e('bash: cd: ' + p + ': No such file or directory'); break; }
+    if (!n.d) { e('bash: cd: ' + p + ': Not a directory'); break; }
+    s.cwd = P;
+    break;
+  }
+
+  case 'cat': {
+    if (!r.length && inp != null) { o(inp); break; }
+    for (const p of r) {
+      const t = rd(s, p, sd);
+      if (t.e) e('cat: ' + p + ': ' + t.e); else o(t.c.replace(/\n$/, ''));
+    }
+    break;
+  }
+
+  case 'mkdir': {
+    const pf = r.includes('-p');
+    for (const p of r.filter(z => z[0] !== '-')) {
+      const P = ab(s, p);
+      if (s.fs[P]) { if (!pf) e("mkdir: cannot create directory '" + p + "': File exists"); continue; }
+      if (!sd && !canWu(s.u, P)) { e("mkdir: cannot create directory '" + p + "': Permission denied"); continue; }
+      const par = P.replace(/\/[^/]*$/, '') || '/';
+      if (!s.fs[par] && !pf) { e("mkdir: cannot create directory '" + p + "': No such file or directory"); continue; }
+      if (pf) { let c = ''; P.split('/').filter(Boolean).forEach(z => { c += '/' + z; if (!s.fs[c]) s.fs[c] = { d: 1, m: '755', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u }; }); }
+      else s.fs[P] = { d: 1, m: '755', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u };
+    }
+    break;
+  }
+
+  case 'touch': for (const p of r) {
+    const P = ab(s, p); if (s.fs[P]) continue;
+    if (!sd && !canWu(s.u, P)) { e("touch: cannot touch '" + p + "': Permission denied"); continue; }
+    s.fs[P] = { c: '', m: '644', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u };
+  } break;
+
+  case 'rm': {
+    const rec = r.some(z => /^-.*[rR]/.test(z));
+    for (const p of r.filter(z => z[0] !== '-')) {
+      const P = ab(s, p), n = s.fs[P];
+      if (!n) { e("rm: cannot remove '" + p + "': No such file or directory"); continue; }
+      if (n.d && !rec) { e("rm: cannot remove '" + p + "': Is a directory"); continue; }
+      if (!sd && !canWu(s.u, P)) { e("rm: cannot remove '" + p + "': Permission denied"); continue; }
+      Object.keys(s.fs).filter(k => k === P || k.startsWith(P + '/')).forEach(k => delete s.fs[k]);
+    }
+    break;
+  }
+
+  case 'chmod': {
+    let rec = r.includes('-R');
+    const rest = r.filter(z => z !== '-R');
+    const m = rest[0], p = rest[1];
+    if (!/^[0-7]{3}$/.test(m || '') || !p) { e('Usage: chmod [-R] MODE(3 digit) FILE'); break; }
+    const P = ab(s, p), n = s.fs[P];
+    if (!n) { e("chmod: cannot access '" + p + "': No such file or directory"); break; }
+    if (!sd && n.o === 'root') { e("chmod: changing permissions of '" + p + "': Operation not permitted"); break; }
+    n.m = m;
+    if (rec && n.d) {
+      Object.keys(s.fs).filter(k => k.startsWith(P + '/')).forEach(k => s.fs[k].m = m);
+    }
+    break;
+  }
+
+  case 'chown': {
+    let rec = r.includes('-R');
+    const rest = r.filter(z => z !== '-R');
+    const owner = rest[0], p = rest[1];
+    if (!sd) { e("chown: changing ownership of '" + p + "': Operation not permitted"); break; }
+    if (!owner || !p) { e('Usage: chown [-R] user:group FILE'); break; }
+    const [usr, grp] = owner.split(':');
+    const P = ab(s, p), n = s.fs[P];
+    if (!n) { e("chown: cannot access '" + p + "': No such file or directory"); break; }
+    n.o = usr || 'root';
+    n.g = grp || usr || 'root';
+    if (rec && n.d) {
+      Object.keys(s.fs).filter(k => k.startsWith(P + '/')).forEach(k => {
+        s.fs[k].o = usr || 'root';
+        s.fs[k].g = grp || usr || 'root';
+      });
+    }
+    break;
+  }
+
+  case 'echo': {
+    let t = r.slice(); const en = t[0] === '-e'; if (en) t.shift();
+    let z = t.join(' '); if (en) z = z.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\\$/g, '$');
+    o(z);
+    break;
+  }
+
+  case 'tee': {
+    const ap = r.includes('-a'), p = r.find(z => z[0] !== '-'); if (!p) break;
+    const P = ab(s, p); if (!sd && !canWu(s.u, P)) { e('tee: ' + p + ': Permission denied'); break; }
+    const old = s.fs[P]; wr(s, P, (ap && old ? old.c : '') + (inp || '') + '\n', sd); o(inp || '');
+    break;
+  }
+
+  case 'sed': {
+    const i = r.includes('-i'), rest = r.filter(z => z !== '-i'), sc = rest[0], p = rest[1], m = sc && sc.match(/^s\/(.*?)\/(.*?)\/(g?)$/);
+    if (!m || !p) { e('usage: sed [-i] s/pola/ganti/ file'); break; }
+    const t = rd(s, p, 1);
+    if (t.e) { e("sed: can't read " + p + ': ' + t.e); break; }
+    const P = ab(s, p);
+    if (i && !sd && !canWu(s.u, P)) { e("sed: couldn't open temporary file " + P.replace(/[^/]*$/, '') + 'sedXXXXXX: Permission denied'); break; }
+    const re = new RegExp(m[1].replace(/\\\?/g, '?').replace(/\\\+/g, '+'), m[3]);
+    const res = t.c.split('\n').map(l => l.replace(re, m[2])).join('\n');
+    if (i) wr(s, P, res, sd); else o(res.replace(/\n$/, ''));
+    break;
+  }
+
+  case 'grep': {
+    const fl = r.filter(z => z[0] === '-'), ar = r.filter(z => z[0] !== '-'), pat = ar[0];
+    if (!pat) { e('Usage: grep [OPTION]... PATTERNS [FILE]...'); break; }
+    let txt;
+    if (ar[1]) { const t = rd(s, ar[1], sd); if (t.e) { e('grep: ' + ar[1] + ': ' + t.e); break; } txt = t.c; }
+    else txt = inp || '';
+    let re; try { re = new RegExp(pat, fl.includes('-i') ? 'i' : ''); } catch (z) { e('grep: Invalid regular expression'); break; }
+    const Ls = txt.split('\n').filter(l => re.test(l) !== fl.includes('-v'));
+    Ls.forEach(l => o(l)); if (!Ls.length) ec = 1;
+    break;
+  }
+
+  case 'tail': {
+    let n = 10, f;
+    for (let i = 0; i < r.length; i++) { if (r[i] === '-n') n = +r[++i]; else if (r[i][0] !== '-') f = r[i]; }
+    if (f === '/var/log/nginx/error.log' && s.name === 'server1') {
+      s.errorLogRead = true;
+      if (!sd) { e("tail: cannot open '" + f + "' for reading: Permission denied"); break; }
+      s.errorLog.slice(-n).forEach(l => o(l));
+      break;
+    }
+    if (f === '/var/log/nginx/access.log' && s.name === 'server1') {
+      if (!sd) { e("tail: cannot open '" + f + "' for reading: Permission denied"); break; }
+      s.accessLog.slice(-n).forEach(l => o(l));
+      break;
+    }
+    let txt = inp;
+    if (f) { const t = rd(s, f, sd); if (t.e) { e("tail: cannot open '" + f + "' for reading: " + t.e); break; } txt = t.c; }
+    (txt || '').split('\n').slice(-n).forEach(l => o(l));
+    break;
+  }
+
+  case 'ln': {
+    if (r[0] === '-s') {
+      const src = r[1], dst = r[2];
+      if (!src || !dst) { e('Usage: ln -s TARGET LINK_NAME'); break; }
+      if (!sd) { e("ln: failed to create symbolic link '" + dst + "': Permission denied"); break; }
+      const pDst = ab(s, dst);
+      s.fs[pDst] = { l: src, m: '777', o: 'root', g: 'root' };
+      break;
+    }
+    e('Usage: ln -s TARGET LINK_NAME');
+    break;
+  }
+
+  case 'curl': {
+    let headOnly = false, insecure = false, hdrs = {}, url = '';
+    for (let i = 0; i < r.length; i++) {
+      if (r[i] === '-I' || r[i] === '--head') headOnly = true;
+      else if (r[i] === '-k' || r[i] === '--insecure') insecure = true;
+      else if (r[i] === '-H') {
+        const [hk, hv] = (r[++i] || '').split(/:\s*/);
+        if (hk) hdrs[hk] = hv;
+      }
+      else if (!r[i].startsWith('-')) url = r[i];
+    }
+    if (!url) { e("curl: try 'curl --help' for more information"); break; }
+    if (!url.startsWith('http://') && !url.startsWith('https://')) url = 'http://' + url;
+
+    const resp = curlRequest(url, hdrs, headOnly, insecure);
+    if (resp.status === 0) { e(resp.err); break; }
+
+    if (headOnly) {
+      o('HTTP/1.1 ' + resp.status + ' ' + (resp.status === 200 ? 'OK' : resp.status === 403 ? 'Forbidden' : resp.status === 404 ? 'Not Found' : 'Error'));
+      Object.entries(resp.headers).forEach(([k, v]) => o(k + ': ' + v));
+    } else {
+      o(resp.body.replace(/\n$/, ''));
+    }
+    break;
+  }
+
+  case 'openssl': {
+    if (r[0] === 'req') {
+      if (!sd) { e('openssl: Permission denied'); break; }
+      let keyout = '/etc/ssl/private/nginx-selfsigned.key', outcrt = '/etc/ssl/certs/nginx-selfsigned.crt';
+      for (let i = 0; i < r.length; i++) {
+        if (r[i] === '-keyout') keyout = r[++i];
+        if (r[i] === '-out') outcrt = r[++i];
+      }
+      s.fs[ab(s, keyout)] = { c: '-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQC67zX\n-----END PRIVATE KEY-----\n', m: '600', o: 'root', g: 'root' };
+      s.fs[ab(s, outcrt)] = { c: '-----BEGIN CERTIFICATE-----\nMIIDdzCCAl+gAwIBAgIUQW\n-----END CERTIFICATE-----\n', m: '644', o: 'root', g: 'root' };
+      o("Generating a RSA private key\n................+++++\nwriting new private key to '" + keyout + "'\n-----");
+      break;
+    }
+    e('Usage: openssl req ...');
+    break;
+  }
+
+  case 'nginx': {
+    if (!sd) { e('nginx: [alert] could not open error log file: Permission denied'); break; }
+    if (!s.inst) { e('bash: nginx: command not found'); break; }
+    if (r.includes('-t')) {
+      o('nginx: the configuration file /etc/nginx/nginx.conf syntax is ok\nnginx: configuration file /etc/nginx/nginx.conf test is successful');
+      break;
+    }
+    if (r[0] === '-s' && r[1] === 'reload') {
+      o('nginx: reload signal sent');
+      break;
+    }
+    e('Usage: nginx -t | nginx -s reload');
+    break;
+  }
+
+  case 'apt': case 'apt-get': {
+    if (!sd) { e('E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)\nE: Unable to acquire the dpkg frontend lock, are you root?'); break; }
+    if (r[0] === 'update') {
+      o('Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]\nFetched 151 kB in 1s (180 kB/s)\nReading package lists... Done\nBuilding dependency tree... Done\nAll packages are up to date.');
+      break;
+    }
+    if (r[0] !== 'install') { e('Usage: apt [update|install] paket'); break; }
+    const pk = r.slice(1).filter(z => z[0] !== '-'); if (!pk.length) { e('E: No packages specified'); break; }
+    for (const p of pk) {
+      if (p === 'nginx') {
+        if (s.inst) { o('nginx is already the newest version (1.22.1-9).'); continue; }
+        o('The following NEW packages will be installed:\n  nginx nginx-common nginx-core\nSetting up nginx (1.22.1-9) ...\nStarting nginx: nginx.');
+        instNginx(s);
+      }
+      else if (p === 'ufw') {
+        s.pk.ufw = 1;
+        o('Setting up ufw (0.36.2) ...');
+      }
+      else e('E: Unable to locate package ' + p);
+    }
+    break;
+  }
+
+  case 'systemctl': {
+    const ac = r.find(z => /^(start|stop|restart|reload|enable|disable|status)$/.test(z));
+    if (!ac || !r.some(z => /^(nginx)(\.service)?$/.test(z))) { e('usage: systemctl start|stop|restart|reload|enable|disable|status nginx'); break; }
+    if (!s.inst) { e('Unit nginx.service could not be found.'); break; }
+    if (ac === 'status') {
+      o((s.act ? '●' : '○') + ' nginx.service - A high performance web server and a reverse proxy server\n     Loaded: loaded (/lib/systemd/system/nginx.service; ' + (s.en ? 'enabled' : 'disabled') + '; preset: enabled)\n     Active: ' + (s.act ? 'active (running) since Mon 2026-10-19 08:00:00 WIB; 15min ago' : 'inactive (dead)') + '\n   Main PID: 1024 (nginx)\n      Tasks: 2 (limit: 2341)\n     Memory: 6.2M\n        CPU: 14ms\n     CGroup: /system.slice/nginx.service\n             ├─1024 "nginx: master process /usr/sbin/nginx -g daemon on; master_process on;"\n             └─1025 "nginx: worker process"');
+      break;
+    }
+    if (!sd) { e('Failed to ' + ac + ' nginx.service: Interactive authentication required.'); break; }
+    if (ac === 'stop') { s.act = 0; o('Stopping nginx service...'); }
+    else if (ac === 'reload') { if (!s.act) { e('Failed to reload nginx.service: Unit nginx.service is not active.'); break; } o('Reloading nginx configuration...'); }
+    else if (ac === 'start' || ac === 'restart') { s.act = 1; o('Starting nginx.service...'); }
+    else if (ac === 'enable') { s.en = 1; o('Synchronizing state of nginx.service with SysV service script with /lib/systemd/systemd-sysv-install.'); }
+    break;
+  }
+
+  case 'ufw': {
+    if (!sd) { e('bash: ufw: command not found'); break; } if (!s.pk.ufw) { e('sudo: ufw: command not found'); break; } const U = s.ufw;
+    if (r[0] === 'allow') {
+      const arg = r[1], pt = arg === '80/tcp' ? 80 : arg === '443/tcp' ? 443 : parseInt(arg);
+      if (!pt) { e('ERROR: Invalid rule'); break; }
+      if (!U.allow.includes(pt)) U.allow.push(pt); o('Rules updated\nRules updated (v6)');
+    }
+    else if (r[0] === 'enable') {
+      U.on = 1; o('Firewall is active and enabled on system startup');
+    }
+    else if (r[0] === 'status') o(U.on ? 'Status: active\n\nTo                         Action      From\n--                         ------      ----\n' + U.allow.map(p => (p + '/tcp').padEnd(27) + 'ALLOW       Anywhere').join('\n') : 'Status: inactive');
+    else e('Usage: ufw allow PORT/tcp | enable | status');
+    break;
+  }
+
+  case 'ping': {
+    const n = r.find(z => z[0] !== '-' && !/^\d+$/.test(z));
+    if (!n) { e('ping: usage error: Destination address required'); break; }
+    if (!NET[n]) { e('ping: ' + n + ': Name or service not known'); break; }
+    o('PING ' + n + ' (' + NET[n] + ') 56(84) bytes of data.\n64 bytes from ' + n + ' (' + NET[n] + '): icmp_seq=1 ttl=64 time=0.4 ms\n--- ' + n + ' ping statistics ---\n1 packets transmitted, 1 received, 0% packet loss');
+    break;
+  }
+
+  case 'exit': o('Sesi konsol utama tidak ditutup. Gunakan: konsol NAMA untuk berpindah mesin.'); break;
+  default: e('bash: ' + x + ': command not found');
+  }
+}
+
+I.onkeydown = async e => {
+  if (e.key === 'Enter') {
+    e.preventDefault(); const v = I.value; I.value = '';
+    if (pend) { const p = pend; pend = null; I.type = 'text'; out(p.lp + (p.hid ? '' : v)); setPs(); p.res(v); return; }
+    if (busy) return; busy = 1; outH(pshtml() + esc(v)); if (v.trim()) { hist.push(v); hi = hist.length; } setPs();
+    try { await run(v); } catch (err) { out('simulator error: ' + err.message, 'd'); }
+    busy = 0; chk(); setPs(); I.focus(); T.scrollTop = T.scrollHeight;
+  }
+  else if (e.key === 'ArrowUp' && !pend) { if (hi > 0) I.value = hist[--hi]; e.preventDefault(); }
+  else if (e.key === 'ArrowDown' && !pend) { hi = Math.min(hi + 1, hist.length); I.value = hist[hi] || ''; e.preventDefault(); }
+  else if (e.key === 'Tab' && !pend) {
+    e.preventDefault(); const parts = I.value.split(' '), w = parts.pop(); let c;
+    if (!parts.length || (parts.length === 1 && parts[0] === 'sudo')) c = CMDS.filter(z => z.startsWith(w));
+    else {
+      const s = S[host()], dir = w.includes('/') ? w.replace(/[^/]*$/, '') : '', base = w.slice(dir.length), P = ab(s, dir || '.');
+      c = kids(s, P).filter(z => z.startsWith(base)).map(z => dir + z + ((s.fs[(P === '/' ? '' : P) + '/' + z] || {}).d ? '/' : ''));
+    }
+    if (c.length === 1) I.value = [...parts, c[0]].join(' ') + (c[0].endsWith('/') ? '' : ' ');
+    else if (c.length > 1) out(c.join('  '));
+  }
+  else if (e.key === 'c' && e.ctrlKey && pend) { pend.res(''); pend = null; I.type = 'text'; }
+};
+
+T.onclick = () => { if (!getSelection().toString()) I.focus(); };
+$('#rs').onclick = init;
+
+const Q = [
+  ['Model arsitektur Nginx yang memungkinkannya menangani ribuan koneksi konkuren dengan RAM rendah adalah...',
+   ['Multi-Threaded Blocking', 'Asynchronous Event-Driven', 'Process-per-Request Forking', 'Monolithic Polling'], 1,
+   'Nginx mengandalkan event loop non-blocking (seperti epoll pada Linux) sehingga 1 proses worker sanggup mengurus ribuan koneksi.'],
+
+  ['Direktori standar di Debian tempat berkas konfigurasi virtual host aktif yang dibaca Nginx berada pada...',
+   ['/var/www/sites/', '/etc/nginx/sites-available/', '/etc/nginx/sites-enabled/', '/etc/nginx/conf.d/active/'], 2,
+   'sites-available adalah wadah draf konfigurasi, sedangkan sites-enabled berisi symlink yang aktif dibaca daemon Nginx.'],
+
+  ['Perintah yang digunakan untuk memverifikasi kebenaran sintaks berkas konfigurasi Nginx tanpa menghentikan server adalah...',
+   ['nginx -t', 'systemctl check nginx', 'nginx -s restart', 'cat /etc/nginx/status'], 0,
+   'nginx -t memeriksa integritas dan kebenaran sintaks file konfigurasi.'],
+
+  ['Kode status HTTP yang muncul ketika Nginx bertindak sebagai Reverse Proxy tetapi aplikasi backend sedang mati adalah...',
+   ['403 Forbidden', '404 Not Found', '502 Bad Gateway', '301 Moved Permanently'], 2,
+   'Error 502 Bad Gateway menandakan server upstream (backend app) tidak membalas atau koneksi socket/port-nya tertutup.'],
+
+  ['Direktif konfigurasi yang digunakan untuk menyembunyikan banner rilis versi Nginx dari response header adalah...',
+   ['server_tokens off;', 'hide_headers all;', 'expose_version false;', 'security_shield on;'], 0,
+   'server_tokens off; menghilangkan nomor rilis Nginx dari header Server dan halaman galat default.'],
+
+  ['Direktif yang bertugas meneruskan permintaan HTTP dari klien menuju server upstream di port lokal adalah...',
+   ['root_pass', 'proxy_pass', 'forward_to', 'upstream_connect'], 1,
+   'proxy_pass (contoh: proxy_pass http://127.0.0.1:8080;) menginstruksikan Nginx bertindak sebagai reverse proxy.']
+];
+
+const qz = $('#quiz');
+Q.forEach((q, k) => {
+  const d = document.createElement('div');
+  d.className = 'card q';
+  d.innerHTML = '<b>' + (k + 1) + '. ' + q[0] + '</b>';
+  q[1].forEach((o, j) => {
+    const b = document.createElement('button');
+    b.textContent = o;
+    b.onclick = () => {
+      [...d.querySelectorAll('button')].forEach((z, y) => {
+        z.disabled = true;
+        if (y === q[2]) z.classList.add('r');
+      });
+      if (j !== q[2]) b.classList.add('x');
+      const e = document.createElement('div');
+      e.className = 'co';
+      e.textContent = (j === q[2] ? 'Benar! ' : 'Belum tepat. ') + q[3];
+      d.appendChild(e);
+    };
+    d.appendChild(b);
+  });
+  qz.appendChild(d);
+});
+
+// Jalankan inisialisasi awal modul
+init();
+show(0);
+</script>
+</body>
+</html>
