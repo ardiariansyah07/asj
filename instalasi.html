@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Modul Instalasi Debian 12 Server - SMK Wikrama Bogor</title>
+<style>
+:root{
+  --bg:#f2f6f4;--fg:#14261f;--card:#fff;--pri:#0f766e;--acc:#dff3ef;--bd:#cfdcd6;
+  --mut:#4f645b;--warn:#fff4e0;--wb:#d97706;--hd:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+    --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+  --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+}
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font:16px/1.7 "Segoe UI",system-ui,-apple-system,sans-serif;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:0 0 auto;
+  height:env(safe-area-inset-top,0px);
+  background:var(--hd);z-index:1001;
+}
+
+header{
+  position:fixed;
+  top:env(safe-area-inset-top,0px);
+  left:0;
+  right:0;
+  z-index:1000;
+  background:var(--hd);
+  border-bottom:1px solid var(--bd);
+  width:100%;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+#bar{height:3px;background:var(--pri);width:0;transition:width .3s}
+.hw{display:flex;align-items:center;gap:10px;padding:8px 20px;max-width:100%;width:100%}
+nav{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  white-space:nowrap;border:0;background:none;color:var(--mut);
+  padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-size:14px;
+  transition:all 0.15s ease;
+}
+nav button:hover{background:var(--acc);color:var(--fg)}
+nav button.on{background:var(--pri);color:var(--hd);font-weight:600}
+button:focus-visible,input:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+.actions{display:flex;gap:8px;align-items:center}
+.tg{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.tg:hover{background:var(--acc)}
+
+main{
+  width:100%;
+  max-width:100%;
+  flex:1;
+  margin:0 auto;
+  padding:84px 32px 80px;
+}
+@media(max-width:768px){
+  main{padding:74px 14px 60px}
+  .hw{padding:6px 10px}
+}
+
+.tab{display:none}
+.tab.active{display:block}
+
+h1{font-size:2.2rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.5rem;margin:1.6em 0 .4em;border-left:5px solid var(--pri);padding-left:12px}
+h3{font-size:1.15rem;margin:1.3em 0 .3em;color:var(--pri)}
+p,li{max-width:100%}
+
+.cover{
+  background:linear-gradient(135deg,var(--pri),#0b3b36);
+  color:#fff;border-radius:14px;padding:36px 32px;margin-bottom:24px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+.cover h1{font-size:2.6rem}
+.cover table,.cover td,.cover tr:nth-child(even) td{
+  border:0;background:none;color:#fff;padding:4px 14px 4px 0;
+}
+.co{
+  border-left:5px solid var(--pri);background:var(--acc);padding:12px 18px;
+  border-radius:8px;margin:16px 0;
+}
+.co.w{border-color:var(--wb);background:var(--warn)}
+.tw{overflow-x:auto;margin:14px 0;border-radius:10px;border:1px solid var(--bd)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--card)}
+th{background:var(--pri);color:var(--hd);text-align:left;padding:10px 14px;font-weight:600}
+td{padding:9px 14px;border:1px solid var(--bd);vertical-align:top}
+tr:nth-child(even) td{background:var(--acc)}
+code{
+  font-family:ui-monospace,Consolas,monospace;font-size:.92em;
+  background:var(--acc);padding:2px 6px;border-radius:4px;word-break:break-word;
+}
+.try{
+  margin-left:8px;border:0;border-radius:6px;background:var(--pri);
+  color:var(--hd);padding:4px 12px;font-size:12px;cursor:pointer;
+  transition:opacity .15s;
+}
+.try:hover{opacity:0.85}
+.nv{display:flex;justify-content:space-between;margin-top:36px;gap:12px}
+.nv button,.btn{
+  background:var(--pri);color:var(--hd);border:0;border-radius:8px;
+  padding:10px 20px;cursor:pointer;font:inherit;font-weight:600;
+  transition:filter .15s;
+}
+.nv button:hover,.btn:hover{filter:brightness(1.1)}
+svg text{fill:currentColor;font:13px sans-serif}
+
+#tbox{margin:20px 0 10px;width:100%}
+#where{
+  font-size:13.5px;color:var(--mut);display:flex;
+  justify-content:space-between;align-items:center;margin-bottom:8px;
+  background:var(--card);padding:8px 14px;border:1px solid var(--bd);border-radius:8px;
+}
+#where button{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12px;
+}
+#where button:hover{background:var(--acc)}
+#term{
+  background:#0c0c0c;color:#e6e6e6;border-radius:10px;padding:16px;
+  height:440px;overflow-y:auto;font:14px/1.48 ui-monospace,Consolas,monospace;
+  white-space:pre-wrap;word-break:break-word;cursor:text;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.6);
+  border:1px solid #232323;
+}
+#term .g{color:#5fd75f;font-weight:700}
+#term .b{color:#6aa5ff;font-weight:700}
+#term .y{color:#f59e0b;font-weight:700}
+#term .r{color:#ef4444;font-weight:700}
+#term .d{color:#8a8a8a}
+#ln{display:flex}
+#ps{white-space:pre}
+#in{flex:1;min-width:40px;background:transparent;border:0;color:#fff;font:inherit;outline:none;padding:0;caret-color:#fff}
+
+.lab{
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:20px;
+  align-items:start;
+  margin-top:10px;
+}
+.lab #term{height:540px}
+@media(max-width:992px){
+  .lab{grid-template-columns:1fr}
+  .lab #term{height:440px}
+}
+.ms{list-style:none;padding:0;margin:0}
+.ms li{
+  padding:12px 14px;border:1px solid var(--bd);border-radius:8px;
+  margin-bottom:8px;background:var(--card);font-size:14px;
+}
+.ms li.ok{background:var(--acc);border-color:var(--pri)}
+.ms li.ok b::after{content:" ✔ Selesai";color:var(--pri)}
+.ms details{color:var(--mut);font-size:13px;margin-top:4px}
+
+.card{
+  background:var(--card);border:1px solid var(--bd);border-radius:10px;
+  padding:18px 22px;margin:16px 0;
+}
+.q button{
+  display:block;width:100%;text-align:left;margin:6px 0;
+  padding:10px 14px;border:1px solid var(--bd);border-radius:8px;
+  background:var(--card);color:var(--fg);cursor:pointer;font:inherit;
+  transition:background .15s;
+}
+.q button:hover{background:var(--acc)}
+.q button.r{background:var(--acc);border-color:var(--pri);font-weight:600}
+.q button.x{background:var(--warn);border-color:var(--wb)}
+@media print{
+  header,.nv,#tbox,.try,.actions{display:none}
+  .tab{display:block!important}
+  body::before{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div id="bar"></div>
+  <div class="hw">
+    <nav id="nav"></nav>
+    <div class="actions">
+      <button class="tg" id="btnFs" title="Toggle Layar Penuh">⛶ Fullscreen</button>
+      <button class="tg" id="tg" aria-label="Ganti tema">◐</button>
+    </div>
+  </div>
+</header>
+<main>
+
+<section class="tab active" data-title="Cover">
+<div class="cover">
+  <p style="font-size:1.1rem;margin-bottom:4px">Modul Ajar Praktik Dasar Server</p>
+  <h1>Instalasi Debian 12 (Bookworm) Server</h1>
+  <table>
+    <tr><td>Sekolah</td><td>: SMK Wikrama Bogor</td></tr>
+    <tr><td>Fase/Kelas</td><td>: F / XI</td></tr>
+    <tr><td>Program Keahlian</td><td>: Teknik Jaringan Komputer dan Telekomunikasi</td></tr>
+    <tr><td>Mata Pelajaran</td><td>: Konsentrasi Keahlian TKJ</td></tr>
+    <tr><td>Elemen</td><td>: Administrasi Sistem Jaringan</td></tr>
+    <tr><td>Materi Praktik</td><td>: Instalasi &amp; Konfigurasi Pasca-Instalasi Debian 12 Headless</td></tr>
+  </table>
+</div>
+<h2>Tujuan Pembelajaran</h2>
+<ul>
+  <li>Memahami persiapan instalasi: verifikasi checksum ISO, media instalasi bootable, dan mode firmware (UEFI vs BIOS Legacy).</li>
+  <li>Menjelaskan perbedaan installer teks (*Debian Text Mode Install*) vs GUI (*Graphical Install*) pada server produksi.</li>
+  <li>Mengonfigurasi parameter regional, hostname identitas, dan nama domain server.</li>
+  <li>Memahami arsitektur keamanan akun: penetapan password root dan pembuatan akun reguler non-root.</li>
+  <li>Menganalisis skema partisi hard disk: penentuan partisi root (`/`), `/home`, `/var`, dan alokasi memori virtual (`swap`).</li>
+  <li>Memahami utilitas *Tasksel Software Selection*: mengapa server produksi wajib mematikan *Debian Desktop Environment* (GNOME/XFCE) dan hanya memilih *Standard System Utilities* &amp; *SSH Server*.</li>
+  <li>Menguasai konfigurasi pasca-instalasi (*post-install*): penentuan IP Static di `/etc/network/interfaces`, DNS resolver di `/etc/resolv.conf`, serta eskalasi hak akses sudo.</li>
+</ul>
+<h2>Cara Memakai Modul</h2>
+<ol>
+  <li>Pelajari panduan visual tahapan instalasi Debian 12 pada tiap tab bab navigasi di atas.</li>
+  <li>Gunakan tombol <b>Coba</b> pada tabel langkah kerja untuk memindahkan perintah verifikasi dan pasca-instalasi ke konsol simulator.</li>
+  <li>Tersedia mesin Debian 12 server baru: <code>srv-wikrama</code> untuk mengonfigurasi IP statis, gateway, repositori, dan privilege sudo.</li>
+  <li>Password default awal untuk superuser di lab ini: <code>siswa123</code>.</li>
+</ol>
+<div class="co w">⚠️ Terminal ini adalah <b>lingkungan simulasi interaktif pasca-instalasi</b>. Ketik <code>reset</code> kapan saja untuk mengembalikan konfigurasi lab ke kondisi awal.</div>
+</section>
+
+<section class="tab" data-title="1. Media & Boot">
+<h1>Bab 1. Persiapan Media Instalasi &amp; Metode Booting</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memilih berkas citra ISO yang tepat (Netinst vs DVD), membuat bootable drive, dan memahami mode boot UEFI/BIOS.</div>
+<h2>Pilihan ISO Debian 12 (Bookworm)</h2>
+<div class="tw">
+  <table>
+    <tr><th>Varian ISO</th><th>Ukuran Berkas</th><th>Kebutuhan Internet</th><th>Peruntukan Ideal</th></tr>
+    <tr><td><b>Netinst (Minimal)</b></td><td>~600 MB - 750 MB</td><td>Wajib ada koneksi internet saat instalasi.</td><td>Rekomendasi server produksi; hanya mengunduh paket yang dipilih saja sehingga instalasi sangat bersih dan hemat ruang.</td></tr>
+    <tr><td><b>DVD-1 (Offline)</b></td><td>~3.7 GB - 4.4 GB</td><td>Bisa tanpa internet sama sekali (offline).</td><td>Laboratorium sekolah dengan jaringan internet terbatas.</td></tr>
+  </table>
+</div>
+<h2>Mode Firmware: UEFI vs BIOS Legacy</h2>
+<svg viewBox="0 0 680 110" width="100%" height="95" role="img" aria-label="Alur Booting Server">
+  <rect x="10" y="25" width="150" height="60" rx="8" fill="none" stroke="currentColor"/>
+  <text x="35" y="52">Firmware (BIOS/UEFI)</text>
+  <text x="45" y="70" font-size="11">Inisialisasi Hardware</text>
+  <rect x="250" y="20" width="180" height="70" rx="8" fill="none" stroke="currentColor" stroke-width="2"/>
+  <text x="270" y="50">Bootloader (GRUB 2)</text>
+  <text x="260" y="70" font-size="11">Memuat Kernel ke RAM</text>
+  <rect x="510" y="25" width="160" height="60" rx="8" fill="none" stroke="currentColor"/>
+  <text x="540" y="52">Kernel Linux 6.1</text>
+  <text x="545" y="70" font-size="11">Systemd (PID 1)</text>
+  <line x1="160" y1="55" x2="250" y2="55" stroke="currentColor" stroke-width="2"/>
+  <line x1="430" y1="55" x2="510" y2="55" stroke="currentColor" stroke-width="2"/>
+</svg>
+<div class="co">💡 <b>Pilihan di Menu Boot:</b> Pilih menu <b>Install</b> (mode Text / ncurses) atau <b>Graphical Install</b>. Pada hakikatnya kedua mode menghasilkan sistem operasi yang 100% sama. Untuk server, teknisi jaringan umumnya memilih mode teks karena responsif dan membutuhkan memori RAM minimal saat instalasi.</div>
+</section>
+
+<section class="tab" data-title="2. Regional & Jaringan">
+<h1>Bab 2. Pengaturan Bahasa, Regional &amp; Jaringan Awal</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mengonfigurasi parameter lokal sistem, zona waktu, hostname identitas mesin, dan domain jaringan.</div>
+<h2>Tahapan Parameter Regional</h2>
+<ul>
+  <li><b>Language:</b> Direkomendasikan memilih <code>English</code> untuk mencegah terjemahan istilah teknis yang rancu di terminal server.</li>
+  <li><b>Country/Territory:</b> Pilih <code>other &rarr; Asia &rarr; Indonesia</code> agar format penulisan waktu dan mata uang sesuai standar nasional.</li>
+  <li><b>Keymap:</b> Pilih <code>American English</code> (standar layout keyboard QWERTY yang beredar di Indonesia).</li>
+</ul>
+<h2>Penamaan Hostname &amp; Domain</h2>
+<p>Hostname adalah nama unik komputer server ini di dalam jaringan lokal (misal: <code>srv-wikrama</code>). Domain name adalah sufiks penamaan domain internal sekolah (misal: <code>tkj.wikrama.sch.id</code> atau <code>sekolah.lan</code>).</p>
+<h2>Langkah Kerja</h2>
+<div data-st="b2"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="3. Akun & Password">
+<h1>Bab 3. Pengaturan Akun Root &amp; Akun Reguler</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memahami model keamanan akun administrator root dan pembatasan wewenang akun pengguna standar.</div>
+<h2>Dua Pendekatan Konfigurasi Root di Debian 12</h2>
+<div class="tw">
+  <table>
+    <tr><th>Pendekatan</th><th>Tindakan pada Form Installer</th><th>Konsekuensi Sistem</th></tr>
+    <tr><td><b>A. Akun Root Terpisah</b></td><td>Mengisi password root pada form yang disediakan installer.</td><td>Akun root memiliki password langsung. Pengguna biasa yang dibuat berikutnya <b>tidak otomatis</b> masuk ke grup `sudo` dan harus didaftarkan manual.</td></tr>
+    <tr><td><b>B. Root Terkunci (Sudo Mode)</b></td><td><b>Mengosongkan form password root</b> saat ditanya installer.</td><td>Debian otomatis menonaktifkan password langsung root, dan secara otomatis memberikan hak administratif <code>sudo</code> penuh kepada akun pengguna reguler pertama yang dibuat.</td></tr>
+  </table>
+</div>
+<div class="co w">⚠️ <b>Aturan Keamanan:</b> Di laboratorium SMK Wikrama, gunakan kata sandi yang mudah diingat untuk latihan (misal: <code>siswa123</code>), namun di lingkungan produksi wajib menerapkan password kombinasi huruf besar, kecil, angka, dan simbol minimal 12 karakter.</div>
+</section>
+
+<section class="tab" data-title="4. Partisi Storage">
+<h1>Bab 4. Skema Partisi Hard Disk (Storage)</h1>
+<div class="co">🎯 <b>Tujuan:</b> Menentukan ukuran partisi sistem operasi, memahami fungsi Swap, dan memilih sistem berkas ext4.</div>
+<h2>Perbandingan Metode Partisi</h2>
+<div class="tw">
+  <table>
+    <tr><th>Metode Partisi</th><th>Kelebihan</th><th>Peruntukan</th></tr>
+    <tr><td><b>Guided - use entire disk</b></td><td>Otomatis, cepat, dan minim risiko kesalahan pemula. Installer membuat partisi root dan swap secara proporsional.</td><td>Lab virtual (VirtualBox / Proxmox) dan server tunggal pemula.</td></tr>
+    <tr><td><b>Guided - with LVM</b></td><td>Menggunakan Logical Volume Manager: kapasitas partisi dapat diperbesar atau diperkecil secara fleksibel tanpa reboot.</td><td>Server produksi korporasi.</td></tr>
+    <tr><td><b>Manual Partitioning</b></td><td>Administrator menentukan sendiri ukuran mount point `/`, `/home`, `/var`, `/tmp`.</td><td>Server dengan kebutuhan isolasi data ketat (misal memisahkan log di partisi terpisah).</td></tr>
+  </table>
+</div>
+<h2>Struktur Partisi Sederhana Rekomendasi Lab</h2>
+<div class="tw">
+  <table>
+    <tr><th>Mount Point</th><th>Tipe Sistem Berkas</th><th>Ukuran yang Dianjurkan</th><th>Fungsi</th></tr>
+    <tr><td><code>/</code> (Root)</td><td>ext4</td><td>Sisa kapasitas terbesar (misal: 20 GB - 100 GB)</td><td>Tempat kernel, binary sistem, dan berkas konfigurasi `/etc`.</td></tr>
+    <tr><td><code>swap</code></td><td>swap area</td><td>1x atau 2x kapasitas RAM fisik (misal: 2 GB)</td><td>Memori cadangan virtual di hard disk saat kapasitas RAM fisik penuh.</td></tr>
+    <tr><td><code>/boot/efi</code></td><td>FAT32 (vfat)</td><td>~512 MB (hanya pada mode UEFI)</td><td>Menyimpan file bootloader EFI.</td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b4"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="5. Tasksel & Paket">
+<h1>Bab 5. Tasksel &amp; Pemilihan Paket Perangkat Lunak</h1>
+<div class="co">🎯 <b>Tujuan:</b> Menghemat sumber daya RAM dan meningkatkan kestabilan server dengan memilih instalasi headless (*tanpa GUI desktop*).</div>
+<h2>Mengapa Server Wajib Tanpa GUI?</h2>
+<p>Pada langkah <i>Software selection (tasksel)</i>, installer menampilkan daftar paket yang ingin dipasang:</p>
+<pre style="background:var(--card);border:1px solid var(--bd);padding:14px;border-radius:8px;font-family:monospace;font-size:13.5px">
+[ ] Debian desktop environment
+[ ] ... GNOME
+[ ] ... XFCE
+[ ] Web server
+[*] SSH server
+[*] standard system utilities
+</pre>
+<div class="tw">
+  <table>
+    <tr><th>Pilihan Komponen</th><th>Tindakan Installer</th><th>Alasan Teknis untuk Server</th></tr>
+    <tr><td><b>Debian desktop environment (GNOME/XFCE)</b></td><td><b>HILANGKAN TANDA BINTANG (Spasi)</b></td><td>GUI memakan RAM 800 MB - 1.5 GB dan CPU secara sia-sia. Server headless tanpa GUI hanya memakan RAM ~120 MB saat idle!</td></tr>
+    <tr><td><b>SSH server</b></td><td><b>CENTANG [*]</b></td><td>Memungkinkan server langsung dapat dikelola secara remote dari laptop siswa setelah reboot pertama.</td></tr>
+    <tr><td><b>Standard system utilities</b></td><td><b>CENTANG [*]</b></td><td>Menyediakan perkakas esensial terminal (man, tar, bash-completion, less).</td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b5"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="6. Bootloader GRUB">
+<h1>Bab 6. Pemasangan Bootloader GRUB 2</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memasang bootloader GRUB pada disk utama agar server dapat melakukan proses booting secara mandiri.</div>
+<h2>Peran GRUB 2 (Grand Unified Bootloader)</h2>
+<p><b>GRUB 2</b> adalah program pertama yang dieksekusi oleh firmware komputer saat mesin dinyalakan. GRUB bertugas menampilkan menu pilihan sistem operasi, memuat kernel Linux (<code>vmlinuz</code>) dan berkas <code>initrd</code> ke dalam memori RAM, lalu menyerahkan kontrol sistem sepenuhnya kepada kernel.</p>
+<h2>Menentukan Target Device</h2>
+<div class="tw">
+  <table>
+    <tr><th>Pilihan Installer</th><th>Target Penulisan</th><th>Keterangan</th></tr>
+    <tr><td><code>Install the GRUB boot loader to your primary drive?</code></td><td>Pilih <b>Yes</b></td><td>Memastikan bootloader terpasang di disk utama.</td></tr>
+    <tr><td><code>Device for boot loader installation:</code></td><td>Pilih <b>/dev/sda</b> atau <b>/dev/vda</b> (Bukan enter manually!)</td><td>Pilih nama perangkat hard disk fisik secara eksplisit, bukan pada partisi (`/dev/sda1`).</td></tr>
+  </table>
+</div>
+<div class="co">💡 Setelah GRUB selesai dipasang, installer akan meminta kamu mencabut flashdisk instalasi atau me-release ISO virtual CD-ROM, lalu menekan <b>Continue</b> untuk me-reboot mesin masuk ke Debian 12 pertama kali.</div>
+</section>
+
+<section class="tab" data-title="7. Pasca-Instalasi">
+<h1>Bab 7. Konfigurasi Pasca-Instalasi (Post-Install)</h1>
+<div class="co">🎯 <b>Tujuan:</b> Menetapkan pengalamatan IP Static di `/etc/network/interfaces`, mengatur DNS nameserver, dan mendaftarkan hak akses sudo.</div>
+<h2>Tiga Langkah Wajib Administrator Pasca-Instalasi</h2>
+<div class="tw">
+  <table>
+    <tr><th>Tugas Administrator</th><th>Berkas / Perintah Kunci</th><th>Tujuan Operasional</th></tr>
+    <tr><td><b>1. Konfigurasi IP Statis</b></td><td><code>/etc/network/interfaces</code></td><td>Server tidak boleh berganti-ganti alamat IP agar klien dapat mengakses layanan jaringan secara konsisten.</td></tr>
+    <tr><td><b>2. DNS Resolver</b></td><td><code>/etc/resolv.conf</code></td><td>Mendaftarkan IP DNS Server (Gateway/Google) agar server dapat menerjemahkan nama domain saat unduh paket.</td></tr>
+    <tr><td><b>3. Hak Akses Sudo</b></td><td><code>usermod -aG sudo [user]</code></td><td>Memberi hak eskalasi root pada akun siswa agar tidak perlu login sebagai root langsung.</td></tr>
+  </table>
+</div>
+<h2>Sintaks `/etc/network/interfaces` untuk IP Statis</h2>
+<pre style="background:var(--card);border:1px solid var(--bd);padding:14px;border-radius:8px;font-family:monospace;font-size:13.5px">
+auto eth0
+iface eth0 inet static
+    address 10.0.0.20/24
+    gateway 10.0.0.1
+</pre>
+<h2>Langkah Kerja</h2>
+<div data-st="b7"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="Lab Terminal">
+<h1>Lab Terminal Pasca-Instalasi Debian 12</h1>
+<p>Selesaikan 6 misi administrasi pasca-instalasi di bawah ini pada server baru <code>srv-wikrama</code>. Konfigurasikan IP statis, gateway, nameserver, dan daftarkan user ke grup sudo. Password: <code>siswa123</code>.</p>
+<div class="lab">
+  <div class="tslot"></div>
+  <div>
+    <h3 style="margin-top:0">Daftar Misi Mandiri</h3>
+    <ul class="ms" id="ms"></ul>
+  </div>
+</div>
+</section>
+
+<section class="tab" data-title="Latihan">
+<h1>Latihan Soal &amp; Rangkuman</h1>
+<div id="quiz"></div>
+<h2>Rangkuman Inti</h2>
+<ul>
+  <li>Debian 12 Netinst adalah media instalasi paling ideal untuk server karena menghasilkan instalasi minimalis dan stabil.</li>
+  <li>Server jaringan wajib diinstal dalam mode <b>Headless (tanpa desktop environment)</b> untuk memaksimalkan efisiensi RAM dan stabilitas 24/7.</li>
+  <li>Mengosongkan form password root saat instalasi secara otomatis akan mengaktifkan wewenang <code>sudo</code> pada akun pengguna pertama.</li>
+  <li>Skema partisi server minimal menyertakan partisi sistem root (<code>/</code>) dengan format <b>ext4</b> dan area memori virtual <b>swap</b>.</li>
+  <li>Bootloader GRUB 2 harus dituliskan langsung pada perangkat disk utama (seperti <code>/dev/sda</code> atau <code>/dev/vda</code>).</li>
+  <li>Tiga konfigurasi krusial pasca-instalasi: alamat IP statis di <code>/etc/network/interfaces</code>, DNS nameserver di <code>/etc/resolv.conf</code>, dan repositori APT resmi di <code>/etc/apt/sources.list</code>.</li>
+</ul>
+</section>
+
+<!-- Terminal Simulator Widget -->
+<div id="tbox">
+  <div id="where">
+    <span></span>
+    <button id="rs" title="Kembalikan terminal ke kondisi semula">⟲ Reset Lab</button>
+  </div>
+  <div id="term">
+    <div id="log"></div>
+    <div id="ln">
+      <span id="ps"></span>
+      <input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Terminal Input">
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+const ST = {
+  b2: [
+    ['Periksa konfigurasi hostname mesin saat ini', [['hostname', 'Melihat nama host komputer aktif.'], ['cat /etc/hostname', 'Membaca berkas identitas hostname server.']]],
+    ['Periksa alamat IP dan antarmuka saat ini (DHCP)', [['ip a', 'Melihat interface jaringan (eth0) yang masih mendapatkan IP dinamis sementara.']]]
+  ],
+  b4: [
+    ['Periksa struktur tabel partisi hard disk', [['lsblk', 'Melihat daftar blok disk (/dev/sda), partisi root (/dev/sda1), dan swap (/dev/sda2).']]],
+    ['Periksa kapasitas partisi yang ter-mount', [['df -h', 'Memeriksa penggunaan ruang penyimpanan pada mount point root (/).']]]
+  ],
+  b5: [
+    ['Periksa penggunaan memori RAM server headless tanpa GUI', [['free -h', 'Perhatikan konsumsi RAM server Debian 12 headless sangat hemat (~120 MB - 180 MB)!']]],
+    ['Periksa service SSH yang terpasang dari tasksel', [['systemctl status ssh', 'Memastikan OpenSSH server langsung aktif setelah instalasi selesai.']]]
+  ],
+  b7: [
+    ['Konfigurasi IP Statis pada berkas interfaces', [['echo -e "auto eth0\\niface eth0 inet static\\n    address 10.0.0.20/24\\n    gateway 10.0.0.1" | sudo tee /etc/network/interfaces', 'Menuliskan konfigurasi IP statis 10.0.0.20/24 dengan gateway 10.0.0.1.']]],
+    ['Terapkan konfigurasi jaringan baru', [['sudo systemctl restart networking', 'Menyalakan ulang daemon networking untuk menerapkan IP statis.'], ['ip a', 'Memverifikasi bahwa eth0 sekarang telah menggunakan IP statis 10.0.0.20/24.']]],
+    ['Konfigurasi DNS Nameserver', [['echo -e "nameserver 10.0.0.1\\nnameserver 8.8.8.8" | sudo tee /etc/resolv.conf', 'Menentukan server DNS untuk menerjemahkan nama domain ke IP.']]],
+    ['Masukkan user siswa ke grup sudo', [['sudo usermod -aG sudo siswa', 'Memberikan wewenang administratif sudo kepada pengguna reguler siswa.'], ['id siswa', 'Memverifikasi keanggotaan grup siswa sudah memiliki grup (27)sudo.']]],
+    ['Uji koneksi jaringan dengan ping gateway', [['ping -c 3 10.0.0.1', 'Menguji konektivitas ke router gateway sekolah.']]]
+  ]
+};
+
+const tabs = Array.from(document.querySelectorAll('.tab'));
+const nav = document.getElementById('nav');
+const TB = document.getElementById('tbox');
+
+function show(i) {
+  tabs.forEach((t, k) => {
+    if (k === i) t.classList.add('active');
+    else t.classList.remove('active');
+  });
+
+  const navBtns = nav.querySelectorAll('button');
+  navBtns.forEach((b, k) => {
+    b.classList.toggle('on', k === i);
+  });
+
+  const bar = document.getElementById('bar');
+  if (bar) bar.style.width = (i / (tabs.length - 1) * 100) + '%';
+
+  const currentTab = tabs[i];
+  const sl = currentTab.querySelector('.tslot');
+  if (sl) {
+    sl.appendChild(TB);
+    TB.style.display = 'block';
+  } else if (currentTab.dataset.title === 'Cover' || currentTab.dataset.title === '1. Persiapan & Media' || currentTab.dataset.title === '3. Akun & Password' || currentTab.dataset.title === '6. Bootloader GRUB' || currentTab.dataset.title === 'Latihan') {
+    TB.style.display = 'none';
+  } else {
+    currentTab.appendChild(TB);
+    TB.style.display = 'block';
+  }
+  window.scrollTo(0, 0);
+}
+
+nav.innerHTML = '';
+tabs.forEach((t, k) => {
+  const b = document.createElement('button');
+  b.textContent = t.dataset.title;
+  b.onclick = () => show(k);
+  nav.appendChild(b);
+
+  const oldNv = t.querySelector('.nv');
+  if (oldNv) oldNv.remove();
+
+  const d = document.createElement('div');
+  d.className = 'nv';
+
+  const prevBtn = k > 0 ? '<button class="btn-prev">← Sebelumnya</button>' : '<div></div>';
+  const nextBtn = k < tabs.length - 1 ? '<button class="btn-next">Berikutnya →</button>' : '<div></div>';
+
+  d.innerHTML = prevBtn + nextBtn;
+  if (k > 0) d.querySelector('.btn-prev').onclick = () => show(k - 1);
+  if (k < tabs.length - 1) d.querySelector('.btn-next').onclick = () => show(k + 1);
+  t.appendChild(d);
+});
+
+document.getElementById('tg').onclick = () => {
+  const r = document.documentElement;
+  const isDark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+  r.dataset.theme = isDark ? 'light' : 'dark';
+};
+
+const btnFs = document.getElementById('btnFs');
+btnFs.onclick = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    btnFs.textContent = '✕ Exit Full';
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+    btnFs.textContent = '⛶ Fullscreen';
+  }
+};
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) btnFs.textContent = '⛶ Fullscreen';
+});
+
+const $ = s => document.querySelector(s);
+const T = $('#term');
+const LOG = $('#log');
+const LN = $('#ln');
+const I = $('#in');
+const PS = $('#ps');
+
+document.querySelectorAll('[data-st]').forEach(el => {
+  let k = 0;
+  const list = ST[el.dataset.st];
+  if (!list) return;
+  list.forEach(([t, rows, n]) => {
+    k++;
+    const h = document.createElement('h3');
+    h.textContent = 'Langkah ' + k + '. ' + t;
+    const w = document.createElement('div');
+    w.className = 'tw';
+    const tb = document.createElement('table');
+    tb.innerHTML = '<tr><th style="width:40%">Perintah</th><th>Fungsi</th></tr>';
+    rows.forEach(([c, f]) => {
+      const tr = tb.insertRow();
+      const a = tr.insertCell();
+      const b = tr.insertCell();
+      const cd = document.createElement('code');
+      cd.textContent = c;
+      a.appendChild(cd);
+      const bt = document.createElement('button');
+      bt.className = 'try';
+      bt.textContent = 'Coba';
+      bt.onclick = () => {
+        I.value = c;
+        I.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        I.focus();
+      };
+      a.appendChild(bt);
+      b.textContent = f;
+    });
+    w.appendChild(tb);
+    el.append(h, w);
+    if (n) {
+      const p = document.createElement('p');
+      p.className = 'co';
+      p.textContent = n;
+      el.appendChild(p);
+    }
+  });
+});
+
+const CMDS = 'help clear reset ls cd pwd cat mkdir touch rm cp chmod chown echo sed grep tail whoami hostname hostnamectl id date uname ip ping sudo apt systemctl lsblk df free tee exit'.split(' ');
+
+let S, stack, D, clk, ec, hist = [], hi = 0, pend = null, busy = 0;
+
+const home = u => u === 'root' ? '/root' : '/home/' + u;
+const canWu = (u, p) => u === 'root' || p === '/tmp' || p.startsWith('/tmp/') || p.startsWith('/home/' + u + '/');
+const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const ts = () => { clk++; return '2026-10-19 14:' + pad(Math.floor(clk / 60) % 60) + ':' + pad(clk % 60); };
+
+function ab(s, p) {
+  if (p === '~' || p.startsWith('~/')) p = home(s.u) + p.slice(1);
+  if (p[0] !== '/') p = (s.cwd === '/' ? '' : s.cwd) + '/' + p;
+  const o = [];
+  p.split('/').forEach(x => {
+    if (x === '' || x === '.') return;
+    if (x === '..') o.pop();
+    else o.push(x);
+  });
+  return '/' + o.join('/');
+}
+
+const kids = (s, P) => {
+  const b = P === '/' ? '/' : P + '/';
+  return Object.keys(s.fs).filter(k => k !== P && k.startsWith(b) && !k.slice(b.length).includes('/')).map(k => k.split('/').pop()).sort();
+};
+const mstr = m => [...m].map(c => 'rwx'.split('').map((x, i) => (c >> (2 - i) & 1) ? x : '-').join('')).join('');
+
+function mkhost(h) {
+  const fs = {};
+  ['/', '/home', '/home/siswa', '/etc', '/etc/network', '/etc/apt', '/var', '/var/log', '/tmp', '/usr', '/srv', '/root', '/bin', '/sbin'].forEach(p => {
+    fs[p] = { d: 1, m: p === '/tmp' ? '777' : '755', o: p === '/home/siswa' ? 'siswa' : 'root', g: p === '/home/siswa' ? 'siswa' : 'root' };
+  });
+  fs['/etc/hostname'] = { c: h + '\n', m: '644', o: 'root', g: 'root' };
+  fs['/etc/network/interfaces'] = {
+    c: `# This file describes the network interfaces available on your system\n# and how to activate them. For more information, see interfaces(5).\n\nsource /etc/network/interfaces.d/*\n\n# The loopback network interface\nauto lo\niface lo inet loopback\n\n# The primary network interface (DHCP)\nallow-hotplug eth0\niface eth0 inet dhcp\n`,
+    m: '644', o: 'root', g: 'root'
+  };
+  fs['/etc/resolv.conf'] = {
+    c: `# Generated by NetworkManager\nnameserver 192.168.1.1\n`,
+    m: '644', o: 'root', g: 'root'
+  };
+  fs['/etc/apt/sources.list'] = {
+    c: `deb http://deb.debian.org/debian bookworm main non-free-firmware\ndeb http://security.debian.org/debian-security bookworm-security main non-free-firmware\ndeb http://deb.debian.org/debian bookworm-updates main non-free-firmware\n`,
+    m: '644', o: 'root', g: 'root'
+  };
+
+  return {
+    name: h, ip: '10.0.0.150', u: 'siswa', cwd: '/home/siswa', fs,
+    isStaticConfigured: false,
+    networkingRestarted: false,
+    dnsConfigured: false,
+    sudoConfigured: false,
+    pingTested: false
+  };
+}
+
+function init() {
+  S = {
+    'srv-wikrama': mkhost('srv-wikrama')
+  };
+
+  clk = 100;
+  stack = [{ h: 'srv-wikrama' }];
+  D = {};
+  LOG.innerHTML = '';
+  pend = null;
+  busy = 0;
+
+  out('Debian GNU/Linux 12 (bookworm) - Simulasi Post-Installation Server');
+  out('Ketik help untuk daftar perintah. Password sudo siswa: siswa123', 'd');
+  rm();
+  setPs();
+}
+
+const host = () => stack[stack.length - 1].h;
+
+function out(t, c) {
+  const d = document.createElement('div');
+  if (c) d.className = c;
+  d.textContent = t;
+  LOG.appendChild(d);
+  T.scrollTop = T.scrollHeight;
+}
+function outH(h) {
+  const d = document.createElement('div');
+  d.innerHTML = h;
+  LOG.appendChild(d);
+  T.scrollTop = T.scrollHeight;
+}
+
+function pshtml() {
+  const s = S[host()], hm = home(s.u), c = s.cwd, p = c === hm ? '~' : c.startsWith(hm + '/') ? '~' + c.slice(hm.length) : c;
+  return '<span class="g">' + s.u + '@' + host() + '</span>:<span class="b">' + p + '</span>' + (s.u === 'root' ? '#' : '$') + ' ';
+}
+
+function setPs() {
+  PS.innerHTML = pshtml();
+  $('#where span').textContent = 'Server: ' + host() + ' (' + S[host()].ip + ')';
+  LN.style.display = (busy && !pend) ? 'none' : 'flex';
+}
+
+const M = [
+  ['Inspeksi Partisi Storage Pasca-Instalasi',
+   'lsblk dan df -h',
+   'Memverifikasi partisi root (ext4) dan swap hasil instalasi.',
+   () => S['srv-wikrama'].fsChecked === true],
+
+  ['Konfigurasi IP Statis di /etc/network/interfaces',
+   'echo -e "auto eth0\\niface eth0 inet static\\n    address 10.0.0.20/24\\n    gateway 10.0.0.1" | sudo tee /etc/network/interfaces',
+   'Menjamin alamat IP server tidak berubah-ubah saat reboot.',
+   () => {
+     const c = (S['srv-wikrama'].fs['/etc/network/interfaces'] || {}).c || '';
+     return c.includes('inet static') && c.includes('10.0.0.20/24');
+   }],
+
+  ['Restart Service Networking & Verifikasi IP Baru',
+   'sudo systemctl restart networking dan ip a',
+   'Mengaktifkan konfigurasi antarmuka jaringan statis.',
+   () => S['srv-wikrama'].networkingRestarted && S['srv-wikrama'].ip === '10.0.0.20'],
+
+  ['Konfigurasi DNS Nameserver di /etc/resolv.conf',
+   'echo -e "nameserver 10.0.0.1\\nnameserver 8.8.8.8" | sudo tee /etc/resolv.conf',
+   'Menetapkan resolver DNS agar server dapat menerjemahkan domain internet.',
+   () => {
+     const c = (S['srv-wikrama'].fs['/etc/resolv.conf'] || {}).c || '';
+     return c.includes('nameserver') && (c.includes('10.0.0.1') || c.includes('8.8.8.8'));
+   }],
+
+  ['Eskalasi Wewenang Sudo untuk Pengguna Siswa',
+   'sudo usermod -aG sudo siswa lalu cek dengan id siswa',
+   'Memungkinkan user non-root menjalankan administrasi sistem.',
+   () => S['srv-wikrama'].sudoConfigured === true],
+
+  ['Uji Konektivitas Jaringan Gateway',
+   'ping -c 3 10.0.0.1',
+   'Memastikan rute keluar ke default gateway telah berfungsi normal.',
+   () => S['srv-wikrama'].pingTested === true]
+];
+
+function rm() {
+  const u = $('#ms');
+  u.innerHTML = '';
+  M.forEach((m, k) => {
+    const l = document.createElement('li');
+    l.id = 'm' + k;
+    l.innerHTML = '<b>Misi ' + (k + 1) + ': ' + m[0] + '</b><details><summary>Petunjuk</summary>' + m[1] + '<br><i>Mengapa: ' + m[2] + '</i></details>';
+    u.appendChild(l);
+  });
+}
+const chk = () => M.forEach((m, k) => {
+  if (!D[k] && m[3]()) D[k] = 1;
+  $('#m' + k).classList.toggle('ok', !!D[k]);
+});
+
+function rd(s, p, sd) {
+  let P = ab(s, p);
+  const n = s.fs[P];
+  if (!n) return { e: 'No such file or directory' };
+  if (n.l) { P = n.l; return rd(s, P, sd); }
+  if (n.d) return { e: 'Is a directory' };
+  if (n.m === '000' && !sd) return { e: 'Permission denied' };
+  return { c: n.c };
+}
+function wr(s, P, c, sd) {
+  const owner = sd ? 'root' : s.u;
+  const grp = sd ? 'root' : s.u;
+  if (s.fs[P] && !s.fs[P].d) s.fs[P].c = c;
+  else s.fs[P] = { c, m: '644', o: owner, g: grp };
+}
+
+function tok(l) {
+  const r = [], re = /"([^"]*)"|'([^']*)'|(>>|>|<|\||&&|[^\s|<>&"']+)/g;
+  let m;
+  while ((m = re.exec(l))) {
+    if (m[1] !== undefined) r.push({ v: m[1], q: 1 });
+    else if (m[2] !== undefined) r.push({ v: m[2], q: 1 });
+    else r.push({ v: m[3], q: 0 });
+  }
+  return r;
+}
+
+async function run(line) {
+  const tk = tok(line);
+  if (!tk.length) return;
+  const segs = [[]];
+  tk.forEach(t => (!t.q && t.v === '&&') ? segs.push([]) : segs[segs.length - 1].push(t));
+
+  for (let q = 0; q < segs.length; q++) {
+    if (q && ec) break;
+    ec = 0;
+    const st = [[]];
+    segs[q].forEach(t => (!t.q && t.v === '|') ? st.push([]) : st[st.length - 1].push(t));
+    let inp = null;
+
+    for (let i = 0; i < st.length; i++) {
+      const a = [];
+      let rdIn = null, rdOut = null;
+      const tsArr = st[i];
+
+      for (let j = 0; j < tsArr.length; j++) {
+        const t = tsArr[j];
+        if (!t.q && (t.v === '>' || t.v === '>>')) {
+          rdOut = { ap: t.v === '>>', f: (tsArr[++j] || {}).v };
+        } else if (!t.q && t.v === '<') {
+          rdIn = { f: (tsArr[++j] || {}).v };
+        } else {
+          a.push(t.v);
+        }
+      }
+      if (!a.length) continue;
+
+      if (rdIn && rdIn.f) {
+        const s = S[host()];
+        const pIn = rd(s, rdIn.f, 0);
+        if (pIn.e) {
+          out('bash: ' + rdIn.f + ': ' + pIn.e);
+          ec = 1;
+          continue;
+        }
+        inp = pIn.c;
+      }
+
+      const last = i === st.length - 1;
+      const buf = [];
+      const o = m => { (last && !rdOut) ? out(m) : buf.push(m); };
+
+      await exec(a, inp, o, 0);
+
+      if (rdOut && rdOut.f) {
+        const s = S[host()], P = ab(s, rdOut.f), par = P.replace(/\/[^/]*$/, '') || '/';
+        if (!s.fs[par]) {
+          out('bash: ' + rdOut.f + ': No such file or directory');
+          ec = 1;
+        } else if (!canWu(s.u, P)) {
+          out('bash: ' + rdOut.f + ': Permission denied');
+          ec = 1;
+        } else {
+          const old = s.fs[P];
+          wr(s, P, (rdOut.ap && old ? old.c : '') + buf.join('\n') + '\n', 0);
+        }
+      }
+      inp = buf.join('\n');
+    }
+  }
+}
+
+async function exec(a, inp, o, sd) {
+  const h = host(), s = S[h], x = a[0], r = a.slice(1), e = m => { o(m); ec = 1; };
+
+  switch (x) {
+  case 'sudo':
+    if (r.length < 1) { e('usage: sudo command'); break; }
+    return exec(r, inp, o, 1);
+
+  case 'help':
+    o('Perintah Instalasi & Setup Lab: ' + CMDS.join(' ') + '\nReset lab: ketik reset');
+    break;
+
+  case 'clear':
+    LOG.innerHTML = '';
+    break;
+
+  case 'reset':
+    init();
+    return;
+
+  case 'whoami': o(sd ? 'root' : s.u); break;
+  case 'hostname': o(h); break;
+  case 'hostnamectl':
+    o(`   Static hostname: ${h}
+         Icon name: computer-vm
+           Chassis: vm 🖴
+        Machine ID: e81b2298c47b4d1396f9a0846200219c
+           Boot ID: 312c9840f1a24d86b71f92e9aa3e8471
+    Virtualization: kvm
+  Operating System: Debian GNU/Linux 12 (bookworm)
+            Kernel: Linux 6.1.0-21-amd64
+      Architecture: x86-64`);
+    break;
+
+  case 'date': o('Mon Oct 19 14:15:00 WIB 2026'); break;
+  case 'pwd': o(s.cwd); break;
+
+  case 'lsblk':
+    s.fsChecked = true;
+    o(`NAME   MAJ:MIN RM  SIZE RO TYPE MOUNTPOINTS
+sda      8:0    0   50G  0 disk 
+├─sda1   8:1    0   48G  0 part /
+└─sda2   8:2    0    2G  0 part [SWAP]
+sr0     11:0    1 1024M  0 rom  `);
+    break;
+
+  case 'df':
+    s.fsChecked = true;
+    o(`Filesystem     Type      Size  Used Avail Use% Mounted on
+udev           devtmpfs  1.9G     0  1.9G   0% /dev
+/dev/sda1      ext4       48G  2.4G   43G   6% /
+tmpfs          tmpfs     386M  840K  385M   1% /run`);
+    break;
+
+  case 'free':
+    o(`               total        used        free      shared  buff/cache   available
+Mem:           3.8Gi       142Mi       3.2Gi        12Mi       450Mi       3.5Gi
+Swap:          2.0Gi          0B       2.0Gi`);
+    break;
+
+  case 'ip':
+    if (r[0] === 'a' || r[0] === 'addr') {
+      const isStatic = s.ip === '10.0.0.20';
+      o(`1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    inet 127.0.0.1/8 scope host lo
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    inet ${s.ip}/24 brd 10.0.0.255 scope global ${isStatic ? '' : 'dynamic '}eth0`);
+    } else if (r[0] === 'route' || r[0] === 'r') {
+      o(`default via 10.0.0.1 dev eth0 onlink
+10.0.0.0/24 dev eth0 proto kernel scope link src ${s.ip}`);
+    } else {
+      o(`eth0: ${s.ip}/24`);
+    }
+    break;
+
+  case 'ping': {
+    const target = r.find(z => z[0] !== '-' && !/^\d+$/.test(z));
+    if (!target) { e('ping: usage error: Destination address required'); break; }
+    s.pingTested = true;
+    o(`PING ${target} (${target === 'debian.org' ? '151.101.130.132' : target}) 56(84) bytes of data.
+64 bytes from ${target}: icmp_seq=1 ttl=64 time=0.42 ms
+64 bytes from ${target}: icmp_seq=2 ttl=64 time=0.38 ms
+64 bytes from ${target}: icmp_seq=3 ttl=64 time=0.35 ms
+
+--- ${target} ping statistics ---
+3 packets transmitted, 3 received, 0% packet loss, time 2003ms
+rtt min/avg/max/mdev = 0.350/0.383/0.420/0.035 ms`);
+    break;
+  }
+
+  case 'echo': {
+    let t = r.slice(); const en = t[0] === '-e'; if (en) t.shift();
+    let z = t.join(' '); if (en) z = z.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"');
+    o(z);
+    break;
+  }
+
+  case 'tee': {
+    const ap = r.includes('-a'), p = r.find(z => z[0] !== '-'); if (!p) break;
+    const P = ab(s, p); if (!sd && !canWu(s.u, P)) { e('tee: ' + p + ': Permission denied'); break; }
+    const old = s.fs[P]; wr(s, P, (ap && old ? old.c : '') + (inp || '') + '\n', sd); o(inp || '');
+    break;
+  }
+
+  case 'cat': {
+    if (!r.length && inp != null) { o(inp); break; }
+    for (const p of r) {
+      const t = rd(s, p, sd);
+      if (t.e) e('cat: ' + p + ': ' + t.e); else o(t.c.replace(/\n$/, ''));
+    }
+    break;
+  }
+
+  case 'ls': {
+    let fl = '', ps = []; r.forEach(z => z[0] === '-' ? fl += z : ps.push(z)); if (!ps.length) ps = ['.'];
+    const row = (nm, n) => fl.includes('l') ? (n.d ? 'd' : n.l ? 'l' : '-') + mstr(n.m || '644') + ' 1 ' + (n.o || s.u) + ' ' + (n.g || s.u) + ' ' + String(n.d ? 4096 : (n.c || '').length).padStart(5) + ' Oct 19 14:00 ' + nm : nm;
+    for (const p of ps) {
+      const P = ab(s, p), n = s.fs[P];
+      if (!n) { e("ls: cannot access '" + p + "': No such file or directory"); continue; }
+      if (n.d && !fl.includes('d')) {
+        let k = kids(s, P); k = fl.includes('a') ? ['.', '..', ...k] : k.filter(z => z[0] !== '.');
+        if (ps.length > 1) o(p + ':');
+        const L = k.map(z => row(z, z === '.' || z === '..' ? n : s.fs[(P === '/' ? '' : P) + '/' + z]));
+        if (fl.includes('l')) { o('total ' + k.length * 4); L.forEach(z => o(z)); }
+        else if (L.length) o(L.join('  '));
+      } else o(row(p, n));
+    }
+    break;
+  }
+
+  case 'cd': {
+    const p = r[0] || '~', P = ab(s, p), n = s.fs[P];
+    if (!n) { e('bash: cd: ' + p + ': No such file or directory'); break; }
+    if (!n.d) { e('bash: cd: ' + p + ': Not a directory'); break; }
+    s.cwd = P;
+    break;
+  }
+
+  case 'usermod': {
+    if (!sd) { e('usermod: Permission denied.'); break; }
+    if (r.includes('-aG') && r.includes('sudo') && r.includes('siswa')) {
+      s.sudoConfigured = true;
+      o('');
+      break;
+    }
+    o('');
+    break;
+  }
+
+  case 'id': {
+    const target = r[0] || s.u;
+    if (target === 'siswa') {
+      const grpStr = s.sudoConfigured ? '1000(siswa),27(sudo)' : '1000(siswa)';
+      o(`uid=1000(siswa) gid=1000(siswa) groups=${grpStr}`);
+    } else {
+      o(`uid=0(root) gid=0(root) groups=0(root)`);
+    }
+    break;
+  }
+
+  case 'systemctl': {
+    if (r[0] === 'restart' && r[1] === 'networking') {
+      if (!sd) { e('Failed to restart networking.service: Interactive authentication required.'); break; }
+      const netFile = (s.fs['/etc/network/interfaces'] || {}).c || '';
+      if (netFile.includes('inet static') && netFile.includes('10.0.0.20')) {
+        s.ip = '10.0.0.20';
+        s.networkingRestarted = true;
+      }
+      o('Restarting networking service... Done.');
+      break;
+    }
+    if (r[0] === 'status' && (r[1] === 'ssh' || r[1] === 'sshd')) {
+      o(`● ssh.service - OpenBSD Secure Shell server
+     Loaded: loaded (/lib/systemd/system/ssh.service; enabled; preset: enabled)
+     Active: active (running) since Mon 2026-10-19 14:00:00 WIB; 15min ago
+   Main PID: 582 (sshd)
+      Tasks: 1 (limit: 2341)
+     Memory: 5.4M
+        CPU: 18ms
+     CGroup: /system.slice/ssh.service
+             └─582 "sshd: /usr/sbin/sshd -D [listener] 0 of 10-100 startups"`);
+      break;
+    }
+    o('Operation succeeded.');
+    break;
+  }
+
+  case 'apt': case 'apt-get': {
+    if (!sd) { e('E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)'); break; }
+    if (r[0] === 'update') {
+      o(`Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]
+Get:2 http://security.debian.org/debian-security bookworm-security InRelease [48.0 kB]
+Fetched 199 kB in 1s (220 kB/s)
+Reading package lists... Done
+Building dependency tree... Done
+All packages are up to date.`);
+      break;
+    }
+    e('Usage: apt update');
+    break;
+  }
+
+  case 'exit':
+    o('Sesi simulasi tidak ditutup. Ketik reset untuk mengulang dari awal.');
+    break;
+
+  default:
+    e('bash: ' + x + ': command not found');
+  }
+}
+
+I.onkeydown = async e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const v = I.value;
+    I.value = '';
+
+    if (pend) {
+      const p = pend;
+      pend = null;
+      I.type = 'text';
+      out(p.lp + (p.hid ? '' : v));
+      setPs();
+      p.res(v);
+      return;
+    }
+
+    if (busy) return;
+    busy = 1;
+    outH(pshtml() + esc(v));
+    if (v.trim()) {
+      hist.push(v);
+      hi = hist.length;
+    }
+    setPs();
+
+    try {
+      await run(v);
+    } catch (err) {
+      out('simulator error: ' + err.message, 'd');
+    }
+
+    busy = 0;
+    chk();
+    setPs();
+    I.focus();
+    T.scrollTop = T.scrollHeight;
+  } else if (e.key === 'ArrowUp' && !pend) {
+    if (hi > 0) I.value = hist[--hi];
+    e.preventDefault();
+  } else if (e.key === 'ArrowDown' && !pend) {
+    hi = Math.min(hi + 1, hist.length);
+    I.value = hist[hi] || '';
+    e.preventDefault();
+  } else if (e.key === 'Tab' && !pend) {
+    e.preventDefault();
+    const parts = I.value.split(' '), w = parts.pop();
+    let c;
+    if (!parts.length || (parts.length === 1 && parts[0] === 'sudo')) {
+      c = CMDS.filter(z => z.startsWith(w));
+    } else {
+      const s = S[host()], dir = w.includes('/') ? w.replace(/[^/]*$/, '') : '', base = w.slice(dir.length), P = ab(s, dir || '.');
+      c = kids(s, P).filter(z => z.startsWith(base)).map(z => dir + z + ((s.fs[(P === '/' ? '' : P) + '/' + z] || {}).d ? '/' : ''));
+    }
+    if (c.length === 1) I.value = [...parts, c[0]].join(' ') + (c[0].endsWith('/') ? '' : ' ');
+    else if (c.length > 1) out(c.join('  '));
+  }
+};
+
+T.onclick = () => { if (!getSelection().toString()) I.focus(); };
+$('#rs').onclick = init;
+
+const Q = [
+  ['Varian citra ISO Debian resmi yang paling direkomendasikan untuk instalasi server minimalis dan bersih adalah...',
+   ['Debian Live GNOME', 'Debian Netinst (Network Install)', 'Debian DVD-3 Offline Pack', 'Debian Source Tarball'], 1,
+   'Netinst berukuran kecil (~600MB) dan hanya mengunduh paket server yang dibutuhkan sehingga instalasi sangat bersih.'],
+
+  ['Konsekuensi keamanan yang terjadi jika form password root dikosongkan saat proses instalasi Debian adalah...',
+   ['Instalasi Debian gagal dan komputer restart', 'Password root otomatis menjadi "admin"', 'Akun root dinonaktifkan password langsungnya dan wewenang sudo otomatis diberikan ke user reguler pertama', 'Server tidak bisa terhubung ke internet'], 2,
+   'Debian secara pintar mengaktifkan mekanisme sudo pada akun reguler jika password root sengaja dikosongkan.'],
+
+  ['Alasan utama mengapa opsi "Debian desktop environment" wajib dihilangkan (uncheck) saat tahap tasksel pada server adalah...',
+   ['Desktop environment membuat hard disk cepat rusak', 'GUI menghabiskan banyak RAM/CPU dan menambah celah keamanan pada server headless', 'Linux Debian tidak mendukung kartu grafis VGA', 'GUI mematikan koneksi internet secara otomatis'], 1,
+   'Server headless tanpa GUI sangat stabil dan hanya membutuhkan RAM sekitar 120-180 MB saat idle.'],
+
+  ['Format sistem berkas (filesystem) default yang paling umum dan stabil digunakan untuk partisi root (/) Debian Linux adalah...',
+   ['NTFS', 'FAT32', 'ext4', 'APFS'], 2,
+   'ext4 adalah standar sistem berkas bawaan Linux yang memiliki fitur journaling dan keandalan tinggi.'],
+
+  ['Pada komputer dengan firmware BIOS MBR, bootloader GRUB 2 harus dituliskan langsung pada...',
+   ['Partisi /dev/sda1', 'Seluruh hard disk utama (/dev/sda)', 'File /etc/fstab', 'Memory RAM'], 1,
+   'GRUB diinstal langsung pada Master Boot Record drive fisik (misal /dev/sda atau /dev/vda).'],
+
+  ['Berkas konfigurasi utama di Debian 12 untuk menetapkan alamat IP statis dan gateway secara permanen adalah...',
+   ['/etc/hosts', '/etc/network/interfaces', '/etc/resolv.conf', '/etc/hostname'], 1,
+   '/etc/network/interfaces adalah berkas resmi konfigurasi antarmuka jaringan pada keluarga Debian.']
+];
+
+const qz = $('#quiz');
+Q.forEach((q, k) => {
+  const d = document.createElement('div');
+  d.className = 'card q';
+  d.innerHTML = '<b>' + (k + 1) + '. ' + q[0] + '</b>';
+  q[1].forEach((o, j) => {
+    const b = document.createElement('button');
+    b.textContent = o;
+    b.onclick = () => {
+      [...d.querySelectorAll('button')].forEach((z, y) => {
+        z.disabled = true;
+        if (y === q[2]) z.classList.add('r');
+      });
+      if (j !== q[2]) b.classList.add('x');
+      const e = document.createElement('div');
+      e.className = 'co';
+      e.textContent = (j === q[2] ? 'Benar! ' : 'Belum tepat. ') + q[3];
+      d.appendChild(e);
+    };
+    d.appendChild(b);
+  });
+  qz.appendChild(d);
+});
+
+init();
+show(0);
+</script>
+</body>
+</html>

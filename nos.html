@@ -1,0 +1,1304 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Modul Sistem Operasi Jaringan (NOS) - SMK Wikrama Bogor</title>
+<style>
+:root{
+  --bg:#f2f6f4;--fg:#14261f;--card:#fff;--pri:#0f766e;--acc:#dff3ef;--bd:#cfdcd6;
+  --mut:#4f645b;--warn:#fff4e0;--wb:#d97706;--hd:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+    --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;
+  --mut:#9db5ab;--warn:#34260f;--wb:#f59e0b;--hd:#122019;
+}
+html,body{
+  height:100%;
+  margin:0;
+  padding:0;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 64px)}
+*{box-sizing:border-box}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font:16px/1.7 "Segoe UI",system-ui,-apple-system,sans-serif;
+  display:flex;
+  flex-direction:column;
+  min-height:100vh;
+}
+body::before{
+  content:"";position:fixed;inset:0 0 auto;
+  height:env(safe-area-inset-top,0px);
+  background:var(--hd);z-index:1001;
+}
+
+/* Header bar fixed freeze */
+header{
+  position:fixed;
+  top:env(safe-area-inset-top,0px);
+  left:0;
+  right:0;
+  z-index:1000;
+  background:var(--hd);
+  border-bottom:1px solid var(--bd);
+  width:100%;
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+#bar{height:3px;background:var(--pri);width:0;transition:width .3s}
+.hw{display:flex;align-items:center;gap:10px;padding:8px 20px;max-width:100%;width:100%}
+nav{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{
+  white-space:nowrap;border:0;background:none;color:var(--mut);
+  padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit;font-size:14px;
+  transition:all 0.15s ease;
+}
+nav button:hover{background:var(--acc);color:var(--fg)}
+nav button.on{background:var(--pri);color:var(--hd);font-weight:600}
+button:focus-visible,input:focus-visible{outline:2px solid var(--pri);outline-offset:2px}
+.actions{display:flex;gap:8px;align-items:center}
+.tg{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:8px;padding:6px 12px;cursor:pointer;font-size:14px;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .2s;
+}
+.tg:hover{background:var(--acc)}
+
+main{
+  width:100%;
+  max-width:100%;
+  flex:1;
+  margin:0 auto;
+  padding:84px 32px 80px;
+}
+@media(max-width:768px){
+  main{padding:74px 14px 60px}
+  .hw{padding:6px 10px}
+}
+
+/* Tab control */
+.tab{display:none}
+.tab.active{display:block}
+
+h1{font-size:2.2rem;line-height:1.2;margin:.2em 0}
+h2{font-size:1.5rem;margin:1.6em 0 .4em;border-left:5px solid var(--pri);padding-left:12px}
+h3{font-size:1.15rem;margin:1.3em 0 .3em;color:var(--pri)}
+p,li{max-width:100%}
+
+.cover{
+  background:linear-gradient(135deg,var(--pri),#0b3b36);
+  color:#fff;border-radius:14px;padding:36px 32px;margin-bottom:24px;
+  box-shadow:0 4px 14px rgba(0,0,0,0.08);
+}
+.cover h1{font-size:2.6rem}
+.cover table,.cover td,.cover tr:nth-child(even) td{
+  border:0;background:none;color:#fff;padding:4px 14px 4px 0;
+}
+.co{
+  border-left:5px solid var(--pri);background:var(--acc);padding:12px 18px;
+  border-radius:8px;margin:16px 0;
+}
+.co.w{border-color:var(--wb);background:var(--warn)}
+.tw{overflow-x:auto;margin:14px 0;border-radius:10px;border:1px solid var(--bd)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;background:var(--card)}
+th{background:var(--pri);color:var(--hd);text-align:left;padding:10px 14px;font-weight:600}
+td{padding:9px 14px;border:1px solid var(--bd);vertical-align:top}
+tr:nth-child(even) td{background:var(--acc)}
+code{
+  font-family:ui-monospace,Consolas,monospace;font-size:.92em;
+  background:var(--acc);padding:2px 6px;border-radius:4px;word-break:break-word;
+}
+.try{
+  margin-left:8px;border:0;border-radius:6px;background:var(--pri);
+  color:var(--hd);padding:4px 12px;font-size:12px;cursor:pointer;
+  transition:opacity .15s;
+}
+.try:hover{opacity:0.85}
+.nv{display:flex;justify-content:space-between;margin-top:36px;gap:12px}
+.nv button,.btn{
+  background:var(--pri);color:var(--hd);border:0;border-radius:8px;
+  padding:10px 20px;cursor:pointer;font:inherit;font-weight:600;
+  transition:filter .15s;
+}
+.nv button:hover,.btn:hover{filter:brightness(1.1)}
+svg text{fill:currentColor;font:13px sans-serif}
+
+/* Terminal simulator styles */
+#tbox{margin:20px 0 10px;width:100%}
+#where{
+  font-size:13.5px;color:var(--mut);display:flex;
+  justify-content:space-between;align-items:center;margin-bottom:8px;
+  background:var(--card);padding:8px 14px;border:1px solid var(--bd);border-radius:8px;
+}
+#where button{
+  border:1px solid var(--bd);background:var(--card);color:var(--fg);
+  border-radius:6px;padding:4px 12px;cursor:pointer;font-size:12px;
+}
+#where button:hover{background:var(--acc)}
+#term{
+  background:#0c0c0c;color:#e6e6e6;border-radius:10px;padding:16px;
+  height:440px;overflow-y:auto;font:14px/1.48 ui-monospace,Consolas,monospace;
+  white-space:pre-wrap;word-break:break-word;cursor:text;
+  box-shadow:inset 0 2px 6px rgba(0,0,0,0.6);
+  border:1px solid #232323;
+}
+#term .g{color:#5fd75f;font-weight:700}
+#term .b{color:#6aa5ff;font-weight:700}
+#term .y{color:#f59e0b;font-weight:700}
+#term .r{color:#ef4444;font-weight:700}
+#term .d{color:#8a8a8a}
+#ln{display:flex}
+#ps{white-space:pre}
+#in{flex:1;min-width:40px;background:transparent;border:0;color:#fff;font:inherit;outline:none;padding:0;caret-color:#fff}
+
+/* Lab 2-column layout */
+.lab{
+  display:grid;
+  grid-template-columns:1fr 340px;
+  gap:20px;
+  align-items:start;
+  margin-top:10px;
+}
+.lab #term{height:540px}
+@media(max-width:992px){
+  .lab{grid-template-columns:1fr}
+  .lab #term{height:440px}
+}
+.ms{list-style:none;padding:0;margin:0}
+.ms li{
+  padding:12px 14px;border:1px solid var(--bd);border-radius:8px;
+  margin-bottom:8px;background:var(--card);font-size:14px;
+}
+.ms li.ok{background:var(--acc);border-color:var(--pri)}
+.ms li.ok b::after{content:" ✔ Selesai";color:var(--pri)}
+.ms details{color:var(--mut);font-size:13px;margin-top:4px}
+
+.card{
+  background:var(--card);border:1px solid var(--bd);border-radius:10px;
+  padding:18px 22px;margin:16px 0;
+}
+.q button{
+  display:block;width:100%;text-align:left;margin:6px 0;
+  padding:10px 14px;border:1px solid var(--bd);border-radius:8px;
+  background:var(--card);color:var(--fg);cursor:pointer;font:inherit;
+  transition:background .15s;
+}
+.q button:hover{background:var(--acc)}
+.q button.r{background:var(--acc);border-color:var(--pri);font-weight:600}
+.q button.x{background:var(--warn);border-color:var(--wb)}
+@media print{
+  header,.nv,#tbox,.try,.actions{display:none}
+  .tab{display:block!important}
+  body::before{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div id="bar"></div>
+  <div class="hw">
+    <nav id="nav"></nav>
+    <div class="actions">
+      <button class="tg" id="btnFs" title="Toggle Layar Penuh">⛶ Fullscreen</button>
+      <button class="tg" id="tg" aria-label="Ganti tema">◐</button>
+    </div>
+  </div>
+</header>
+<main>
+
+<section class="tab active" data-title="Cover">
+<div class="cover">
+  <p style="font-size:1.1rem;margin-bottom:4px">Modul Ajar Interaktif Fondasi</p>
+  <h1>Sistem Operasi Jaringan (NOS)</h1>
+  <table>
+    <tr><td>Sekolah</td><td>: SMK Wikrama Bogor</td></tr>
+    <tr><td>Fase/Kelas</td><td>: F / XI</td></tr>
+    <tr><td>Program Keahlian</td><td>: Teknik Jaringan Komputer dan Telekomunikasi</td></tr>
+    <tr><td>Mata Pelajaran</td><td>: Konsentrasi Keahlian TKJ</td></tr>
+    <tr><td>Elemen</td><td>: Administrasi Sistem Jaringan</td></tr>
+    <tr><td>Materi Fondasi</td><td>: Sistem Operasi Jaringan (Network Operating System)</td></tr>
+  </table>
+</div>
+<h2>Tujuan Pembelajaran</h2>
+<ul>
+  <li>Memahami definisi, fungsi, dan arsitektur Sistem Operasi Jaringan (*Network Operating System* / NOS).</li>
+  <li>Membedakan karakteristik sistem operasi desktop (*Client OS*) dengan sistem operasi server/jaringan (*NOS*).</li>
+  <li>Menganalisis jenis-jenis NOS berbasis kode sumber (*Open Source* vs *Proprietary*) serta keluarga distribusi Linux (Debian, RHEL, Arch).</li>
+  <li>Menguasai hierarki direktori FHS (*Filesystem Hierarchy Standard*) pada server Linux Debian 12.</li>
+  <li>Mengelola akun pengguna (*users*), grup (*groups*), dan hak akses berkas (*POSIX permissions & ownership*).</li>
+  <li>Memantau dan mengontrol proses latar belakang (*services/daemons*), beban CPU, RAM, serta penyimpanan disk.</li>
+  <li>Memahami manajemen repositori paket (*APT*) sebagai fondasi instalasi service jaringan selanjutnya (SSH, Web, DB, Firewall).</li>
+</ul>
+<h2>Cara Memakai Modul</h2>
+<ol>
+  <li>Pelajari materi konsep fondasi pada setiap tab navigasi di bagian atas.</li>
+  <li>Klik tombol <b>Coba</b> pada tabel langkah kerja untuk memindahkan perintah langsung ke baris terminal simulator, lalu tekan <b>Enter</b>.</li>
+  <li>Tersedia mesin simulasi Debian 12: <code>srv-wikrama</code> (10.0.0.1) untuk eksplorasi perintah kernel, user, dan proses.</li>
+  <li>Password sudo untuk semua akun di lab ini: <code>siswa123</code>.</li>
+</ol>
+<div class="co w">⚠️ Terminal ini adalah <b>lingkungan simulasi interaktif</b>. Ketik <code>reset</code> kapan saja untuk mengembalikan konfigurasi lab ke kondisi awal.</div>
+</section>
+
+<section class="tab" data-title="1. Konsep NOS">
+<h1>Bab 1. Konsep &amp; Definisi Sistem Operasi Jaringan</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memahami definisi NOS, perbedaannya dengan OS Desktop, serta peranannya sebagai penyedia layanan terpusat.</div>
+<h2>Apa itu Sistem Operasi Jaringan (NOS)?</h2>
+<p><b>Sistem Operasi Jaringan (Network Operating System / NOS)</b> adalah sistem operasi khusus yang dirancang untuk mengoordinasikan, mengelola, dan mengamankan lalu lintas data serta sumber daya perangkat keras (*hardware*) di dalam jaringan komputer. NOS menjadi jembatan antara banyak komputer klien (*clients*) dengan server pusat.</p>
+<svg viewBox="0 0 680 110" width="100%" height="95" role="img" aria-label="Alur Peran NOS">
+  <rect x="10" y="25" width="150" height="60" rx="8" fill="none" stroke="currentColor"/>
+  <text x="35" y="52">Klien Jaringan</text>
+  <text x="30" y="70" font-size="11">(Laptop, PC, HP)</text>
+  <rect x="250" y="20" width="180" height="70" rx="8" fill="none" stroke="currentColor" stroke-width="2"/>
+  <text x="270" y="50">NOS (Debian Server)</text>
+  <text x="265" y="70" font-size="11">• Multi-User • Daemons</text>
+  <rect x="510" y="25" width="160" height="60" rx="8" fill="none" stroke="currentColor"/>
+  <text x="535" y="52">Sumber Daya</text>
+  <text x="530" y="70" font-size="11">(Web, DB, File, Print)</text>
+  <line x1="160" y1="55" x2="250" y2="55" stroke="currentColor" stroke-width="2"/>
+  <line x1="430" y1="55" x2="510" y2="55" stroke="currentColor" stroke-width="2"/>
+</svg>
+<h2>Perbedaan: OS Desktop vs Sistem Operasi Jaringan (Server)</h2>
+<div class="tw">
+  <table>
+    <tr><th>Aspek Pembeda</th><th>OS Desktop (Client)</th><th>Sistem Operasi Jaringan (NOS / Server)</th></tr>
+    <tr><td>Tujuan Penggunaan</td><td>Pengalaman personal satu pengguna (*single-user*), menjalankan software office, multimedia, dan game.</td><td>Melayani banyak pengguna (*multi-user*) dan perangkat secara simultan tanpa antarmuka grafis berat.</td></tr>
+    <tr><td>Antarmuka (UI)</td><td>Didominasi grafis GUI (*Graphical User Interface*) yang memakan banyak memori RAM dan GPU.</td><td>Dominan CLI (*Command Line Interface* / Headless) untuk stabilitas dan efisiensi memori maksimal.</td></tr>
+    <tr><td>Ketersediaan (Uptime)</td><td>Biasa dimatikan (*shutdown*) setiap hari setelah selesai digunakan.</td><td>Dirancang hidup tanpa henti (*24/7/365*) dengan toleransi crash mendekati nol (*High Availability*).</td></tr>
+    <tr><td>Model Keamanan</td><td>Izin pengguna berfokus pada proteksi akun personal lokal.</td><td>Kontrol hak akses ketat (*least privilege*), audit log mendalam, dan proteksi port layanan jaringan.</td></tr>
+  </table>
+</div>
+<h3>Ringkasan</h3>
+<p>NOS adalah otak dari arsitektur client-server modern. <b>Latihan:</b> Mengapa sistem operasi server umumnya dijalankan dalam mode CLI tanpa tampilan desktop grafis?</p>
+</section>
+
+<section class="tab" data-title="2. Karakteristik">
+<h1>Bab 2. Karakteristik &amp; Arsitektur Sistem Operasi Jaringan</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mengidentifikasi ciri-ciri penting NOS dan memahami struktur hirarki berkas Linux FHS (*Filesystem Hierarchy Standard*).</div>
+<h2>Karakteristik Utama NOS</h2>
+<ul>
+  <li><b>Multi-User:</b> Mengizinkan banyak pengguna masuk (*login*) dan menjalankan tugas secara bersamaan tanpa mengganggu satu sama lain.</li>
+  <li><b>Multi-Tasking Preemptive:</b> Kernel server mengalokasikan waktu CPU secara adil sehingga layanan prioritas tinggi (seperti web atau database) tidak macet saat ada proses lain yang berat.</li>
+  <li><b>Manajemen Hak Akses Ketat:</b> Pemisahan hak antara pengguna biasa (*unprivileged users*) dan administrator sistem tertinggi (*root / superuser*).</li>
+  <li><b>Arsitektur Server Headless:</b> Server dijalankan tanpa monitor, keyboard fisik, atau GUI, sepenuhnya dikontrol lewat jaringan (remote SSH).</li>
+</ul>
+<h2>Standar Hirarki Berkas Linux (FHS)</h2>
+<p>Di Linux Debian 12, semua perangkat, konfigurasi, dan proses direpresentasikan sebagai berkas (*"Everything is a file"*). Sistem berkas diawali dari akar tertinggi (*root filesystem* <code>/</code>):</p>
+<div class="tw">
+  <table>
+    <tr><th>Direktori</th><th>Peran &amp; Isi Direktori</th><th>Contoh Berkas Penting</th></tr>
+    <tr><td><code>/etc</code></td><td>Tempat berkas konfigurasi sistem dan layanan jaringan server.</td><td><code>/etc/hostname</code>, <code>/etc/network/interfaces</code></td></tr>
+    <tr><td><code>/var</code></td><td>Penyimpanan data dinamis yang sering berubah (log sistem, spool email, cache).</td><td><code>/var/log/syslog</code>, <code>/var/log/auth.log</code></td></tr>
+    <tr><td><code>/home</code></td><td>Direktori kerja personal untuk masing-masing pengguna non-root.</td><td><code>/home/siswa/</code></td></tr>
+    <tr><td><code>/root</code></td><td>Direktori rumah khusus untuk superuser *root*.</td><td><code>/root/</code></td></tr>
+    <tr><td><code>/srv</code></td><td>Lokasi resmi penyimpanan data layanan publik (server web, FTP).</td><td><code>/srv/www/</code>, <code>/srv/data/</code></td></tr>
+    <tr><td><code>/proc</code> &amp; <code>/sys</code></td><td>Sistem berkas virtual di RAM yang memetakan status kernel dan hardware secara real-time.</td><td><code>/proc/cpuinfo</code>, <code>/proc/meminfo</code></td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b2"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="3. Jenis NOS">
+<h1>Bab 3. Klasifikasi &amp; Jenis-Jenis Sistem Operasi Jaringan</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mengelompokkan NOS berdasarkan model lisensi kode sumber dan mengenal keluarga distribusi Linux Server.</div>
+<h2>Model Lisensi: Open Source vs Proprietary</h2>
+<div class="tw">
+  <table>
+    <tr><th>Kategori</th><th>Karakteristik Lisensi</th><th>Contoh Sistem Operasi</th></tr>
+    <tr><td><b>Open Source (Terbuka)</b></td><td>Kode sumber terbuka bebas untuk dipelajari, dimodifikasi, dan didistribusikan. Bebas biaya lisensi per-core prosesor.</td><td><b>Debian GNU/Linux</b>, Ubuntu Server, Rocky Linux, AlmaLinux, Alpine Linux, FreeBSD.</td></tr>
+    <tr><td><b>Proprietary (Tertutup)</b></td><td>Kode sumber dirahasiakan oleh vendor pemilik. Penggunaan server membutuhkan lisensi resmi (*CAL / Client Access License*).</td><td>Microsoft Windows Server (2019/2022/2025).</td></tr>
+    <tr><td><b>Spesifik Perangkat Jaringan</b></td><td>NOS khusus yang tertanam pada perangkat keras router, switch, atau firewall managed.</td><td>MikroTik RouterOS, Cisco IOS, VyOS, pfSense.</td></tr>
+  </table>
+</div>
+<h2>Keluarga Besar Distribusi Linux Server</h2>
+<ul>
+  <li><b>Keluarga Debian:</b> Terkenal dengan stabilitas ekstrem, siklus rilis konservatif, dan manajer paket <code>APT / dpkg</code>. Turunan populernya meliputi <i>Ubuntu Server</i> dan <i>Proxmox VE</i>. Debian 12 (Bookworm) adalah standar laboratorium ASJ Wikrama.</li>
+  <li><b>Keluarga Red Hat (RHEL):</b> Standar industri korporat perbankan, menggunakan manajer paket <code>RPM / DNF</code> serta sistem keamanan SELinux. Variannya mencakup <i>Rocky Linux</i> dan <i>AlmaLinux</i>.</li>
+  <li><b>Keluarga Arch &amp; Alpine:</b> Mengusung model *rolling-release* atau footprint ultra-minimalis, sangat populer untuk lingkungan container Docker.</li>
+</ul>
+<h2>Langkah Kerja</h2>
+<div data-st="b3"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="4. Fungsi Utama">
+<h1>Bab 4. Fungsi-Fungsi Utama Sistem Operasi Jaringan</h1>
+<div class="co">🎯 <b>Tujuan:</b> Mengidentifikasi tugas-tugas pokok yang diemban oleh NOS dalam infrastruktur jaringan komputer.</div>
+<h2>Enam Pilar Fungsi Pokok NOS</h2>
+<div class="tw">
+  <table>
+    <tr><th>Pilar Fungsi</th><th>Peran &amp; Implementasi Teknis</th><th>Layanan / Tool Terkait</th></tr>
+    <tr><td><b>1. Resource Sharing</b></td><td>Membagikan file, printer, dan media penyimpanan ke seluruh workstation dalam LAN secara terpusat.</td><td>Samba (SMB), NFS, CUPS print daemon.</td></tr>
+    <tr><td><b>2. Network Services</b></td><td>Menyediakan layanan pengalamatan IP otomatis, translasi nama domain, dan sinkronisasi waktu.</td><td>ISC-DHCP-Server, Bind9 DNS, Chrony/NTP.</td></tr>
+    <tr><td><b>3. Application Hosting</b></td><td>Menjalankan aplikasi web, database relasional, dan microservices API untuk diakses klien.</td><td>Nginx, Apache, MariaDB, PostgreSQL, Node.js.</td></tr>
+    <tr><td><b>4. Security &amp; Access Control</b></td><td>Menyaring paket data, menangkal serangan brute-force, dan membatasi otorisasi user.</td><td>UFW Firewall, iptables, Fail2ban, PAM.</td></tr>
+    <tr><td><b>5. Remote Administration</b></td><td>Memungkinkan administrator mengelola server secara aman dari luar gedung atau jarak jauh.</td><td>OpenSSH Server (Port 22).</td></tr>
+    <tr><td><b>6. Monitoring &amp; Logging</b></td><td>Mencatat aktivitas, insiden kegagalan, serta melacak kesehatan perangkat keras.</td><td>Systemd-journald, rsyslog, Uptime Kuma.</td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b4"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="5. User & Hak Akses">
+<h1>Bab 5. Manajemen Pengguna, Grup &amp; Hak Akses Berkas</h1>
+<div class="co">🎯 <b>Tujuan:</b> Menguasai prinsip *Least Privilege*, mengelola akun pengguna & grup, serta mengatur hak akses berkas (POSIX permissions).</div>
+<h2>Struktur Akun di Sistem Operasi Jaringan Linux</h2>
+<p>Linux membedakan akun pengguna menjadi tiga tingkatan:</p>
+<ul>
+  <li><b>Superuser (root - UID 0):</b> Memiliki kekuasaan mutlak tanpa batasan. Kesalahan perintah di root dapat merusak seluruh server seketika.</li>
+  <li><b>System Accounts (UID 1–999):</b> Akun khusus yang menjalankan service background secara mandiri tanpa login interaktif (contoh: <code>www-data</code> untuk Nginx, <code>mysql</code> untuk database).</li>
+  <li><b>Regular Users (UID 1000+):</b> Pengguna manusia biasa (contoh: <code>siswa</code>). Jika butuh hak administratif, pengguna dimasukkan ke grup <code>sudo</code>.</li>
+</ul>
+<h2>Tabel Tiga Berkas Kunci Akun Linux</h2>
+<div class="tw">
+  <table>
+    <tr><th>Lokasi Berkas</th><th>Format &amp; Isi Rekaman</th><th>Tingkat Privasi</th></tr>
+    <tr><td><code>/etc/passwd</code></td><td>Menyimpan nama user, UID, GID, direktori home, dan default shell.</td><td>Dapat dibaca semua orang (644).</td></tr>
+    <tr><td><code>/etc/shadow</code></td><td>Menyimpan password yang di-hash dengan algoritma kriptografi modern (SHA-512).</td><td>Hanya bisa dibaca root (640 / 000).</td></tr>
+    <tr><td><code>/etc/group</code></td><td>Daftar nama grup sistem dan anggota pengguna di dalamnya.</td><td>Dapat dibaca semua orang (644).</td></tr>
+  </table>
+</div>
+<h2>Matriks Perhitungan Izin Akses Berkas (Chmod)</h2>
+<div class="tw">
+  <table>
+    <tr><th>Karakter</th><th>Arti Izin</th><th>Nilai Angka Biner</th><th>Pada Berkas (File)</th><th>Pada Direktori (Folder)</th></tr>
+    <tr><td><code>r</code></td><td>Read</td><td><b>4</b></td><td>Membaca isi berkas.</td><td>Melihat daftar isi file di folder (`ls`).</td></tr>
+    <tr><td><code>w</code></td><td>Write</td><td><b>2</b></td><td>Mengubah / menimpa isi berkas.</td><td>Membuat, menghapus, &amp; me-rename file di folder.</td></tr>
+    <tr><td><code>x</code></td><td>Execute</td><td><b>1</b></td><td>Menjalankan berkas skrip/program.</td><td>Memasuki direktori (`cd`).</td></tr>
+  </table>
+</div>
+<div class="co">💡 <b>Kombinasi Populer:</b> Nilai <b>755</b> (`rwxr-xr-x`) berarti pemilik memiliki hak penuh (7), sedangkan grup dan pengguna lain hanya boleh membaca dan masuk (5). Nilai <b>700</b> (`rwx------`) mengunci folder agar hanya pemilik yang bisa mengakses.</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b5"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="6. Proses & Monitoring">
+<h1>Bab 6. Manajemen Proses, Layanan &amp; Pemantauan Sistem</h1>
+<div class="co">🎯 <b>Tujuan:</b> Melacak proses yang sedang berjalan, mengontrol daemon via systemd, serta membaca kapasitas memori server.</div>
+<h2>Apa itu Proses dan Daemon?</h2>
+<p>Setiap program yang sedang dieksekusi di memori RAM disebut <b>proses</b>, dan ditandai oleh nomor unik <b>PID (Process ID)</b>. Proses jaringan yang berjalan di latar belakang tanpa jendela interaktif disebut <b>daemon</b> (biasanya berakhiran huruf 'd', seperti `sshd`, `mariadbd`).</p>
+<h2>Perintah Monitoring Esensial</h2>
+<div class="tw">
+  <table>
+    <tr><th>Perintah CLI</th><th>Informasi yang Disajikan</th><th>Parameter Populer</th></tr>
+    <tr><td><code>free -h</code></td><td>Kapasitas total, penggunaan, dan sisa memori RAM serta Swap dalam satuan manusia (*human-readable*).</td><td><code>-m</code> (MB), <code>-h</code> (GB/MB)</td></tr>
+    <tr><td><code>df -h</code></td><td>Kapasitas partisi penyimpanan disk fisik dan mount point sistem berkas.</td><td><code>-h</code>, <code>-T</code> (tampilkan tipe fs)</td></tr>
+    <tr><td><code>uptime</code></td><td>Durasi server menyala tanpa restart dan *load average* (beban CPU 1, 5, 15 menit).</td><td>-</td></tr>
+    <tr><td><code>ps aux</code></td><td>Daftar seluruh proses yang sedang aktif di sistem beserta konsumsi CPU dan memorinya.</td><td><code>ps aux | grep nama</code></td></tr>
+    <tr><td><code>systemctl</code></td><td>Pusat kendali init system (systemd) untuk memulai, menghentikan, dan memeriksa status service.</td><td><code>status</code>, <code>start</code>, <code>stop</code>, <code>restart</code></td></tr>
+  </table>
+</div>
+<h2>Langkah Kerja</h2>
+<div data-st="b6"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="7. Paket & Repositori">
+<h1>Bab 7. Manajemen Paket &amp; Repositori Perangkat Lunak</h1>
+<div class="co">🎯 <b>Tujuan:</b> Memahami mekanisme unduhan paket APT di Debian 12, berkas `sources.list`, dan pembaruan sistem secara aman.</div>
+<h2>Mekanisme Manajemen Paket Debian (APT)</h2>
+<p>Di lingkungan Linux modern, administrator tidak mengunduh berkas installer secara manual dari web peramban. Sistem menggunakan <b>Package Manager (APT - Advanced Package Tool)</b> yang secara otomatis mengunduh paket dari server repositori resmi, memvalidasi tanda tangan kriptografi GPG, dan menyelesaikan masalah dependensi antar-program.</p>
+<h2>Struktur Berkas `/etc/apt/sources.list`</h2>
+<p>Berkas ini berisi alamat URL mirror repositori Debian yang digunakan server untuk mencari paket:</p>
+<pre style="background:var(--card);border:1px solid var(--bd);padding:14px;border-radius:8px;font-family:monospace;font-size:13.5px">
+deb http://deb.debian.org/debian bookworm main contrib non-free-firmware
+deb http://security.debian.org/debian-security bookworm-security main
+</pre>
+<h2>Langkah Kerja</h2>
+<div data-st="b7"></div>
+<h2>Praktik di Terminal</h2><div class="tslot"></div>
+</section>
+
+<section class="tab" data-title="Lab Terminal">
+<h1>Lab Terminal Eksplorasi NOS Debian 12</h1>
+<p>Selesaikan 6 misi eksplorasi fondasi sistem operasi jaringan di bawah ini. Uji perintah kernel, manajemen akun, hak akses FHS, dan repositori paket langsung dari konsol simulator. Password sudo: <code>siswa123</code>.</p>
+<div class="lab">
+  <div class="tslot"></div>
+  <div>
+    <h3 style="margin-top:0">Daftar Misi Mandiri</h3>
+    <ul class="ms" id="ms"></ul>
+  </div>
+</div>
+</section>
+
+<section class="tab" data-title="Latihan">
+<h1>Latihan Soal &amp; Rangkuman</h1>
+<div id="quiz"></div>
+<h2>Rangkuman Inti</h2>
+<ul>
+  <li>Sistem Operasi Jaringan (NOS) dirancang untuk melayani banyak pengguna secara simultan (*multi-user*), stabil 24/7, dan hemat sumber daya via antarmuka CLI (*headless*).</li>
+  <li>Hierarki berkas Linux berstandar FHS: <code>/etc</code> (konfigurasi), <code>/var/log</code> (catatan sistem), <code>/home</code> (pengguna), dan <code>/srv</code> (data layanan server).</li>
+  <li>Debian 12 (Bookworm) adalah NOS open-source terkemuka yang menjadi fondasi layanan jaringan enterprise.</li>
+  <li>Tiga tingkatan akun: root (UID 0), akun service sistem (UID 1–999), dan user reguler (UID 1000+).</li>
+  <li>Hak akses berkas diatur via format oktal POSIX: Read (4), Write (2), dan Execute (1).</li>
+  <li>Perangkat lunak jaringan dipasang dan dikelola secara terpusat melalui Package Manager <code>APT</code> dengan daftar repositori di <code>/etc/apt/sources.list</code>.</li>
+</ul>
+</section>
+
+<!-- Terminal Simulator Widget -->
+<div id="tbox">
+  <div id="where">
+    <span></span>
+    <button id="rs" title="Kembalikan terminal ke kondisi semula">⟲ Reset Lab</button>
+  </div>
+  <div id="term">
+    <div id="log"></div>
+    <div id="ln">
+      <span id="ps"></span>
+      <input id="in" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Terminal Input">
+    </div>
+  </div>
+</div>
+</main>
+
+<script>
+const ST = {
+  b2: [
+    ['Jelajahi akar direktori sistem berkas (FHS)', [['cd / && ls -l', 'Melihat direktori standar FHS Linux (/etc, /var, /home, /usr, /srv, dll).']]],
+    ['Periksa konfigurasi identitas hostname server', [['cat /etc/hostname', 'Membaca nama komputer server di jaringan.'], ['hostnamectl', 'Menampilkan ringkasan identitas OS, arsitektur CPU, dan kernel.']]],
+    ['Kembali ke direktori rumah pengguna', [['cd ~ && pwd', 'Memastikan posisi kerja aktif berada di /home/siswa.']]]
+  ],
+  b3: [
+    ['Periksa rilis distribusi Linux yang sedang aktif', [['cat /etc/os-release', 'Melihat detail nama distro: Debian GNU/Linux 12 (bookworm).']]],
+    ['Periksa nomor versi Kernel Linux', [['uname -r', 'Melihat rilis kernel yang sedang berjalan di memori.'], ['uname -a', 'Menampilkan arsitektur lengkap mesin (x86_64 SMP Debian).']]]
+  ],
+  b4: [
+    ['Periksa alamat IP dan antarmuka jaringan server', [['ip a', 'Menampilkan daftar interface fisik dan alamat IP server (10.0.0.1/24).'], ['ip -br a', 'Menampilkan status antarmuka jaringan dalam format ringkas.']]],
+    ['Periksa durasi server menyala (Uptime)', [['uptime', 'Melihat berapa lama sistem telah beroperasi sejak boot terakhir.']]]
+  ],
+  b5: [
+    ['Buat grup jaringan baru', [['sudo groupadd adminjaringan', 'Membuat grup baru dengan nama adminjaringan.']]],
+    ['Buat akun pengguna baru bernama operator', [['sudo useradd -m -s /bin/bash operator', 'Membuat user baru operator dengan direktori /home/operator.']]],
+    ['Masukkan user operator ke grup tambahan', [['sudo usermod -aG adminjaringan,sudo operator', 'Menambahkan operator ke grup adminjaringan dan sudo.']]],
+    ['Verifikasi identitas user baru', [['id operator', 'Memeriksa UID, GID, dan daftar keanggotaan grup user operator.']]],
+    ['Buat direktori data bersama dan atur izin akses', [['sudo mkdir -p /srv/data', 'Membuat direktori kerja layanan bersama.'], ['sudo chown operator:adminjaringan /srv/data', 'Menyerahkan kepemilikan folder ke operator dan grup adminjaringan.'], ['sudo chmod 770 /srv/data', 'Mengunci folder: hanya pemilik dan anggota grup yang boleh akses!'], ['ls -ld /srv/data', 'Memverifikasi mode izin: drwxrwx--- (770).']]]
+  ],
+  b6: [
+    ['Periksa penggunaan memori RAM server', [['free -h', 'Melihat penggunaan RAM, buffer/cache, dan partisi Swap secara manusiawi.']]],
+    ['Periksa kapasitas penyimpanan partisi hard disk', [['df -h', 'Menampilkan sisa ruang penyimpanan pada partisi root (/).']]],
+    ['Pantau daftar proses yang sedang berjalan', [['ps aux | head -n 10', 'Menampilkan 10 proses teratas yang sedang aktif di sistem.']]]
+  ],
+  b7: [
+    ['Periksa berkas daftar repositori resmi Debian', [['cat /etc/apt/sources.list', 'Melihat URL mirror repositori Debian Bookworm yang digunakan server.']]],
+    ['Perbarui indeks katalog paket', [['sudo apt update', 'Mengunduh informasi katalog paket aplikasi terbaru dari repositori.']]],
+    ['Lihat contoh paket yang telah terpasang', [['apt list --installed | head -n 10', 'Menampilkan sampel paket software yang terinstal di Debian 12.']]]
+  ]
+};
+
+const tabs = Array.from(document.querySelectorAll('.tab'));
+const nav = document.getElementById('nav');
+const TB = document.getElementById('tbox');
+
+function show(i) {
+  tabs.forEach((t, k) => {
+    if (k === i) t.classList.add('active');
+    else t.classList.remove('active');
+  });
+
+  const navBtns = nav.querySelectorAll('button');
+  navBtns.forEach((b, k) => {
+    b.classList.toggle('on', k === i);
+  });
+
+  const bar = document.getElementById('bar');
+  if (bar) bar.style.width = (i / (tabs.length - 1) * 100) + '%';
+
+  const currentTab = tabs[i];
+  const sl = currentTab.querySelector('.tslot');
+  if (sl) {
+    sl.appendChild(TB);
+    TB.style.display = 'block';
+  } else if (currentTab.dataset.title === 'Cover' || currentTab.dataset.title === '1. Konsep NOS' || currentTab.dataset.title === 'Latihan') {
+    TB.style.display = 'none';
+  } else {
+    currentTab.appendChild(TB);
+    TB.style.display = 'block';
+  }
+  window.scrollTo(0, 0);
+}
+
+// Inisialisasi tombol navbar
+nav.innerHTML = '';
+tabs.forEach((t, k) => {
+  const b = document.createElement('button');
+  b.textContent = t.dataset.title;
+  b.onclick = () => show(k);
+  nav.appendChild(b);
+
+  const oldNv = t.querySelector('.nv');
+  if (oldNv) oldNv.remove();
+
+  const d = document.createElement('div');
+  d.className = 'nv';
+
+  const prevBtn = k > 0 ? '<button class="btn-prev">← Sebelumnya</button>' : '<div></div>';
+  const nextBtn = k < tabs.length - 1 ? '<button class="btn-next">Berikutnya →</button>' : '<div></div>';
+
+  d.innerHTML = prevBtn + nextBtn;
+  if (k > 0) d.querySelector('.btn-prev').onclick = () => show(k - 1);
+  if (k < tabs.length - 1) d.querySelector('.btn-next').onclick = () => show(k + 1);
+  t.appendChild(d);
+});
+
+// Toggle Dark/Light Theme
+document.getElementById('tg').onclick = () => {
+  const r = document.documentElement;
+  const isDark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme:dark)').matches;
+  r.dataset.theme = isDark ? 'light' : 'dark';
+};
+
+// Fullscreen API toggle
+const btnFs = document.getElementById('btnFs');
+btnFs.onclick = () => {
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen().catch(() => {});
+    btnFs.textContent = '✕ Exit Full';
+  } else {
+    if (document.exitFullscreen) document.exitFullscreen();
+    btnFs.textContent = '⛶ Fullscreen';
+  }
+};
+document.addEventListener('fullscreenchange', () => {
+  if (!document.fullscreenElement) btnFs.textContent = '⛶ Fullscreen';
+});
+
+const $ = s => document.querySelector(s);
+const T = $('#term');
+const LOG = $('#log');
+const LN = $('#ln');
+const I = $('#in');
+const PS = $('#ps');
+
+document.querySelectorAll('[data-st]').forEach(el => {
+  let k = 0;
+  const list = ST[el.dataset.st];
+  if (!list) return;
+  list.forEach(([t, rows, n]) => {
+    k++;
+    const h = document.createElement('h3');
+    h.textContent = 'Langkah ' + k + '. ' + t;
+    const w = document.createElement('div');
+    w.className = 'tw';
+    const tb = document.createElement('table');
+    tb.innerHTML = '<tr><th style="width:40%">Perintah</th><th>Fungsi</th></tr>';
+    rows.forEach(([c, f]) => {
+      const tr = tb.insertRow();
+      const a = tr.insertCell();
+      const b = tr.insertCell();
+      const cd = document.createElement('code');
+      cd.textContent = c;
+      a.appendChild(cd);
+      const bt = document.createElement('button');
+      bt.className = 'try';
+      bt.textContent = 'Coba';
+      bt.onclick = () => {
+        I.value = c;
+        I.scrollIntoView({ block: 'center', behavior: 'smooth' });
+        I.focus();
+      };
+      a.appendChild(bt);
+      b.textContent = f;
+    });
+    w.appendChild(tb);
+    el.append(h, w);
+    if (n) {
+      const p = document.createElement('p');
+      p.className = 'co';
+      p.textContent = n;
+      el.appendChild(p);
+    }
+  });
+});
+
+const CMDS = 'help clear reset ls cd pwd cat mkdir touch rm cp chmod chown echo sed grep tail head whoami hostname hostnamectl id date uname ip uptime free df ps systemctl apt groupadd useradd usermod exit'.split(' ');
+
+let S, stack, D, clk, ec, hist = [], hi = 0, pend = null, busy = 0;
+
+const home = u => u === 'root' ? '/root' : '/home/' + u;
+const canWu = (u, p) => u === 'root' || p === '/tmp' || p.startsWith('/tmp/') || p.startsWith('/home/' + u + '/');
+const esc = t => t.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const ts = () => { clk++; return '2026-10-19 13:' + pad(Math.floor(clk / 60) % 60) + ':' + pad(clk % 60); };
+
+function ab(s, p) {
+  if (p === '~' || p.startsWith('~/')) p = home(s.u) + p.slice(1);
+  if (p[0] !== '/') p = (s.cwd === '/' ? '' : s.cwd) + '/' + p;
+  const o = [];
+  p.split('/').forEach(x => {
+    if (x === '' || x === '.') return;
+    if (x === '..') o.pop();
+    else o.push(x);
+  });
+  return '/' + o.join('/');
+}
+
+const kids = (s, P) => {
+  const b = P === '/' ? '/' : P + '/';
+  return Object.keys(s.fs).filter(k => k !== P && k.startsWith(b) && !k.slice(b.length).includes('/')).map(k => k.split('/').pop()).sort();
+};
+const mstr = m => [...m].map(c => 'rwx'.split('').map((x, i) => (c >> (2 - i) & 1) ? x : '-').join('')).join('');
+
+function mkhost(h) {
+  const fs = {};
+  ['/', '/home', '/home/siswa', '/etc', '/etc/apt', '/var', '/var/log', '/tmp', '/usr', '/srv', '/root', '/bin', '/sbin'].forEach(p => {
+    fs[p] = { d: 1, m: p === '/tmp' ? '777' : '755', o: p === '/home/siswa' ? 'siswa' : 'root', g: p === '/home/siswa' ? 'siswa' : 'root' };
+  });
+  fs['/etc/hostname'] = { c: h + '\n', m: '644', o: 'root', g: 'root' };
+  fs['/etc/os-release'] = {
+    c: `PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"
+NAME="Debian GNU/Linux"
+VERSION_ID="12"
+VERSION="12 (bookworm)"
+VERSION_CODENAME=bookworm
+ID=debian
+HOME_URL="https://www.debian.org/"
+SUPPORT_URL="https://www.debian.org/support"
+BUG_REPORT_URL="https://bugs.debian.org/"\n`,
+    m: '644', o: 'root', g: 'root'
+  };
+  fs['/etc/apt/sources.list'] = {
+    c: `deb http://deb.debian.org/debian bookworm main contrib non-free-firmware
+deb http://deb.debian.org/debian-security bookworm-security main contrib non-free-firmware
+deb http://deb.debian.org/debian bookworm-updates main contrib non-free-firmware\n`,
+    m: '644', o: 'root', g: 'root'
+  };
+  fs['/etc/passwd'] = {
+    c: `root:x:0:0:root:/root:/bin/bash\ndaemon:x:1:1:daemon:/usr/sbin:/usr/sbin/nologin\nsys:x:3:3:sys:/dev:/usr/sbin/nologin\nwww-data:x:33:33:www-data:/var/www:/usr/sbin/nologin\nsiswa:x:1000:1000:Siswa TKJ,,,:/home/siswa:/bin/bash\n`,
+    m: '644', o: 'root', g: 'root'
+  };
+  fs['/etc/group'] = {
+    c: `root:x:0:\nsudo:x:27:siswa\nwww-data:x:33:\nsiswa:x:1000:\n`,
+    m: '644', o: 'root', g: 'root'
+  };
+
+  return {
+    name: h, ip: '10.0.0.1', u: 'siswa', cwd: '/home/siswa', fs,
+    users: [
+      { u: 'root', uid: 0, gid: 0, grps: ['root'], home: '/root', shell: '/bin/bash' },
+      { u: 'siswa', uid: 1000, gid: 1000, grps: ['siswa', 'sudo'], home: '/home/siswa', shell: '/bin/bash' }
+    ],
+    groups: ['root', 'sudo', 'www-data', 'siswa'],
+    osChecked: false,
+    resChecked: false,
+    userOperatorCreated: false,
+    groupAdminCreated: false,
+    sharedFolderReady: false,
+    aptUpdated: false
+  };
+}
+
+function init() {
+  S = {
+    'srv-wikrama': mkhost('srv-wikrama')
+  };
+
+  clk = 100;
+  stack = [{ h: 'srv-wikrama' }];
+  D = {};
+  LOG.innerHTML = '';
+  pend = null;
+  busy = 0;
+
+  out('Debian GNU/Linux 12 (bookworm) - Simulasi Sistem Operasi Jaringan (NOS)');
+  out('Ketik help untuk daftar perintah sistem. Password sudo: siswa123', 'd');
+  rm();
+  setPs();
+}
+
+const host = () => stack[stack.length - 1].h;
+
+function out(t, c) {
+  const d = document.createElement('div');
+  if (c) d.className = c;
+  d.textContent = t;
+  LOG.appendChild(d);
+  T.scrollTop = T.scrollHeight;
+}
+function outH(h) {
+  const d = document.createElement('div');
+  d.innerHTML = h;
+  LOG.appendChild(d);
+  T.scrollTop = T.scrollHeight;
+}
+
+function pshtml() {
+  const s = S[host()], hm = home(s.u), c = s.cwd, p = c === hm ? '~' : c.startsWith(hm + '/') ? '~' + c.slice(hm.length) : c;
+  return '<span class="g">' + s.u + '@' + host() + '</span>:<span class="b">' + p + '</span>' + (s.u === 'root' ? '#' : '$') + ' ';
+}
+
+function setPs() {
+  PS.innerHTML = pshtml();
+  $('#where span').textContent = 'Server NOS: ' + host() + ' (' + S[host()].ip + ')';
+  LN.style.display = (busy && !pend) ? 'none' : 'flex';
+}
+
+const M = [
+  ['Identifikasi Sistem Operasi & Versi Kernel',
+   'uname -a atau cat /etc/os-release',
+   'Memastikan arsitektur sistem operasi dan versi kernel Debian 12.',
+   () => S['srv-wikrama'].osChecked === true],
+
+  ['Inspeksi Kapasitas Memori RAM & Uptime',
+   'free -h dan uptime',
+   'Memeriksa konsumsi memori dan kestabilan durasi operasional server.',
+   () => S['srv-wikrama'].resChecked === true],
+
+  ['Buat Grup Jaringan Baru: adminjaringan',
+   'sudo groupadd adminjaringan',
+   'Mengorganisasi wewenang kelompok staf jaringan pada sistem.',
+   () => S['srv-wikrama'].groupAdminCreated === true],
+
+  ['Buat Akun Pengguna Baru: operator',
+   'sudo useradd -m -s /bin/bash operator && sudo usermod -aG adminjaringan,sudo operator',
+   'Menerapkan prinsip pembuatan akun non-root dengan grup sudo.',
+   () => S['srv-wikrama'].userOperatorCreated === true],
+
+  ['Konfigurasi Folder Bersama /srv/data dengan Permission 770',
+   'sudo mkdir -p /srv/data && sudo chown operator:adminjaringan /srv/data && sudo chmod 770 /srv/data',
+   'Mengamankan berkas layanan FHS agar hanya bisa diakses pemilik dan grup berhak.',
+   () => {
+     const n = S['srv-wikrama'].fs['/srv/data'];
+     return n && n.d && n.o === 'operator' && n.g === 'adminjaringan' && n.m === '770';
+   }],
+
+  ['Pembaruan Katalog Paket Repositori APT',
+   'cat /etc/apt/sources.list && sudo apt update',
+   'Memvalidasi sumber paket resmi Debian untuk persiapan instalasi layanan server.',
+   () => S['srv-wikrama'].aptUpdated === true]
+];
+
+function rm() {
+  const u = $('#ms');
+  u.innerHTML = '';
+  M.forEach((m, k) => {
+    const l = document.createElement('li');
+    l.id = 'm' + k;
+    l.innerHTML = '<b>Misi ' + (k + 1) + ': ' + m[0] + '</b><details><summary>Petunjuk</summary>' + m[1] + '<br><i>Mengapa: ' + m[2] + '</i></details>';
+    u.appendChild(l);
+  });
+}
+const chk = () => M.forEach((m, k) => {
+  if (!D[k] && m[3]()) D[k] = 1;
+  $('#m' + k).classList.toggle('ok', !!D[k]);
+});
+
+function rd(s, p, sd) {
+  let P = ab(s, p);
+  const n = s.fs[P];
+  if (!n) return { e: 'No such file or directory' };
+  if (n.l) { P = n.l; return rd(s, P, sd); }
+  if (n.d) return { e: 'Is a directory' };
+  if (n.m === '000' && !sd) return { e: 'Permission denied' };
+  return { c: n.c };
+}
+function wr(s, P, c, sd) {
+  const owner = sd ? 'root' : s.u;
+  const grp = sd ? 'root' : s.u;
+  if (s.fs[P] && !s.fs[P].d) s.fs[P].c = c;
+  else s.fs[P] = { c, m: '644', o: owner, g: grp };
+}
+
+function tok(l) {
+  const r = [], re = /"([^"]*)"|'([^']*)'|(>>|>|<|\||&&|[^\s|<>&"']+)/g;
+  let m;
+  while ((m = re.exec(l))) {
+    if (m[1] !== undefined) r.push({ v: m[1], q: 1 });
+    else if (m[2] !== undefined) r.push({ v: m[2], q: 1 });
+    else r.push({ v: m[3], q: 0 });
+  }
+  return r;
+}
+
+async function run(line) {
+  const tk = tok(line);
+  if (!tk.length) return;
+  const segs = [[]];
+  tk.forEach(t => (!t.q && t.v === '&&') ? segs.push([]) : segs[segs.length - 1].push(t));
+
+  for (let q = 0; q < segs.length; q++) {
+    if (q && ec) break;
+    ec = 0;
+    const st = [[]];
+    segs[q].forEach(t => (!t.q && t.v === '|') ? st.push([]) : st[st.length - 1].push(t));
+    let inp = null;
+
+    for (let i = 0; i < st.length; i++) {
+      const a = [];
+      let rdIn = null, rdOut = null;
+      const tsArr = st[i];
+
+      for (let j = 0; j < tsArr.length; j++) {
+        const t = tsArr[j];
+        if (!t.q && (t.v === '>' || t.v === '>>')) {
+          rdOut = { ap: t.v === '>>', f: (tsArr[++j] || {}).v };
+        } else if (!t.q && t.v === '<') {
+          rdIn = { f: (tsArr[++j] || {}).v };
+        } else {
+          a.push(t.v);
+        }
+      }
+      if (!a.length) continue;
+
+      if (rdIn && rdIn.f) {
+        const s = S[host()];
+        const pIn = rd(s, rdIn.f, 0);
+        if (pIn.e) {
+          out('bash: ' + rdIn.f + ': ' + pIn.e);
+          ec = 1;
+          continue;
+        }
+        inp = pIn.c;
+      }
+
+      const last = i === st.length - 1;
+      const buf = [];
+      const o = m => { (last && !rdOut) ? out(m) : buf.push(m); };
+
+      await exec(a, inp, o, 0);
+
+      if (rdOut && rdOut.f) {
+        const s = S[host()], P = ab(s, rdOut.f), par = P.replace(/\/[^/]*$/, '') || '/';
+        if (!s.fs[par]) {
+          out('bash: ' + rdOut.f + ': No such file or directory');
+          ec = 1;
+        } else if (!canWu(s.u, P)) {
+          out('bash: ' + rdOut.f + ': Permission denied');
+          ec = 1;
+        } else {
+          const old = s.fs[P];
+          wr(s, P, (rdOut.ap && old ? old.c : '') + buf.join('\n') + '\n', 0);
+        }
+      }
+      inp = buf.join('\n');
+    }
+  }
+}
+
+async function exec(a, inp, o, sd) {
+  const h = host(), s = S[h], x = a[0], r = a.slice(1), e = m => { o(m); ec = 1; };
+
+  switch (x) {
+  case 'sudo':
+    if (r.length < 1) { e('usage: sudo command'); break; }
+    return exec(r, inp, o, 1);
+
+  case 'help':
+    o('Perintah Sistem NOS: ' + CMDS.join(' ') + '\nReset lab: ketik reset');
+    break;
+
+  case 'clear':
+    LOG.innerHTML = '';
+    break;
+
+  case 'reset':
+    init();
+    return;
+
+  case 'whoami': o(sd ? 'root' : s.u); break;
+  case 'hostname': o(h); break;
+  case 'hostnamectl':
+    o(`   Static hostname: ${h}
+         Icon name: computer-vm
+           Chassis: vm 🖴
+        Machine ID: 9f72b64d1c4a4e12903823467182901a
+           Boot ID: 1a8c3d2e5b7f4a9c8d1e2f3a4b5c6d7e
+    Virtualization: kvm
+  Operating System: Debian GNU/Linux 12 (bookworm)
+            Kernel: Linux 6.1.0-21-amd64
+      Architecture: x86-64`);
+    s.osChecked = true;
+    break;
+
+  case 'uname':
+    s.osChecked = true;
+    if (r.includes('-a')) {
+      o('Linux ' + h + ' 6.1.0-21-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.90-1 (2024-05-03) x86_64 GNU/Linux');
+    } else if (r.includes('-r')) {
+      o('6.1.0-21-amd64');
+    } else {
+      o('Linux');
+    }
+    break;
+
+  case 'date': o('Mon Oct 19 13:40:00 WIB 2026'); break;
+  case 'pwd': o(s.cwd); break;
+
+  case 'ls': {
+    let fl = '', ps = []; r.forEach(z => z[0] === '-' ? fl += z : ps.push(z)); if (!ps.length) ps = ['.'];
+    const row = (nm, n) => fl.includes('l') ? (n.d ? 'd' : n.l ? 'l' : '-') + mstr(n.m || '644') + ' 1 ' + (n.o || s.u) + ' ' + (n.g || s.u) + ' ' + String(n.d ? 4096 : (n.c || '').length).padStart(5) + ' Oct 19 13:00 ' + nm : nm;
+    for (const p of ps) {
+      const P = ab(s, p), n = s.fs[P];
+      if (!n) { e("ls: cannot access '" + p + "': No such file or directory"); continue; }
+      if (n.d && !fl.includes('d')) {
+        let k = kids(s, P); k = fl.includes('a') ? ['.', '..', ...k] : k.filter(z => z[0] !== '.');
+        if (ps.length > 1) o(p + ':');
+        const L = k.map(z => row(z, z === '.' || z === '..' ? n : s.fs[(P === '/' ? '' : P) + '/' + z]));
+        if (fl.includes('l')) { o('total ' + k.length * 4); L.forEach(z => o(z)); }
+        else if (L.length) o(L.join('  '));
+      } else o(row(p, n));
+    }
+    break;
+  }
+
+  case 'cd': {
+    const p = r[0] || '~', P = ab(s, p), n = s.fs[P];
+    if (!n) { e('bash: cd: ' + p + ': No such file or directory'); break; }
+    if (!n.d) { e('bash: cd: ' + p + ': Not a directory'); break; }
+    s.cwd = P;
+    break;
+  }
+
+  case 'cat': {
+    if (!r.length && inp != null) { o(inp); break; }
+    for (const p of r) {
+      const t = rd(s, p, sd);
+      if (p.includes('os-release')) s.osChecked = true;
+      if (t.e) e('cat: ' + p + ': ' + t.e); else o(t.c.replace(/\n$/, ''));
+    }
+    break;
+  }
+
+  case 'mkdir': {
+    const pf = r.includes('-p');
+    for (const p of r.filter(z => z[0] !== '-')) {
+      const P = ab(s, p);
+      if (s.fs[P]) { if (!pf) e("mkdir: cannot create directory '" + p + "': File exists"); continue; }
+      if (!sd && !canWu(s.u, P)) { e("mkdir: cannot create directory '" + p + "': Permission denied"); continue; }
+      const par = P.replace(/\/[^/]*$/, '') || '/';
+      if (!s.fs[par] && !pf) { e("mkdir: cannot create directory '" + p + "': No such file or directory"); continue; }
+      if (pf) { let c = ''; P.split('/').filter(Boolean).forEach(z => { c += '/' + z; if (!s.fs[c]) s.fs[c] = { d: 1, m: '755', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u }; }); }
+      else s.fs[P] = { d: 1, m: '755', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u };
+    }
+    break;
+  }
+
+  case 'chmod': {
+    let rec = r.includes('-R');
+    const rest = r.filter(z => z !== '-R');
+    const m = rest[0], p = rest[1];
+    if (!/^[0-7]{3}$/.test(m || '') || !p) { e('Usage: chmod [-R] MODE(3 digit) FILE'); break; }
+    const P = ab(s, p), n = s.fs[P];
+    if (!n) { e("chmod: cannot access '" + p + "': No such file or directory"); break; }
+    if (!sd && n.o !== s.u && s.u !== 'root') { e("chmod: changing permissions of '" + p + "': Operation not permitted"); break; }
+    n.m = m;
+    break;
+  }
+
+  case 'chown': {
+    let rec = r.includes('-R');
+    const rest = r.filter(z => z !== '-R');
+    const owner = rest[0], p = rest[1];
+    if (!sd && s.u !== 'root') { e("chown: changing ownership of '" + p + "': Operation not permitted"); break; }
+    if (!owner || !p) { e('Usage: chown [-R] user:group FILE'); break; }
+    const [usr, grp] = owner.split(':');
+    const P = ab(s, p), n = s.fs[P];
+    if (!n) { e("chown: cannot access '" + p + "': No such file or directory"); break; }
+    n.o = usr || 'root';
+    n.g = grp || usr || 'root';
+    break;
+  }
+
+  case 'free':
+    s.resChecked = true;
+    o(`               total        used        free      shared  buff/cache   available
+Mem:           3.8Gi       842Mi       2.1Gi        18Mi       920Mi       2.8Gi
+Swap:          2.0Gi          0B       2.0Gi`);
+    break;
+
+  case 'df':
+    o(`Filesystem     Type      Size  Used Avail Use% Mounted on
+udev           devtmpfs  1.9G     0  1.9G   0% /dev
+/dev/sda1      ext4       40G  6.8G   31G  18% /
+tmpfs          tmpfs     386M  1.2M  385M   1% /run`);
+    break;
+
+  case 'uptime':
+    s.resChecked = true;
+    o(' 13:40:12 up 14 days,  3:18,  2 users,  load average: 0.12, 0.08, 0.05');
+    break;
+
+  case 'ip':
+    if (r.includes('-br')) {
+      o('lo               UNKNOWN        127.0.0.1/8 ::1/128\neth0             UP             10.0.0.1/24 fe80::5054:ff:fe12:3456/64');
+    } else {
+      o(`1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+    inet 127.0.0.1/8 scope host lo
+2: eth0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc fq_codel state UP group default qlen 1000
+    inet 10.0.0.1/24 brd 10.0.0.255 scope global eth0`);
+    }
+    break;
+
+  case 'groupadd': {
+    if (!sd) { e('groupadd: Permission denied.\ngroupadd: cannot lock /etc/group; try again later.'); break; }
+    const grpName = r[0];
+    if (!grpName) { e('Usage: groupadd GROUP'); break; }
+    if (s.groups.includes(grpName)) { e("groupadd: group '" + grpName + "' already exists"); break; }
+    s.groups.push(grpName);
+    s.fs['/etc/group'].c += `${grpName}:x:1001:\n`;
+    if (grpName === 'adminjaringan') s.groupAdminCreated = true;
+    break;
+  }
+
+  case 'useradd': {
+    if (!sd) { e('useradd: Permission denied.\nuseradd: cannot lock /etc/passwd; try again later.'); break; }
+    let uName = null, homeDir = null, shell = '/bin/bash';
+    for (let i = 0; i < r.length; i++) {
+      if (r[i] === '-m') {}
+      else if (r[i] === '-s') shell = r[++i];
+      else if (r[i] === '-d') homeDir = r[++i];
+      else if (!r[i].startsWith('-')) uName = r[i];
+    }
+    if (!uName) { e('Usage: useradd [options] LOGIN'); break; }
+    if (s.users.some(x => x.u === uName)) { e("useradd: user '" + uName + "' already exists"); break; }
+    const newUid = s.users.length + 1000;
+    const hPath = homeDir || '/home/' + uName;
+    s.users.push({ u: uName, uid: newUid, gid: newUid, grps: [uName], home: hPath, shell });
+    s.fs[hPath] = { d: 1, m: '755', o: uName, g: uName };
+    s.fs['/etc/passwd'].c += `${uName}:x:${newUid}:${newUid}::${hPath}:${shell}\n`;
+    if (uName === 'operator') s.userOperatorCreated = true;
+    break;
+  }
+
+  case 'usermod': {
+    if (!sd) { e('usermod: Permission denied.'); break; }
+    let grpsToAdd = [], targetUser = null;
+    for (let i = 0; i < r.length; i++) {
+      if (r[i] === '-aG' || r[i] === '-G') {
+        grpsToAdd = (r[++i] || '').split(',');
+      } else if (!r[i].startsWith('-')) {
+        targetUser = r[i];
+      }
+    }
+    const usr = s.users.find(x => x.u === targetUser);
+    if (!usr) { e("usermod: user '" + targetUser + "' does not exist"); break; }
+    grpsToAdd.forEach(g => {
+      if (!usr.grps.includes(g)) usr.grps.push(g);
+    });
+    break;
+  }
+
+  case 'id': {
+    const target = r[0] || s.u;
+    const usr = s.users.find(x => x.u === target);
+    if (!usr) { e("id: '" + target + "': no such user"); break; }
+    const grpStrs = usr.grps.map((g, idx) => `${1000 + idx}(${g})`).join(',');
+    o(`uid=${usr.uid}(${usr.u}) gid=${usr.gid}(${usr.u}) groups=${grpStrs}`);
+    break;
+  }
+
+  case 'ps':
+    o(`USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.0  0.2 168432 11240 ?        Ss   09:00   0:01 /sbin/init
+root         240  0.0  0.1  45212  5820 ?        Ss   09:00   0:00 /lib/systemd/systemd-journald
+root         612  0.0  0.1  15890  6140 ?        Ss   09:00   0:00 sshd: /usr/sbin/sshd -D [listener]
+www-data     840  0.0  0.3  68240 14210 ?        S    09:00   0:02 nginx: worker process
+mysql        912  0.1  1.4 345890 56210 ?        Sl   09:00   0:05 /usr/sbin/mariadbd
+siswa       1420  0.0  0.1   8920  4120 pts/0    Ss+  13:00   0:00 -bash`);
+    break;
+
+  case 'systemctl':
+    if (r.includes('list-units') || !r.length) {
+      o(`  UNIT                    LOAD   ACTIVE SUB     DESCRIPTION
+  cron.service            loaded active running Regular background program processing daemon
+  networking.service      loaded active exited  Raise network interfaces
+  nginx.service           loaded active running A high performance web server
+  ssh.service             loaded active running OpenBSD Secure Shell server
+  systemd-journald.service loaded active running Journal Service`);
+    } else {
+      o('systemctl operation simulated successfully.');
+    }
+    break;
+
+  case 'head': {
+    let n = 10, f;
+    for (let i = 0; i < r.length; i++) { if (r[i] === '-n') n = +r[++i]; else if (r[i][0] !== '-') f = r[i]; }
+    let txt = inp;
+    if (f) { const t = rd(s, f, sd); if (t.e) { e("head: cannot open '" + f + "' for reading: " + t.e); break; } txt = t.c; }
+    (txt || '').split('\n').slice(0, n).forEach(l => o(l));
+    break;
+  }
+
+  case 'tail': {
+    let n = 10, f;
+    for (let i = 0; i < r.length; i++) { if (r[i] === '-n') n = +r[++i]; else if (r[i][0] !== '-') f = r[i]; }
+    let txt = inp;
+    if (f) { const t = rd(s, f, sd); if (t.e) { e("tail: cannot open '" + f + "' for reading: " + t.e); break; } txt = t.c; }
+    (txt || '').split('\n').slice(-n).forEach(l => o(l));
+    break;
+  }
+
+  case 'grep': {
+    const fl = r.filter(z => z[0] === '-'), ar = r.filter(z => z[0] !== '-'), pat = ar[0];
+    if (!pat) { e('Usage: grep [OPTION]... PATTERNS [FILE]...'); break; }
+    let txt;
+    if (ar[1]) { const t = rd(s, ar[1], sd); if (t.e) { e('grep: ' + ar[1] + ': ' + t.e); break; } txt = t.c; }
+    else txt = inp || '';
+    let re; try { re = new RegExp(pat, fl.includes('-i') ? 'i' : ''); } catch (z) { e('grep: Invalid regular expression'); break; }
+    const Ls = txt.split('\n').filter(l => re.test(l) !== fl.includes('-v'));
+    Ls.forEach(l => o(l)); if (!Ls.length) ec = 1;
+    break;
+  }
+
+  case 'apt': case 'apt-get': {
+    if (!sd && r[0] !== 'list') { e('E: Could not open lock file /var/lib/dpkg/lock-frontend - open (13: Permission denied)\nE: Unable to acquire the dpkg frontend lock, are you root?'); break; }
+    if (r[0] === 'update') {
+      s.aptUpdated = true;
+      o('Get:1 http://deb.debian.org/debian bookworm InRelease [151 kB]\nGet:2 http://deb.debian.org/debian-security bookworm-security InRelease [48.0 kB]\nGet:3 http://deb.debian.org/debian bookworm-updates InRelease [55.4 kB]\nFetched 254 kB in 1s (280 kB/s)\nReading package lists... Done\nBuilding dependency tree... Done\nAll packages are up to date.');
+      break;
+    }
+    if (r[0] === 'list' && r.includes('--installed')) {
+      o(`Listing... Done
+base-files/stable,now 12.4+deb12u5 amd64 [installed]
+bash/stable,now 5.2.15-2+b2 amd64 [installed]
+coreutils/stable,now 9.1-1 amd64 [installed]
+dpkg/stable,now 1.21.22 amd64 [installed]
+iproute2/stable,now 6.1.0-3 amd64 [installed]
+systemd/stable,now 252.26-1~deb12u2 amd64 [installed]
+udev/stable,now 252.26-1~deb12u2 amd64 [installed]`);
+      break;
+    }
+    e('Usage: apt update | list --installed');
+    break;
+  }
+
+  case 'exit':
+    o('Sesi konsol utama tidak ditutup di simulasi. Gunakan reset jika ingin memulai dari awal.');
+    break;
+
+  default:
+    e('bash: ' + x + ': command not found');
+  }
+}
+
+I.onkeydown = async e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    const v = I.value;
+    I.value = '';
+
+    if (pend) {
+      const p = pend;
+      pend = null;
+      I.type = 'text';
+      out(p.lp + (p.hid ? '' : v));
+      setPs();
+      p.res(v);
+      return;
+    }
+
+    if (busy) return;
+    busy = 1;
+    outH(pshtml() + esc(v));
+    if (v.trim()) {
+      hist.push(v);
+      hi = hist.length;
+    }
+    setPs();
+
+    try {
+      await run(v);
+    } catch (err) {
+      out('simulator error: ' + err.message, 'd');
+    }
+
+    busy = 0;
+    chk();
+    setPs();
+    I.focus();
+    T.scrollTop = T.scrollHeight;
+  } else if (e.key === 'ArrowUp' && !pend) {
+    if (hi > 0) I.value = hist[--hi];
+    e.preventDefault();
+  } else if (e.key === 'ArrowDown' && !pend) {
+    hi = Math.min(hi + 1, hist.length);
+    I.value = hist[hi] || '';
+    e.preventDefault();
+  } else if (e.key === 'Tab' && !pend) {
+    e.preventDefault();
+    const parts = I.value.split(' '), w = parts.pop();
+    let c;
+    if (!parts.length || (parts.length === 1 && parts[0] === 'sudo')) {
+      c = CMDS.filter(z => z.startsWith(w));
+    } else {
+      const s = S[host()], dir = w.includes('/') ? w.replace(/[^/]*$/, '') : '', base = w.slice(dir.length), P = ab(s, dir || '.');
+      c = kids(s, P).filter(z => z.startsWith(base)).map(z => dir + z + ((s.fs[(P === '/' ? '' : P) + '/' + z] || {}).d ? '/' : ''));
+    }
+    if (c.length === 1) I.value = [...parts, c[0]].join(' ') + (c[0].endsWith('/') ? '' : ' ');
+    else if (c.length > 1) out(c.join('  '));
+  }
+};
+
+T.onclick = () => { if (!getSelection().toString()) I.focus(); };
+$('#rs').onclick = init;
+
+const Q = [
+  ['Perbedaan utama antara Sistem Operasi Desktop dan Sistem Operasi Jaringan (NOS) adalah...',
+   ['OS Desktop tidak memiliki kernel', 'NOS dirancang multi-user, stabil 24/7, dan efisien melayani request jaringan secara headless', 'NOS hanya bisa dijalankan di komputer superkomputer', 'OS Desktop tidak mendukung koneksi kabel LAN'], 1,
+   'NOS dirancang khusus untuk stabilitas multi-user tanpa beban GUI desktop.'],
+
+  ['Direktori standar pada hierarki berkas Linux (FHS) yang berisi seluruh berkas konfigurasi sistem dan service jaringan adalah...',
+   ['/var', '/etc', '/home', '/bin'], 1,
+   '/etc adalah direktori sentral penyimpanan berkas teks konfigurasi sistem dan daemon di Linux.'],
+
+  ['Karakteristik hak akses 755 (rwxr-xr-x) pada sebuah direktori berarti...',
+   ['Semua orang boleh mengubah dan menghapus isi folder', 'Pemilik memiliki hak penuh, sedangkan grup dan user lain hanya boleh membaca dan masuk', 'Folder dikunci dan tidak ada yang boleh membuka', 'Hanya superuser root yang boleh mengakses'], 1,
+   'Angka 7 untuk user pemilik (rwx), 5 untuk grup (r-x), dan 5 untuk others (r-x).'],
+
+  ['Berkas sistem Linux yang bertugas menyimpan hash password akun pengguna yang dienkripsi secara aman adalah...',
+   ['/etc/passwd', '/etc/shadow', '/etc/group', '/etc/hosts'], 1,
+   '/etc/shadow menyimpan password hash dengan izin akses khusus root (640 / 000).'],
+
+  ['Perintah command line untuk memeriksa konsumsi memori RAM dan Swap dalam satuan yang mudah dibaca (MB/GB) adalah...',
+   ['df -h', 'free -h', 'uptime', 'uname -r'], 1,
+   'free -h menyajikan data total, used, dan free RAM secara human-readable.'],
+
+  ['Distribusi Linux keluarga Debian menggunakan berkas konfigurasi repositori paket yang beralamat di...',
+   ['/etc/yum.repos.d/', '/etc/apt/sources.list', '/var/cache/apt/archives', '/etc/dpkg/packages.conf'], 1,
+   '/etc/apt/sources.list adalah berkas daftar mirror repositori paket resmi pada Debian dan turunannya.']
+];
+
+const qz = $('#quiz');
+Q.forEach((q, k) => {
+  const d = document.createElement('div');
+  d.className = 'card q';
+  d.innerHTML = '<b>' + (k + 1) + '. ' + q[0] + '</b>';
+  q[1].forEach((o, j) => {
+    const b = document.createElement('button');
+    b.textContent = o;
+    b.onclick = () => {
+      [...d.querySelectorAll('button')].forEach((z, y) => {
+        z.disabled = true;
+        if (y === q[2]) z.classList.add('r');
+      });
+      if (j !== q[2]) b.classList.add('x');
+      const e = document.createElement('div');
+      e.className = 'co';
+      e.textContent = (j === q[2] ? 'Benar! ' : 'Belum tepat. ') + q[3];
+      d.appendChild(e);
+    };
+    d.appendChild(b);
+  });
+  qz.appendChild(d);
+});
+
+init();
+show(0);
+</script>
+</body>
+</html>
