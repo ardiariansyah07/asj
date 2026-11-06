@@ -75,6 +75,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--pri);outline-of
   transition:background .2s;
 }
 .tg:hover{background:var(--acc)}
+.portal-link{text-decoration:none;white-space:nowrap}
 
 main{
   width:100%;
@@ -209,6 +210,7 @@ svg text{fill:currentColor;font:13px sans-serif}
 <header>
   <div id="bar"></div>
   <div class="hw">
+    <a class="tg portal-link" href="index.html">← Kembali ke Beranda</a>
     <nav id="nav"></nav>
     <div class="actions">
       <button class="tg" id="btnFs" title="Toggle Layar Penuh">⛶ Fullscreen</button>
@@ -467,6 +469,7 @@ deb http://security.debian.org/debian-security bookworm-security main
 </div>
 </main>
 
+<script src="local-progress.js"></script>
 <script>
 const ST = {
   b2: [
@@ -974,6 +977,52 @@ async function exec(a, inp, o, sd) {
     break;
   }
 
+  case 'echo': {
+    let args = r.slice();
+    const escapes = args[0] === '-e';
+    if (escapes) args.shift();
+    let text = args.join(' ');
+    if (escapes) text = text.replace(/\\n/g, '\n').replace(/\\t/g, '\t').replace(/\\"/g, '"');
+    o(text);
+    break;
+  }
+
+  case 'touch':
+    for (const p of r) {
+      const P = ab(s, p);
+      if (s.fs[P]) continue;
+      const parent = P.replace(/\/[^/]*$/, '') || '/';
+      if (!s.fs[parent]) { e("touch: cannot touch '" + p + "': No such file or directory"); continue; }
+      if (!sd && !canWu(s.u, P)) { e("touch: cannot touch '" + p + "': Permission denied"); continue; }
+      s.fs[P] = { c: '', m: '644', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u };
+    }
+    break;
+
+  case 'rm': {
+    const recursive = r.some(z => /^-.*[rR]/.test(z));
+    for (const p of r.filter(z => !z.startsWith('-'))) {
+      const P = ab(s, p), node = s.fs[P];
+      if (!node) { e("rm: cannot remove '" + p + "': No such file or directory"); continue; }
+      if (node.d && !recursive) { e("rm: cannot remove '" + p + "': Is a directory"); continue; }
+      if (!sd && !canWu(s.u, P)) { e("rm: cannot remove '" + p + "': Permission denied"); continue; }
+      Object.keys(s.fs).filter(k => k === P || k.startsWith(P + '/')).forEach(k => delete s.fs[k]);
+    }
+    break;
+  }
+
+  case 'cp': {
+    const paths = r.filter(z => !z.startsWith('-'));
+    if (paths.length < 2) { e('cp: missing file operand'); break; }
+    const from = ab(s, paths[0]), to = ab(s, paths[1]), node = s.fs[from];
+    if (!node) { e("cp: cannot stat '" + paths[0] + "': No such file or directory"); break; }
+    if (node.d) { e("cp: -r not specified; omitting directory '" + paths[0] + "'"); break; }
+    const parent = to.replace(/\/[^/]*$/, '') || '/';
+    if (!s.fs[parent]) { e("cp: cannot create regular file '" + paths[1] + "': No such file or directory"); break; }
+    if (!sd && !canWu(s.u, to)) { e("cp: cannot create regular file '" + paths[1] + "': Permission denied"); break; }
+    s.fs[to] = { c: node.c, m: node.m || '644', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u };
+    break;
+  }
+
   case 'mkdir': {
     const pf = r.includes('-p');
     for (const p of r.filter(z => z[0] !== '-')) {
@@ -985,6 +1034,23 @@ async function exec(a, inp, o, sd) {
       if (pf) { let c = ''; P.split('/').filter(Boolean).forEach(z => { c += '/' + z; if (!s.fs[c]) s.fs[c] = { d: 1, m: '755', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u }; }); }
       else s.fs[P] = { d: 1, m: '755', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u };
     }
+    break;
+  }
+
+  case 'sed': {
+    const inplace = r.includes('-i'), expression = r.find(z => z.startsWith('s/')), p = r.filter(z => !z.startsWith('-') && z !== expression)[0];
+    const match = expression && expression.match(/^s\/(.*?)\/(.*?)\/(g?)$/);
+    if (!match || !p) { e('Usage: sed [-i] s/pola/pengganti/[g] FILE'); break; }
+    const result = rd(s, p, sd);
+    if (result.e) { e("sed: can't read " + p + ': ' + result.e); break; }
+    const P = ab(s, p);
+    if (inplace && !sd && !canWu(s.u, P)) { e("sed: couldn't write " + p + ': Permission denied'); break; }
+    let regex;
+    try { regex = new RegExp(match[1], match[3]); }
+    catch (_) { e('sed: Invalid regular expression'); break; }
+    const text = result.c.split('\n').map(line => line.replace(regex, match[2])).join('\n');
+    if (inplace) wr(s, P, text, sd);
+    else o(text.replace(/\n$/, ''));
     break;
   }
 
@@ -1299,6 +1365,21 @@ Q.forEach((q, k) => {
 
 init();
 show(0);
+window.ASJ.registerState('lab', () => ({
+  S, stack, D, clk, ec, hist, log: Array.from(LOG.children).map(row => ({ text: row.textContent, className: row.className }))
+}), saved => {
+  if (!saved || !saved.S) return;
+  S = saved.S; stack = saved.stack || stack; D = saved.D || {}; clk = saved.clk || clk;
+  ec = saved.ec || 0; hist = saved.hist || []; hi = hist.length; pend = null; busy = 0;
+  LOG.replaceChildren();
+  (saved.log || []).forEach(row => {
+    const line = document.createElement('div');
+    if (['g', 'b', 'y', 'r', 'd'].includes(row.className)) line.className = row.className;
+    line.textContent = row.text;
+    LOG.appendChild(line);
+  });
+  chk(); setPs();
+});
 </script>
 </body>
 </html>

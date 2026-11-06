@@ -74,6 +74,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--pri);outline-of
   transition:background .2s;
 }
 .tg:hover{background:var(--acc)}
+.portal-link{text-decoration:none;white-space:nowrap}
 
 main{
   width:100%;
@@ -194,6 +195,28 @@ svg text{fill:currentColor;font:13px sans-serif}
 .q button:hover{background:var(--acc)}
 .q button.r{background:var(--acc);border-color:var(--pri);font-weight:600}
 .q button.x{background:var(--warn);border-color:var(--wb)}
+#debian-installer{max-width:980px;margin:18px auto;border:1px solid #54616d;border-radius:12px;overflow:hidden;background:#101820;color:#eef3f8;font:14px/1.5 ui-monospace,Consolas,monospace;box-shadow:0 12px 30px #0003}
+#installer-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 16px;background:#202b36;color:#fff}
+#installer-screen{min-height:320px;padding:22px;background:#08121c}
+#installer-screen h2{margin:0 0 16px;border:0;padding:0;color:#9bd4ff;font:600 19px/1.4 ui-monospace,Consolas,monospace}
+#installer-screen p{max-width:75ch;color:#d4dee8}
+#installer-options{display:grid;gap:8px;margin:18px 0}
+#installer-options button{padding:10px 12px;text-align:left;border:1px solid #56697c;border-radius:5px;background:#172534;color:#eef3f8;font:inherit;cursor:pointer}
+#installer-options button.selected,#installer-options button:hover{border-color:#65bcff;background:#183c5b}
+#debian-installer[data-mode="gui"] #installer-screen{background:#e8edf3;color:#17212b;border:1px solid #aeb9c4}
+#debian-installer[data-mode="gui"] #installer-screen h2{color:#133e68}
+#debian-installer[data-mode="gui"] #installer-screen p{color:#273746}
+#debian-installer[data-mode="gui"] #installer-options button{background:#fff;color:#17212b;border-color:#aeb9c4}
+#debian-installer[data-mode="gui"] #installer-options button.selected,#debian-installer[data-mode="gui"] #installer-options button:hover{background:#dcecff;border-color:#1670b8}
+#debian-installer[data-mode="text"] #installer-screen{background:#000;color:#d7ffd7;border:1px solid #425642}
+#debian-installer[data-mode="text"] #installer-screen h2{color:#8cff8c}
+#debian-installer[data-mode="text"] #installer-screen p{color:#d7ffd7}
+#debian-installer[data-mode="text"] #installer-options button{background:#080808;color:#d7ffd7;border-color:#557055}
+#debian-installer[data-mode="text"] #installer-options button.selected,#debian-installer[data-mode="text"] #installer-options button:hover{background:#153315;border-color:#8cff8c}
+#installer-footer{display:flex;justify-content:space-between;gap:10px;padding:12px 16px;background:#202b36}
+#installer-footer button,#installer-top button{border:1px solid #93a6b8;border-radius:6px;padding:8px 12px;background:#2d4052;color:white;font:inherit;cursor:pointer}
+#installer-progress{color:#c6d5e4}
+.installer-note{margin-top:14px;padding:12px;border-left:4px solid var(--pri);background:var(--acc)}
 @media print{
   header,.nv,#tbox,.try,.actions{display:none}
   .tab{display:block!important}
@@ -205,6 +228,7 @@ svg text{fill:currentColor;font:13px sans-serif}
 <header>
   <div id="bar"></div>
   <div class="hw">
+    <a class="tg portal-link" href="index.html">← Kembali ke Beranda</a>
     <nav id="nav"></nav>
     <div class="actions">
       <button class="tg" id="btnFs" title="Toggle Layar Penuh">⛶ Fullscreen</button>
@@ -239,12 +263,25 @@ svg text{fill:currentColor;font:13px sans-serif}
 </ul>
 <h2>Cara Memakai Modul</h2>
 <ol>
+  <li>Mulai dari tab <b>Simulasi Installer</b> dan ikuti alur boot sampai login pertama; pilih mode teks atau grafis saat menu boot.</li>
   <li>Pelajari panduan visual tahapan instalasi Debian 12 pada tiap tab bab navigasi di atas.</li>
   <li>Gunakan tombol <b>Coba</b> pada tabel langkah kerja untuk memindahkan perintah verifikasi dan pasca-instalasi ke konsol simulator.</li>
   <li>Tersedia mesin Debian 12 server baru: <code>srv-wikrama</code> untuk mengonfigurasi IP statis, gateway, repositori, dan privilege sudo.</li>
-  <li>Password default awal untuk superuser di lab ini: <code>siswa123</code>.</li>
+  <li>Kredensial latihan untuk terminal simulator: <code>siswa123</code>.</li>
 </ol>
-<div class="co w">⚠️ Terminal ini adalah <b>lingkungan simulasi interaktif pasca-instalasi</b>. Ketik <code>reset</code> kapan saja untuk mengembalikan konfigurasi lab ke kondisi awal.</div>
+<div class="co w">⚠️ Terminal pada tab Lab Terminal adalah <b>lingkungan Debian 12 setelah instalasi</b>. Ketik <code>reset</code> kapan saja untuk mengembalikan konfigurasi lab ke kondisi awal.</div>
+</section>
+
+<section class="tab" data-title="Simulasi Installer">
+<h1>Simulasi Instalasi Debian 12 dari Boot hingga Login</h1>
+<p>Alur ini menirukan urutan Debian Installer (d-i) pada ISO Debian 12 Netinst: firmware/boot menu, pengaturan regional dan jaringan, akun, partisi, APT, tasksel, GRUB, reboot, lalu login. Mode grafis dan teks menjalankan tahapan installer yang sama; perbedaannya hanya antarmuka.</p>
+<div class="installer-note"><b>Catatan:</b> Ini simulasi edukatif di browser, bukan mesin virtual dan tidak mengubah komputer Anda. Hasil akhirnya dapat dilanjutkan di terminal Debian simulasi pada tab <b>Lab Terminal</b>.</div>
+<div id="debian-installer" aria-live="polite">
+  <div id="installer-top"><strong>Debian GNU/Linux 12 Installer</strong><span id="installer-progress"></span><button type="button" id="installer-reset">Ulangi simulasi</button></div>
+  <div id="installer-screen"></div>
+  <div id="installer-footer"><button type="button" id="installer-back">← Kembali</button><span id="installer-mode"></span><button type="button" id="installer-next">Lanjut →</button></div>
+</div>
+<p id="installer-status" class="co">Pilih mode instalasi pada menu boot. Gunakan tombol panah pada layar atau klik pilihan.</p>
 </section>
 
 <section class="tab" data-title="1. Media & Boot">
@@ -399,7 +436,7 @@ iface eth0 inet static
 
 <section class="tab" data-title="Lab Terminal">
 <h1>Lab Terminal Pasca-Instalasi Debian 12</h1>
-<p>Selesaikan 6 misi administrasi pasca-instalasi di bawah ini pada server baru <code>srv-wikrama</code>. Konfigurasikan IP statis, gateway, nameserver, dan daftarkan user ke grup sudo. Password: <code>siswa123</code>.</p>
+<p id="lab-intro">Selesaikan 6 misi administrasi pasca-instalasi di bawah ini pada server <code>srv-wikrama</code>. Konfigurasikan IP statis, gateway, nameserver, dan verifikasi hak sudo. Kredensial latihan: <code>siswa123</code>.</p>
 <div class="lab">
   <div class="tslot"></div>
   <div>
@@ -439,6 +476,7 @@ iface eth0 inet static
 </div>
 </main>
 
+<script src="local-progress.js"></script>
 <script>
 const ST = {
   b2: [
@@ -485,7 +523,7 @@ function show(i) {
   if (sl) {
     sl.appendChild(TB);
     TB.style.display = 'block';
-  } else if (currentTab.dataset.title === 'Cover' || currentTab.dataset.title === '1. Persiapan & Media' || currentTab.dataset.title === '3. Akun & Password' || currentTab.dataset.title === '6. Bootloader GRUB' || currentTab.dataset.title === 'Latihan') {
+  } else if (currentTab.dataset.title === 'Cover' || currentTab.dataset.title === 'Simulasi Installer' || currentTab.dataset.title === '1. Persiapan & Media' || currentTab.dataset.title === '3. Akun & Password' || currentTab.dataset.title === '6. Bootloader GRUB' || currentTab.dataset.title === 'Latihan') {
     TB.style.display = 'none';
   } else {
     currentTab.appendChild(TB);
@@ -584,7 +622,7 @@ document.querySelectorAll('[data-st]').forEach(el => {
   });
 });
 
-const CMDS = 'help clear reset ls cd pwd cat mkdir touch rm cp chmod chown echo sed grep tail whoami hostname hostnamectl id date uname ip ping sudo apt systemctl lsblk df free tee exit'.split(' ');
+const CMDS = 'help clear reset ls cd pwd cat mkdir touch rm cp chmod chown echo sed grep tail head whoami hostname hostnamectl id date uname uptime ps ip ping sudo apt systemctl lsblk df free tee exit'.split(' ');
 
 let S, stack, D, clk, ec, hist = [], hi = 0, pend = null, busy = 0;
 
@@ -654,7 +692,7 @@ function init() {
   busy = 0;
 
   out('Debian GNU/Linux 12 (bookworm) - Simulasi Post-Installation Server');
-  out('Ketik help untuk daftar perintah. Password sudo siswa: siswa123', 'd');
+  out('Ketik help untuk daftar perintah. Password latihan: siswa123', 'd');
   rm();
   setPs();
 }
@@ -690,38 +728,38 @@ const M = [
   ['Inspeksi Partisi Storage Pasca-Instalasi',
    'lsblk dan df -h',
    'Memverifikasi partisi root (ext4) dan swap hasil instalasi.',
-   () => S['srv-wikrama'].fsChecked === true],
+   () => S[host()].fsChecked === true],
 
   ['Konfigurasi IP Statis di /etc/network/interfaces',
    'echo -e "auto eth0\\niface eth0 inet static\\n    address 10.0.0.20/24\\n    gateway 10.0.0.1" | sudo tee /etc/network/interfaces',
    'Menjamin alamat IP server tidak berubah-ubah saat reboot.',
    () => {
-     const c = (S['srv-wikrama'].fs['/etc/network/interfaces'] || {}).c || '';
+     const c = (S[host()].fs['/etc/network/interfaces'] || {}).c || '';
      return c.includes('inet static') && c.includes('10.0.0.20/24');
    }],
 
   ['Restart Service Networking & Verifikasi IP Baru',
    'sudo systemctl restart networking dan ip a',
    'Mengaktifkan konfigurasi antarmuka jaringan statis.',
-   () => S['srv-wikrama'].networkingRestarted && S['srv-wikrama'].ip === '10.0.0.20'],
+   () => S[host()].networkingRestarted && S[host()].ip === '10.0.0.20'],
 
   ['Konfigurasi DNS Nameserver di /etc/resolv.conf',
    'echo -e "nameserver 10.0.0.1\\nnameserver 8.8.8.8" | sudo tee /etc/resolv.conf',
    'Menetapkan resolver DNS agar server dapat menerjemahkan domain internet.',
    () => {
-     const c = (S['srv-wikrama'].fs['/etc/resolv.conf'] || {}).c || '';
+     const c = (S[host()].fs['/etc/resolv.conf'] || {}).c || '';
      return c.includes('nameserver') && (c.includes('10.0.0.1') || c.includes('8.8.8.8'));
    }],
 
   ['Eskalasi Wewenang Sudo untuk Pengguna Siswa',
    'sudo usermod -aG sudo siswa lalu cek dengan id siswa',
    'Memungkinkan user non-root menjalankan administrasi sistem.',
-   () => S['srv-wikrama'].sudoConfigured === true],
+   () => S[host()].sudoConfigured === true],
 
   ['Uji Konektivitas Jaringan Gateway',
    'ping -c 3 10.0.0.1',
    'Memastikan rute keluar ke default gateway telah berfungsi normal.',
-   () => S['srv-wikrama'].pingTested === true]
+   () => S[host()].pingTested === true]
 ];
 
 function rm() {
@@ -730,7 +768,9 @@ function rm() {
   M.forEach((m, k) => {
     const l = document.createElement('li');
     l.id = 'm' + k;
-    l.innerHTML = '<b>Misi ' + (k + 1) + ': ' + m[0] + '</b><details><summary>Petunjuk</summary>' + m[1] + '<br><i>Mengapa: ' + m[2] + '</i></details>';
+    const title = k === 4 ? 'Eskalasi Wewenang Sudo untuk Pengguna ' + S[host()].u : m[0];
+    const hint = k === 4 ? 'sudo usermod -aG sudo ' + S[host()].u + ' lalu cek dengan id ' + S[host()].u : m[1];
+    l.innerHTML = '<b>Misi ' + (k + 1) + ': ' + title + '</b><details><summary>Petunjuk</summary>' + hint + '<br><i>Mengapa: ' + m[2] + '</i></details>';
     u.appendChild(l);
   });
 }
@@ -867,6 +907,14 @@ async function exec(a, inp, o, sd) {
 
   case 'date': o('Mon Oct 19 14:15:00 WIB 2026'); break;
   case 'pwd': o(s.cwd); break;
+  case 'uname':
+    o(r.includes('-a')
+      ? 'Linux ' + h + ' 6.1.0-21-amd64 #1 SMP PREEMPT_DYNAMIC Debian 6.1.90-1 (2024-05-03) x86_64 GNU/Linux'
+      : r.includes('-r') ? '6.1.0-21-amd64' : 'Linux');
+    break;
+  case 'uptime': o(' 14:30:00 up 15 min, 1 user, load average: 0.02, 0.04, 0.01'); break;
+  case 'ps': o('    PID TTY          TIME CMD\n      1 ?        00:00:02 systemd\n    412 tty1     00:00:00 bash\n    527 tty1     00:00:00 ps'); break;
+  case 'clear': LOG.replaceChildren(); break;
 
   case 'lsblk':
     s.fsChecked = true;
@@ -944,6 +992,140 @@ rtt min/avg/max/mdev = 0.350/0.383/0.420/0.035 ms`);
     break;
   }
 
+  case 'mkdir': {
+    const parents = r.includes('-p');
+    for (const path of r.filter(value => !value.startsWith('-'))) {
+      const target = ab(s, path);
+      if (s.fs[target]) {
+        if (!parents) e("mkdir: cannot create directory '" + path + "': File exists");
+        continue;
+      }
+      if (!sd && !canWu(s.u, target)) { e("mkdir: cannot create directory '" + path + "': Permission denied"); continue; }
+      const parent = target.replace(/\/[^/]*$/, '') || '/';
+      if (!s.fs[parent] && !parents) { e("mkdir: cannot create directory '" + path + "': No such file or directory"); continue; }
+      if (parents) {
+        let current = '';
+        target.split('/').filter(Boolean).forEach(part => {
+          current += '/' + part;
+          if (!s.fs[current]) s.fs[current] = { d: 1, m: '755', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u };
+        });
+      } else {
+        s.fs[target] = { d: 1, m: '755', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u };
+      }
+    }
+    break;
+  }
+
+  case 'touch':
+    for (const path of r) {
+      const target = ab(s, path);
+      if (s.fs[target]) continue;
+      const parent = target.replace(/\/[^/]*$/, '') || '/';
+      if (!s.fs[parent] || !canWu(s.u, target) && !sd) { e("touch: cannot touch '" + path + "': Permission denied"); continue; }
+      s.fs[target] = { c: '', m: '644', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u };
+    }
+    break;
+
+  case 'rm': {
+    const recursive = r.some(value => /^-.*[rR]/.test(value));
+    for (const path of r.filter(value => !value.startsWith('-'))) {
+      const target = ab(s, path), node = s.fs[target];
+      if (!node) { e("rm: cannot remove '" + path + "': No such file or directory"); continue; }
+      if (node.d && !recursive) { e("rm: cannot remove '" + path + "': Is a directory"); continue; }
+      if (!sd && !canWu(s.u, target)) { e("rm: cannot remove '" + path + "': Permission denied"); continue; }
+      Object.keys(s.fs).filter(key => key === target || key.startsWith(target + '/')).forEach(key => delete s.fs[key]);
+    }
+    break;
+  }
+
+  case 'cp': {
+    const paths = r.filter(value => !value.startsWith('-'));
+    if (paths.length < 2) { e('cp: missing file operand'); break; }
+    const source = ab(s, paths[0]), target = ab(s, paths[1]), node = s.fs[source];
+    if (!node) { e("cp: cannot stat '" + paths[0] + "': No such file or directory"); break; }
+    if (node.d) { e("cp: -r not specified; omitting directory '" + paths[0] + "'"); break; }
+    const parent = target.replace(/\/[^/]*$/, '') || '/';
+    if (!s.fs[parent]) { e("cp: cannot create regular file '" + paths[1] + "': No such file or directory"); break; }
+    if (!sd && !canWu(s.u, target)) { e("cp: cannot create regular file '" + paths[1] + "': Permission denied"); break; }
+    s.fs[target] = { c: node.c, m: node.m || '644', o: sd ? 'root' : s.u, g: sd ? 'root' : s.u };
+    break;
+  }
+
+  case 'sed': {
+    const inplace = r.includes('-i'), expression = r.find(value => value.startsWith('s/')), path = r.filter(value => !value.startsWith('-') && value !== expression)[0];
+    const match = expression && expression.match(/^s\/(.*?)\/(.*?)\/(g?)$/);
+    if (!match || !path) { e('Usage: sed [-i] s/pola/pengganti/[g] FILE'); break; }
+    const result = rd(s, path, sd);
+    if (result.e) { e("sed: can't read " + path + ': ' + result.e); break; }
+    const target = ab(s, path);
+    if (inplace && !sd && !canWu(s.u, target)) { e("sed: couldn't write " + path + ': Permission denied'); break; }
+    let regex;
+    try { regex = new RegExp(match[1], match[3]); }
+    catch (_) { e('sed: Invalid regular expression'); break; }
+    const output = result.c.split('\n').map(line => line.replace(regex, match[2])).join('\n');
+    if (inplace) wr(s, target, output, sd);
+    else o(output.replace(/\n$/, ''));
+    break;
+  }
+
+  case 'chmod': {
+    const args = r.filter(value => !value.startsWith('-')), mode = args[0], path = args[1];
+    if (!/^[0-7]{3}$/.test(mode || '') || !path) { e('Usage: chmod MODE(3 digit) FILE'); break; }
+    const node = s.fs[ab(s, path)];
+    if (!node) { e("chmod: cannot access '" + path + "': No such file or directory"); break; }
+    if (!sd && node.o !== s.u) { e("chmod: changing permissions of '" + path + "': Operation not permitted"); break; }
+    node.m = mode;
+    break;
+  }
+
+  case 'chown': {
+    const owner = r.find(value => !value.startsWith('-')), path = r.filter(value => !value.startsWith('-'))[1];
+    if (!sd) { e("chown: changing ownership of '" + (path || '') + "': Operation not permitted"); break; }
+    if (!owner || !path) { e('Usage: chown user:group FILE'); break; }
+    const node = s.fs[ab(s, path)];
+    if (!node) { e("chown: cannot access '" + path + "': No such file or directory"); break; }
+    const [user, group] = owner.split(':');
+    node.o = user;
+    node.g = group || user;
+    break;
+  }
+
+  case 'grep': {
+    const args = r.filter(value => !value.startsWith('-')), pattern = args[0];
+    if (!pattern) { e('Usage: grep PATTERN [FILE]'); break; }
+    let text = inp || '';
+    if (args[1]) {
+      const result = rd(s, args[1], sd);
+      if (result.e) { e('grep: ' + args[1] + ': ' + result.e); break; }
+      text = result.c;
+    }
+    let regex;
+    try { regex = new RegExp(pattern, r.includes('-i') ? 'i' : ''); }
+    catch (_) { e('grep: Invalid regular expression'); break; }
+    const matches = text.split('\n').filter(line => regex.test(line));
+    if (matches.length) matches.forEach(o);
+    else ec = 1;
+    break;
+  }
+
+  case 'head':
+  case 'tail': {
+    let count = 10, path;
+    for (let index = 0; index < r.length; index++) {
+      if (r[index] === '-n') count = Math.max(0, Number(r[++index]) || 10);
+      else if (!r[index].startsWith('-')) path = r[index];
+    }
+    let text = inp || '';
+    if (path) {
+      const result = rd(s, path, sd);
+      if (result.e) { e(x + ': cannot open ' + path + ': ' + result.e); break; }
+      text = result.c;
+    }
+    const lines = text.split('\n');
+    (x === 'head' ? lines.slice(0, count) : lines.slice(-count)).forEach(o);
+    break;
+  }
+
   case 'ls': {
     let fl = '', ps = []; r.forEach(z => z[0] === '-' ? fl += z : ps.push(z)); if (!ps.length) ps = ['.'];
     const row = (nm, n) => fl.includes('l') ? (n.d ? 'd' : n.l ? 'l' : '-') + mstr(n.m || '644') + ' 1 ' + (n.o || s.u) + ' ' + (n.g || s.u) + ' ' + String(n.d ? 4096 : (n.c || '').length).padStart(5) + ' Oct 19 14:00 ' + nm : nm;
@@ -971,7 +1153,7 @@ rtt min/avg/max/mdev = 0.350/0.383/0.420/0.035 ms`);
 
   case 'usermod': {
     if (!sd) { e('usermod: Permission denied.'); break; }
-    if (r.includes('-aG') && r.includes('sudo') && r.includes('siswa')) {
+    if (r.includes('-aG') && r.includes('sudo') && r.includes(s.u)) {
       s.sudoConfigured = true;
       o('');
       break;
@@ -982,9 +1164,9 @@ rtt min/avg/max/mdev = 0.350/0.383/0.420/0.035 ms`);
 
   case 'id': {
     const target = r[0] || s.u;
-    if (target === 'siswa') {
-      const grpStr = s.sudoConfigured ? '1000(siswa),27(sudo)' : '1000(siswa)';
-      o(`uid=1000(siswa) gid=1000(siswa) groups=${grpStr}`);
+    if (target === s.u) {
+      const groups = `1000(${s.u})` + (s.sudoConfigured ? ',27(sudo)' : '');
+      o(`uid=1000(${s.u}) gid=1000(${s.u}) groups=${groups}`);
     } else {
       o(`uid=0(root) gid=0(root) groups=0(root)`);
     }
@@ -1155,6 +1337,65 @@ Q.forEach((q, k) => {
 
 init();
 show(0);
+window.ASJ.registerState('lab', () => ({
+  S, stack, D, clk, ec, hist, log: Array.from(LOG.children).map(row => ({ text: row.textContent, className: row.className }))
+}), saved => {
+  if (!saved || !saved.S) return;
+  S = saved.S;
+  stack = saved.stack || stack;
+  D = saved.D || {};
+  clk = saved.clk || clk;
+  ec = saved.ec || 0;
+  hist = saved.hist || [];
+  hi = hist.length;
+  pend = null;
+  busy = 0;
+  LOG.replaceChildren();
+  (saved.log || []).forEach(row => {
+    const line = document.createElement('div');
+    if (['g', 'b', 'y', 'r', 'd'].includes(row.className)) line.className = row.className;
+    line.textContent = row.text;
+    LOG.appendChild(line);
+  });
+  chk();
+  setPs();
+});
+window.ASJ.configureInstalledOS = settings => {
+  const previousHost = 'srv-wikrama';
+  const hostname = /^[a-z0-9][a-z0-9-]{0,62}$/i.test(settings.hostname || '') ? settings.hostname : previousHost;
+  const username = /^[a-z_][a-z0-9_-]{0,31}$/i.test(settings.username || '') ? settings.username : 'siswa';
+  const machine = S[previousHost];
+  if (!machine) return;
+  const previousUser = machine.u;
+  machine.name = hostname;
+  machine.u = username;
+  machine.cwd = '/home/' + username;
+  machine.sudoConfigured = Boolean(settings.rootPasswordEmpty);
+  machine.fs['/home'] = machine.fs['/home'] || { d: 1, m: '755', o: 'root', g: 'root' };
+  machine.fs[machine.cwd] = { d: 1, m: '755', o: username, g: username };
+  machine.fs['/etc/hostname'].c = hostname + '\n';
+  const passwd = machine.fs['/etc/passwd'];
+  if (passwd) passwd.c = passwd.c.replace(new RegExp('^' + previousUser + ':.*$', 'm'), username + ':x:1000:1000:' + username + ',,,/home/' + username + ':/bin/bash');
+  const group = machine.fs['/etc/group'];
+  if (group) group.c = group.c.replace(/^sudo:x:27:.*$/m, 'sudo:x:27:' + (machine.sudoConfigured ? username : '')).replace(new RegExp('^' + previousUser + ':x:1000:.*$', 'm'), username + ':x:1000:');
+  if (hostname !== previousHost) {
+    delete S[previousHost];
+    S[hostname] = machine;
+    stack.forEach(entry => { if (entry.h === previousHost) entry.h = hostname; });
+  }
+  D = {};
+  const intro = document.getElementById('lab-intro');
+  if (intro) intro.textContent = 'Selesaikan 6 misi administrasi pasca-instalasi pada server ' + hostname + '. Konfigurasikan IP statis, gateway, nameserver, dan verifikasi hak sudo. Kredensial latihan simulator: siswa123.';
+  rm();
+  chk();
+  setPs();
+};
+window.ASJ.resetLab = () => {
+  init();
+  const intro = document.getElementById('lab-intro');
+  if (intro) intro.textContent = 'Selesaikan 6 misi administrasi pasca-instalasi pada server srv-wikrama. Konfigurasikan IP statis, gateway, nameserver, dan verifikasi hak sudo. Kredensial latihan simulator: siswa123.';
+};
 </script>
+<script src="installer-simulator.js"></script>
 </body>
 </html>

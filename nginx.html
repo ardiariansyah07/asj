@@ -74,6 +74,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--pri);outline-of
   transition:background .2s;
 }
 .tg:hover{background:var(--acc)}
+.portal-link{text-decoration:none;white-space:nowrap}
 
 main{
   width:100%;
@@ -211,6 +212,7 @@ svg text{fill:currentColor;font:13px sans-serif}
 <header>
   <div id="bar"></div>
   <div class="hw">
+    <a class="tg portal-link" href="index.html">← Kembali ke Beranda</a>
     <nav id="nav"></nav>
     <div class="actions">
       <button class="tg" id="btnFs" title="Toggle Layar Penuh">⛶ Fullscreen</button>
@@ -475,6 +477,7 @@ svg text{fill:currentColor;font:13px sans-serif}
 </div>
 </main>
 
+<script src="local-progress.js"></script>
 <script>
 const ST = {
   b2: [
@@ -649,7 +652,7 @@ document.querySelectorAll('[data-st]').forEach(el => {
 
 const NET = { client: '10.0.0.10', server1: '10.0.0.20', 'app-backend': '10.0.0.30' };
 const PW = { siswa: 'siswa123', root: 'root123' };
-const CMDS = 'help clear reset konsol ls cd pwd cat mkdir touch rm cp chmod chown echo sed grep tail whoami hostname id date uname ip ping nc sudo apt systemctl nginx ufw curl openssl ln exit'.split(' ');
+const CMDS = 'help clear reset konsol ls cd pwd cat mkdir touch rm chmod chown echo sed grep tail whoami hostname id date uname ping sudo apt systemctl nginx ufw curl openssl ln exit'.split(' ');
 let S, stack, D, clk, ec, hist = [], hi = 0, pend = null, busy = 0;
 
 const home = u => u === 'root' ? '/root' : '/home/' + u;
@@ -1408,6 +1411,21 @@ Q.forEach((q, k) => {
 // Jalankan inisialisasi awal modul
 init();
 show(0);
+window.ASJ.registerState('lab', () => ({
+  S, stack, D, clk, ec, hist, log: Array.from(LOG.children).map(row => ({ text: row.textContent, className: row.className }))
+}), saved => {
+  if (!saved || !saved.S) return;
+  S = saved.S; stack = saved.stack || stack; D = saved.D || {}; clk = saved.clk || clk;
+  ec = saved.ec || 0; hist = saved.hist || []; hi = hist.length; pend = null; busy = 0;
+  LOG.replaceChildren();
+  (saved.log || []).forEach(row => {
+    const line = document.createElement('div');
+    if (['g', 'b', 'y', 'r', 'd'].includes(row.className)) line.className = row.className;
+    line.textContent = row.text;
+    LOG.appendChild(line);
+  });
+  chk(); setPs();
+});
 </script>
 </body>
 </html>

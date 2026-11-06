@@ -74,6 +74,7 @@ button:focus-visible,input:focus-visible{outline:2px solid var(--pri);outline-of
   transition:background .2s;
 }
 .tg:hover{background:var(--acc)}
+.portal-link{text-decoration:none;white-space:nowrap}
 
 main{
   width:100%;
@@ -151,6 +152,7 @@ svg text{fill:currentColor;font:13px sans-serif}
 <header>
   <div id="bar"></div>
   <div class="hw">
+    <a class="tg portal-link" href="index.html">← Kembali ke Beranda</a>
     <nav id="nav"></nav>
     <div class="actions">
       <button class="tg" onclick="window.print()" title="Cetak Lembar Soal">🖨️ Cetak</button>
@@ -541,6 +543,7 @@ svg text{fill:currentColor;font:13px sans-serif}
 
 </main>
 
+<script src="local-progress.js"></script>
 <script>
 const tabs = Array.from(document.querySelectorAll('.tab'));
 const nav = document.getElementById('nav');

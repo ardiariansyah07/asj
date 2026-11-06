@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monitoring Uptime Kuma - SMK Wikrama Bogor</title>
+<style>
+:root{--bg:#f2f6f4;--fg:#14261f;--card:#fff;--pri:#0f766e;--acc:#dff3ef;--bd:#cfdcd6;--mut:#4f645b;--hd:#fff}
+:root[data-theme="dark"]{--bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;--mut:#9db5ab;--hd:#122019}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d1714;--fg:#e4efe9;--card:#15231f;--pri:#4fd1b8;--acc:#16342e;--bd:#294039;--mut:#9db5ab;--hd:#122019}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.6 "Segoe UI",system-ui,sans-serif}
+header{position:sticky;top:0;z-index:5;background:var(--hd);border-bottom:1px solid var(--bd)}
+.hw{max-width:1120px;margin:auto;padding:10px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{color:var(--pri);font-weight:700;text-decoration:none}
+button,.button{font:inherit;cursor:pointer;border:1px solid var(--bd);border-radius:8px;padding:8px 12px;background:var(--card);color:var(--fg)}
+.primary{background:var(--pri);color:white;border-color:var(--pri);font-weight:600}
+main{max-width:1120px;margin:auto;padding:36px 20px}
+.hero,.card,.panel{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:24px;margin-bottom:20px}
+.hero{background:linear-gradient(135deg,var(--pri),#0b3b36);color:white}
+h1{line-height:1.2}
+h2{font-size:1.3rem}
+.muted{color:var(--mut)}
+.dashboard{border:1px solid var(--bd);border-radius:12px;overflow:hidden;background:var(--card)}
+.dash-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 18px;background:var(--acc)}
+.monitor{display:grid;grid-template-columns:1fr auto auto;gap:14px;align-items:center;padding:16px 18px;border-top:1px solid var(--bd)}
+.monitor strong{display:block}.monitor small{color:var(--mut)}
+.badge{border-radius:999px;padding:4px 10px;font-size:13px;font-weight:700}
+.up{background:#dcfce7;color:#166534}.down{background:#fee2e2;color:#991b1b}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+#events{max-height:210px;overflow:auto;padding-left:22px}
+.checklist li{margin:8px 0}
+@media(max-width:650px){.monitor{grid-template-columns:1fr auto}.monitor .latency{grid-column:1/-1}.hw{padding:10px}.hero,.card,.panel{padding:18px}}
+</style>
+</head>
+<body>
+<header><div class="hw"><a class="brand" href="index.html">← Kembali ke Beranda</a><div class="actions"><button id="theme" type="button">◐ Tema</button></div></div></header>
+<main>
+  <section class="hero">
+    <p>Modul 08 · Monitoring Layanan</p>
+    <h1>Uptime Kuma: Pantau Kesehatan Server</h1>
+    <p>Uptime Kuma dikelola melalui dashboard web, jadi praktik modul ini menggunakan simulasi UI monitor (bukan terminal CLI). Amati perubahan status saat layanan berhenti dan pulih kembali.</p>
+  </section>
+  <section class="card">
+    <h2>Tujuan Praktik</h2>
+    <ul class="checklist">
+      <li>Membedakan pemeriksaan HTTP, TCP port, dan status layanan.</li>
+      <li>Membuat monitor Web, MariaDB, dan SSH untuk server lab.</li>
+      <li>Mengamati insiden downtime serta pemulihan layanan.</li>
+    </ul>
+  </section>
+  <section class="panel" aria-labelledby="dashboard-title">
+    <div class="dash-head"><div><strong id="dashboard-title">Dashboard · srv-wikrama</strong><div class="muted">Simulasi pemantauan lokal</div></div><button id="add-monitors" type="button" class="primary">Tambah monitor lab</button></div>
+    <div class="dashboard" id="dashboard" aria-live="polite"></div>
+    <div class="actions" style="margin-top:14px">
+      <button id="toggle-db" type="button">Simulasikan MariaDB berhenti</button>
+      <button id="restore-db" type="button">Pulihkan MariaDB</button>
+      <button id="reset-kuma" type="button">Reset simulasi</button>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Riwayat Kejadian</h2>
+    <ol id="events" aria-live="polite"></ol>
+  </section>
+  <section class="card">
+    <h2>Langkah Evaluasi</h2>
+    <ol class="checklist">
+      <li>Klik <b>Tambah monitor lab</b> dan periksa tiga tipe monitor yang muncul.</li>
+      <li>Hentikan MariaDB pada simulasi; monitor TCP port 3306 harus berubah menjadi <b>DOWN</b>.</li>
+      <li>Pulihkan layanan, pastikan monitor kembali <b>UP</b>, lalu baca riwayat kejadian.</li>
+      <li>Di server nyata, Uptime Kuma dapat dipasang dengan Docker atau Node.js dan dashboard diakses melalui browser.</li>
+    </ol>
+    <p class="muted">Contoh target: HTTP <code>http://localhost:80</code>, TCP <code>127.0.0.1:3306</code>, dan TCP <code>127.0.0.1:22</code>. Reverse proxy Nginx memerlukan dukungan WebSocket.</p>
+  </section>
+</main>
+<script src="local-progress.js"></script>
+<script>
+(function () {
+  const dashboard = document.getElementById('dashboard');
+  const events = document.getElementById('events');
+  const baseline = [
+    { id: 'web', name: 'Web Profil', type: 'HTTP(s)', target: 'http://localhost:80', up: true, latency: '24 ms' },
+    { id: 'db', name: 'Database MariaDB', type: 'TCP Port', target: '127.0.0.1:3306', up: true, latency: '8 ms' },
+    { id: 'ssh', name: 'Remote SSH', type: 'TCP Port', target: '127.0.0.1:22', up: true, latency: '11 ms' }
+  ];
+  let monitors = [];
+  let log = [];
+
+  function draw() {
+    dashboard.replaceChildren();
+    if (!monitors.length) {
+      const empty = document.createElement('p');
+      empty.className = 'muted';
+      empty.style.padding = '12px 18px';
+      empty.textContent = 'Belum ada monitor. Tambahkan monitor lab untuk memulai.';
+      dashboard.appendChild(empty);
+    }
+    monitors.forEach(monitor => {
+      const row = document.createElement('div');
+      row.className = 'monitor';
+      const info = document.createElement('div');
+      const name = document.createElement('strong');
+      name.textContent = monitor.name;
+      const target = document.createElement('small');
+      target.textContent = monitor.type + ' · ' + monitor.target;
+      info.append(name, target);
+      const badge = document.createElement('span');
+      badge.className = 'badge ' + (monitor.up ? 'up' : 'down');
+      badge.textContent = monitor.up ? 'UP' : 'DOWN';
+      const latency = document.createElement('small');
+      latency.className = 'latency';
+      latency.textContent = monitor.up ? monitor.latency : 'Tidak ada respons';
+      row.append(info, badge, latency);
+      dashboard.appendChild(row);
+    });
+    events.replaceChildren();
+    log.forEach(entry => {
+      const item = document.createElement('li');
+      item.textContent = entry;
+      events.appendChild(item);
+    });
+    document.getElementById('toggle-db').disabled = !monitors.length || !monitors.find(m => m.id === 'db')?.up;
+    document.getElementById('restore-db').disabled = !monitors.length || Boolean(monitors.find(m => m.id === 'db')?.up);
+  }
+
+  function addMonitors() {
+    if (monitors.length) return;
+    monitors = baseline.map(monitor => ({ ...monitor }));
+    log.unshift(new Date().toLocaleTimeString('id-ID') + ' · Tiga monitor lab dibuat; pemeriksaan awal berhasil.');
+    draw();
+    window.ASJ.saveNow();
+  }
+
+  function setDatabase(up) {
+    const monitor = monitors.find(item => item.id === 'db');
+    if (!monitor || monitor.up === up) return;
+    monitor.up = up;
+    log.unshift(new Date().toLocaleTimeString('id-ID') + ' · MariaDB ' + (up ? 'pulih, probe TCP 3306 berhasil.' : 'berhenti, probe TCP 3306 gagal.'));
+    draw();
+    window.ASJ.saveNow();
+  }
+
+  document.getElementById('add-monitors').addEventListener('click', addMonitors);
+  document.getElementById('toggle-db').addEventListener('click', () => setDatabase(false));
+  document.getElementById('restore-db').addEventListener('click', () => setDatabase(true));
+  document.getElementById('reset-kuma').addEventListener('click', () => {
+    monitors = [];
+    log = [];
+    draw();
+    window.ASJ.saveNow();
+  });
+  document.getElementById('theme').addEventListener('click', () => {
+    const root = document.documentElement;
+    const dark = root.dataset.theme ? root.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+    root.dataset.theme = dark ? 'light' : 'dark';
+  });
+  window.ASJ.registerState('kuma', () => ({ monitors, log }), saved => {
+    if (!saved) return;
+    monitors = Array.isArray(saved.monitors) ? saved.monitors : [];
+    log = Array.isArray(saved.log) ? saved.log : [];
+    draw();
+  });
+  draw();
+})();
+</script>
+</body>
+</html>
