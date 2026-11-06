@@ -3,6 +3,10 @@
   const PROGRESS_KEY = 'asj.progress.v1';
   const THEME_KEY = 'asj.theme.v1';
   const page = location.pathname.split('/').pop() || 'index.html';
+  const themeLink = document.createElement('link');
+  themeLink.rel = 'stylesheet';
+  themeLink.href = new URL('tjkt-theme.css', location.href).href;
+  document.head.appendChild(themeLink);
   const states = new Map();
   const tabs = Array.from(document.querySelectorAll('.tab'));
   const labIndex = tabs.findIndex(tab => /lab terminal/i.test(tab.dataset.title || ''));
@@ -413,6 +417,18 @@
     header.appendChild(control);
   }
 
+  function addBrandLogo() {
+    const header = document.querySelector('header .hw');
+    const brand = header?.querySelector('.portal-link, a.brand');
+    if (!brand || brand.querySelector('.asj-header-logo')) return;
+    const logo = document.createElement('img');
+    logo.className = 'asj-header-logo';
+    logo.src = new URL('logo-tjkt.png', location.href).href;
+    logo.alt = 'Logo TJKT SMK Wikrama Bogor';
+    if (brand.querySelector('svg')) brand.querySelector('svg').replaceWith(logo);
+    else brand.prepend(logo);
+  }
+
   function showNameDialog(isChange) {
     let overlay = document.getElementById('asj-name-overlay');
     if (!overlay) {
@@ -494,6 +510,7 @@
   };
 
   document.addEventListener('DOMContentLoaded', () => {
+    addBrandLogo();
     addProfileControl();
     if (!profile) showNameDialog(false);
 

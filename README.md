@@ -22,3 +22,4 @@ Portal belajar ini berisi halaman HTML statis dan JavaScript lokal. Tidak ada ba
 - `kuma.html`: simulasi dashboard monitoring berbasis web; Uptime Kuma dikelola melalui UI, bukan CLI.
 - `projek.html`: lembar projek akhir.
 - `logo-tjkt.png`: logo yang digunakan pada sertifikat cetak.
+- `tjkt-theme.css`: tema bersama portal dan seluruh modul dengan palet navy, cyan, merah, dan putih dari identitas TJKT Learning Hub.
