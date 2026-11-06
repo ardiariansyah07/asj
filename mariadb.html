@@ -57,7 +57,7 @@ header{
 }
 #bar{height:3px;background:var(--pri);width:0;transition:width .3s}
 .hw{display:flex;align-items:center;gap:10px;padding:8px 20px;max-width:100%;width:100%}
-nav{display:flex;gap:6px;overflow-x:auto;flex:1;scrollbar-width:none}
+nav{display:flex;gap:6px;overflow-x:auto;flex:1;min-width:0;scrollbar-width:none}
 nav::-webkit-scrollbar{display:none}
 nav button{
   white-space:nowrap;border:0;background:none;color:var(--mut);
@@ -528,6 +528,7 @@ const nav = document.getElementById('nav');
 const TB = document.getElementById('tbox');
 
 function show(i) {
+  if (!window.ASJ.canOpenTab(i)) { window.ASJ.notifyLocked(i); return; }
   tabs.forEach((t, k) => {
     if (k === i) {
       t.classList.add('active');
@@ -556,6 +557,7 @@ function show(i) {
     TB.style.display = 'block';
   }
   window.scrollTo(0, 0);
+  window.ASJ.setActiveTab(i);
 }
 
 // Inisialisasi tombol navbar
